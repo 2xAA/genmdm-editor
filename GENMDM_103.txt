@@ -1,0 +1,169 @@
+=====================================================================================
+GenMDM Firmware v103 - Quick Reference MIDI Mapping by little-scale
+
+21 January 2013
+
+http://www.little-scale.blogspot.com.au/
+seb.tomczak@gmail.com
+
+
+=====================================================================================
+Special thanks to: Freezedream, Lazerbeat, Aly James, Tanikugu, Paul Slocum, Christian Haines, Celsius, Dot.AY, 10k
+=====================================================================================
+Firmware v103 Version Information: 
+* Added YM2612 and SN76489 data capture mode
+* Added YM2612 and SN76489 data acquire mode
+* Added TL Equal mode 
+=====================================================================================
+Firmware v102 Version Information: 
+* Native MIDI 5 pin DIN support via user-end hardware modification
+* This is via the UART RX PIN, found on digital pin 7 of the Teensy board
+* More cohesive handling of SSG-EG in terms of mapping - every OP and CH is catered for
+* Storage and recall of 15 different RAM-based instruments for VERY quick instrument changes
+* Reduced the sample storage ROM area by 2KB
+* Simplified and restructured sample code and sample storage ROM area
+* The current samples are just some 808 samples - looking to add user-assignable samples
+=====================================================================================
+Firmware v101 Version Information: 
+* Added: control of YM2612 FM voice 3 mode
+* Added: control of SSG-EG mode
+* Added: control of test registers 0x20, 0x27, 0x2A and 0x2C
+* Trimmed code
+=====================================================================================
+MIDI Channel Sound Chip Mapping
+* YM2612 FM sound chip is mapped to MIDI channels 1 - 6. 
+* SN76489 PSG sound chip is mapped to MIDI channels 7 - 10.
+* YM2612 FM voice 3 special mode is mapped to MIDI channels 11 - 13. 
+=====================================================================================
+YM2612 FM Sound Chip Mapping
+-------------------------------------------------------------------------------------
+Parameter						CC		Data Range
+* LFO Enable (Global)					74		2
+* LFO Speed 						1		8	
+* Pitch Transposition					85		128
+* Octave Division					84		128
+* PAL / NTSC Tuning					83		2
+* Voice 3 Special Mode					80		2
+* Test Register 0x27 Lowest Six Bits			92		64
+* Test Register 0x27 Highest One Bit			93		2
+* Test Register 0x20 Lowest Four Bits			94		16
+* Test Register 0x20 Highest Four Bits			95		16
+* Test Register 0x2C Lowest Four Bits			96		16
+* Test Register 0x2C Highest Four Bits			97		16
+-------------------------------------------------------------------------------------
+Special Mode
+* When Voice 3 is in Special Mode, each operator of Voice 3 has its own frequency
+* In this case, the frequency for each is controlled using MIDI ch 3, 11, 12 and 13
+* In this case, the TL / volume of each operator is controlled via velocity
+-------------------------------------------------------------------------------------
+Channel / Voice Control					CC		Data Range
+* Preset Instrument Setting Store in RAM		6		16
+* Preset Instrument Setting Recall from RAM		9		16
+* Frequency						Note Number	128
+* Pitch Bend Amount					81		18
+* FM Algorithm						14		8
+* FM Feedback						15		8
+* Stereo Configuration					77		4
+* Amplitude Modulation Level				76		8
+* Frequency Modulation Level				75		8
+* SSG-EG Operator 1 On and Setting			90		16
+* SSG-EG Operator 2 On and Setting			91		16
+* SSG-EG Operator 3 On and Setting			92		16
+* SSG-EG Operator 4 On and Setting			93		16
+-------------------------------------------------------------------------------------
+* The 8 FM algorithms are as follows: 
+* Algorithm 00: OP1 (m) --> OP2(m)  --> OP3 (m) --> OP4 (c)
+* Algorithm 01: OP1 (m) && OP2 (m) --> OP3 (m) --> OP4 (c)
+* Algorithm 02: (OP1 (m) && (OP2 (m) --> OP3 (m))) --> OP4 (c)
+* Algorithm 03: ((OP1 (m) --> OP2 (m)) && OP3 (m)) --> OP4 (c)
+* Algorithm 04: OP1 (m) --> OP2 (c) && OP3 (m) --> OP4 (c)
+* Algorithm 05: OP1 (m) --> (OP2 (c) && OP3 (c) && OP4 (c))
+* Algorithm 06: OP1 (m) --> OP2 (c) && OP3 (c) && OP4 (c)
+* Algorithm 07: OP1 (c) && OP2 (c) && OP3 (c) && OP4 (c)
+-------------------------------------------------------------------------------------
+Operator Control 					CC		Data Range
+* Total Level OP 1					16		128
+* Total Level OP 2					17		128
+* Total Level OP 3					18		128
+* Total Level OP 4					19		128
+* Multiple OP 1						20		16
+* Multiple OP 2						21		16
+* Multiple OP 3						22		16
+* Multiple OP 4						23		16
+* Detune OP 1						24		8
+* Detune OP 2						25		8
+* Detune OP 3						26		8
+* Detune OP 4						27		8
+* Rate Scaling OP 1					39		4
+* Rate Scaling OP 2					40		4
+* Rate Scaling OP 3					41		4
+* Rate Scaling OP 4					42		4
+* Attack Rate OP 1					43		32
+* Attack Rate OP 2					44		32
+* Attack Rate OP 3					45		32
+* Attack Rate OP 4					46		32
+* First Decay Rate OP 1					47		32
+* First Decay Rate OP 2					48		32
+* First Decay Rate OP 3					49		32
+* First Decay Rate OP 4					50		32
+* Secondary Decay Rate OP 1				51		16
+* Secondary Decay Rate OP 2				52		16
+* Secondary Decay Rate OP 3				53		16
+* Secondary Decay Rate OP 4				54		16
+* Secondary Amplitude Level OP 1			55		16
+* Secondary Amplitude Level OP 2			56		16
+* Secondary Amplitude Level OP 3			57		16
+* Secondary Amplitude Level OP 4			58		16
+* Release Rate OP 1					59		16
+* Release Rate OP 2					60		16
+* Release Rate OP 3					61		16
+* Release Rate OP 4					62		16
+* Amplitude Modulation Enable OP 1			70		2
+* Amplitude Modulation Enable OP 2			71		2
+* Amplitude Modulation Enable OP 3			72		2
+* Amplitude Modulation Enable OP 4			73		2
+-------------------------------------------------------------------------------------
+DAC Control (MIDI Channel 6) 				CC		Data Range
+* DAC Enable						78		2
+* DAC Direct Data					79		128
+* DAC Sample Pitch Speed				86		128
+* DAC Sample Oversample					88		16
+* DAC Noise  / Custom Wave Mode				89		2
+* Custom Wave Byte 1 of 14				100		128
+* Custom Wave Byte 2 of 14				101		128
+* Custom Wave Byte 3 of 14				102		128
+* Custom Wave Byte 4 of 14				103		128
+* Custom Wave Byte 5 of 14				104		128
+* Custom Wave Byte 6 of 14				105		128
+* Custom Wave Byte 7 of 14				106		128
+* Custom Wave Byte 8 of 14				107		128
+* Custom Wave Byte 9 of 14				108		128
+* Custom Wave Byte 10 of 14				109		128
+* Custom Wave Byte 11 of 14				110		128
+* Custom Wave Byte 12 of 14				111		128
+* Custom Wave Byte 13 of 14				112		128
+* Custom Wave Byte 14 of 14				113		128
+=====================================================================================SN76489 PSG Sound Chip Mapping
+-------------------------------------------------------------------------------------
+Global Control 						CC		Data Range
+* Pitch Transposition					85		128
+* PAL / NTSC						83		2
+-------------------------------------------------------------------------------------
+Noise Channel Control					Type
+* C and C#						High Frequency; Periodic Type
+* D and D#						Medium Frequency; Periodic Type
+* E							Low Frequency; Periodic Type
+* F							High Frequency; Noise Type
+* F#							Medium Frequency; Noise Type
+* G and G#						Low Frequency; Noise Type
+* A and A#						Channel 9; Periodic Type
+* B							Channel 9; Noise Type
+=====================================================================================
+Other	
+-------------------------------------------------------------------------------------
+Generate VGM Files (Experimental)			CC		Data Range
+-------------------------------------------------------------------------------------
+* Enable / Disable data capture mode			114		2
+* Enable data acquire mode				115		2
+* Disable data acquire mode				Ch 16 Note 127
+=====================================================================================
