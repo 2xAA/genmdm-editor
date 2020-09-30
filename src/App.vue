@@ -29,12 +29,22 @@
           <c span="2">
             <TFIFileUpload/>
             <GENMFileUpload/>
+            <TFIFileDownload/>
           </c>
           <c span="10">
             <grid columns="2">
               <c v-for="x in 4" :key="x">
-                <h2>OP {{x}}</h2>
-                <MDMADSR :operator="x"/>
+                <div class="operator-controls">
+                  <grid columns="6">
+                    <c span="1">
+                      <h2>OP {{x}}</h2>
+                    </c>
+                    <c span="5" class="sseg-container">
+                      <MDMSSGEGDisplay :operator="x" />
+                    </c>
+                  </grid>
+                  <MDMADSR :operator="x"/>
+                </div>
               </c>
             </grid>
           </c>
@@ -109,10 +119,14 @@ import WebMidi from "webmidi";
 import MDMControlGroup from "./components/MDMControlGroup";
 import MDMADSR from "./components/MDMADSR";
 import TFIFileUpload from "./components/TFIFileUpload";
+import TFIFileDownload from "./components/TFIFileDownload";
 import GENMFileUpload from "./components/GENMFileUpload";
 import DACSettings from "./components/DACSettings";
 import GlobalSettings from "./components/GlobalSettings";
-import MDMAlgorithmDisplay from "./components/MDMAlgorithmDisplay.vue";
+import MDMAlgorithmDisplay from "./components/MDMAlgorithmDisplay";
+import MDMSSGEGDisplay from "./components/MDMSSGEGDisplay"
+import mapToCCRange from './utils/map-to-cc-range';
+import defaultMapping from './default-mapping';
 
 export default {
   name: "App",
@@ -121,10 +135,12 @@ export default {
     MDMControlGroup,
     MDMADSR,
     TFIFileUpload,
+    TFIFileDownload,
     GENMFileUpload,
     DACSettings,
     GlobalSettings,
-    MDMAlgorithmDisplay
+    MDMAlgorithmDisplay,
+    MDMSSGEGDisplay
   },
 
   data() {
@@ -206,7 +222,18 @@ export default {
         return;
       }
 
-      this.outputPort.sendControlChange(parseInt(cc, 10), value, channel);
+      const intChannel = parseInt(channel, 10);
+      const intController = parseInt(cc, 10);
+
+      const mappedValue = mapToCCRange(value,
+        defaultMapping[intController].range - 1
+      );
+
+      this.outputPort.sendControlChange(
+        intController,
+        mappedValue,
+        intChannel
+      );
     },
 
     handleNoteOn(e) {
@@ -259,6 +286,16 @@ export default {
       }
     },
 
+    freeChannels() {
+      const channels = [false, true, true, true, true, true];
+
+      Object.values(this.notesOn).forEach(channel => {
+        channels[channel] = false;
+      });
+
+      return Object.keys(channels.filter(channel => channel));
+    },
+
     nextPolyphonyChannel(newNoteNumber) {
       const notesOn = Object.keys(this.notesOn);
       const lowestNote = Math.min(...notesOn);
@@ -268,13 +305,23 @@ export default {
         lowestNoteChannel = this.notesOn[lowestNote];
       }
 
-      if (lowestNoteChannel + 1 > this.maxPolyphonicChannels) {
-        this.polyphonyChannel = 1;
-      } else {
-        this.polyphonyChannel = lowestNoteChannel + 1;
+      let nextChannel = this.polyphonyChannel + 1;
+
+      if (nextChannel > this.maxPolyphonicChannels) {
+        nextChannel = 1;
       }
 
-      return this.polyphonyChannel;
+      if (nextChannel === lowestNoteChannel) {
+        const freeChannel = this.freeChannels()[0];
+        if (!freeChannel) {
+          return nextChannel;
+        }
+
+        nextChannel = freeChannel;
+      }
+
+      this.polyphonyChannel = nextChannel;
+      return nextChannel;
     }
   },
 
@@ -303,15 +350,41 @@ export default {
 <style>
 @import url("/fonts/kokoro/index.css");
 
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-image: url(assets/images/background.jpg);
+  background-attachment: fixed;
+  background-position: calc(50% - 100px) center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  margin: 0;
+}
+
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  max-width: 1120px;
+  width: 1120px;
+  min-width: 1120px;
   margin: 0 auto;
 
   font-family: "Kokoro";
   letter-spacing: -1px;
+
+  transform: rotate(-0.2deg);
+  margin-top: -0.5px;
+}
+
+.ns-resize-cursor {
+  cursor: ns-resize;
 }
 
 label span {
@@ -327,5 +400,15 @@ h2 {
   font-size: 18px;
   font-weight: normal;
   text-transform: uppercase;
+}
+
+.operator-controls {
+  max-width: 400px;
+}
+
+.sseg-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 </style>

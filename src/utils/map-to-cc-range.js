@@ -1,3 +1,5 @@
+import mapToRange from './map-to-range';
+
 export default function mapToCCRange(value, range) {
-  return Math.ceil((value / range) * 127);
+  return mapToRange(value, range, 127)
 }

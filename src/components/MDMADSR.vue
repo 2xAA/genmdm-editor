@@ -10,25 +10,27 @@
     ]" />
   </c>
   <c span="6">
-    <canvas ref="canvas"></canvas>
+    <canvas ref="canvas" class="asdr-canvas"></canvas>
   </c>
-  <c span="8">
-    <MDMDial :value="displayPositions[0][0]" @input="setPosition(0, 0, $event)" :quantise="32"/>
+  <c span="8" class="envelope-dials">
+    <MDMDial :value="displayPositions[0][0]" @input="setPosition(0, 0, $event)" :inverse="true" :quantise="32" :cc="ADSR_CC_NUMBERS[0]"/>
     <MDMDial
       :value="displayPositions[0][1]"
       @input="setPosition(0, 1, $event)"
-      :quantise="127"
+      :quantise="128"
       :inverse="true"
+      :cc="ADSR_CC_NUMBERS[1]"
     />
-    <MDMDial :value="displayPositions[1][0]" @input="setPosition(1, 0, $event)" :quantise="32"/>
+    <MDMDial :value="displayPositions[1][0]" @input="setPosition(1, 0, $event)" :quantise="32" :cc="ADSR_CC_NUMBERS[2]"/>
     <MDMDial
       :value="displayPositions[1][1]"
       @input="setPosition(1, 1, $event)"
       :quantise="32"
       :inverse="true"
+      :cc="ADSR_CC_NUMBERS[3]"
     />
-    <MDMDial :value="displayPositions[2][0]" @input="setPosition(2, 0, $event)" :quantise="16"/>
-    <MDMDial :value="displayPositions[3][0]" @input="setPosition(3, 0, $event)" :quantise="16"/>
+    <MDMDial :value="displayPositions[2][0]" @input="setPosition(2, 0, $event)" :quantise="16" :cc="ADSR_CC_NUMBERS[4]"/>
+    <MDMDial :value="displayPositions[3][0]" @input="setPosition(3, 0, $event)" :quantise="16" :cc="ADSR_CC_NUMBERS[5]"/>
   </c>
 </grid>
 </template>
@@ -36,24 +38,16 @@
 <script>
 import MDMDial from "./MDMDial";
 import MDMControlGroup from "./MDMControlGroup";
-
-function radiusCollision(circle1, circle2) {
-  var dx = circle1.x - circle2.x;
-  var dy = circle1.y - circle2.y;
-  var distance = Math.sqrt(dx * dx + dy * dy);
-
-  return distance < circle1.radius + circle2.radius;
-}
+import defaultMapping from '../default-mapping';
 
 const ADSR_CC_NUMBERS = [43, 16, 47, 55, 51, 59];
 
 export default {
   props: {
-    value: { type: Object },
     color: { type: String, default: "#000000" },
     operator: { type: Number, required: true },
-    width: { type: Number, default: 300 },
-    height: { type: Number, default: 150 }
+    width: { type: Number, default: 298 },
+    height: { type: Number, default: 156 }
   },
 
   components: {
@@ -65,7 +59,8 @@ export default {
     return {
       context: null,
       mouseDown: true,
-      nodeSelected: -1
+      nodeSelected: -1,
+      ADSR_CC_NUMBERS
     };
   },
 
@@ -77,15 +72,15 @@ export default {
     displayPositions: {
       get() {
         const channel = this.$store.state[`channel${this.channel}`];
-        const positions = [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 1]];
         const operator = this.operator - 1;
+        const positions = [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 1]];
 
-        positions[0][0] = (127 - channel[ADSR_CC_NUMBERS[0] + operator]) / 127;
-        positions[0][1] = (127 - channel[ADSR_CC_NUMBERS[1] + operator]) / 127;
-        positions[1][0] = (127 - channel[ADSR_CC_NUMBERS[2] + operator]) / 127;
-        positions[1][1] = (127 - channel[ADSR_CC_NUMBERS[3] + operator]) / 127;
-        positions[2][0] = (127 - channel[ADSR_CC_NUMBERS[4] + operator]) / 127;
-        positions[3][0] = (127 - channel[ADSR_CC_NUMBERS[5] + operator]) / 127;
+        positions[0][0] = (channel[ADSR_CC_NUMBERS[0] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[0]].range - 1);
+        positions[0][1] = (channel[ADSR_CC_NUMBERS[1] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[1]].range - 1);
+        positions[1][0] = (channel[ADSR_CC_NUMBERS[2] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[2]].range - 1);
+        positions[1][1] = (channel[ADSR_CC_NUMBERS[3] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[3]].range - 1);
+        positions[2][0] = (channel[ADSR_CC_NUMBERS[4] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[4]].range - 1);
+        positions[3][0] = (channel[ADSR_CC_NUMBERS[5] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[5]].range - 1);
 
         return positions;
       },
@@ -95,8 +90,6 @@ export default {
       }
     }
   },
-
-  // 32, 32, 16, 16
 
   mounted() {
     const { canvas } = this.$refs;
@@ -117,70 +110,6 @@ export default {
   },
 
   methods: {
-    down() {
-      this.mouseDown = true;
-    },
-
-    up() {
-      this.mouseDown = false;
-
-      const values = this.generateValues();
-      this.$store.dispatch("setCCValues", values);
-    },
-
-    move(e) {
-      const { canvas } = this.$refs;
-      const qw = Math.floor(canvas.width / 4);
-      const x = Math.floor(Math.max(0, e.offsetX));
-      const y = Math.floor(Math.max(0, e.offsetY));
-
-      if (!this.mouseDown) {
-        let nodeSelected = -1;
-
-        for (let i = 0; i < this.displayPositions.length; ++i) {
-          const pos = this.getXYFromPosition(i);
-
-          const collision = radiusCollision(
-            { x, y, radius: 3 },
-            { ...pos, radius: 3 }
-          );
-          if (collision) {
-            nodeSelected = i;
-            break;
-          }
-        }
-
-        this.nodeSelected = nodeSelected;
-      }
-
-      if (this.mouseDown && this.nodeSelected > -1) {
-        let lowerX = 0;
-
-        if (this.nodeSelected > 0) {
-          lowerX = this.getXYFromPosition(this.nodeSelected - 1).x;
-        }
-
-        const higherX = lowerX + qw;
-
-        if (x > lowerX && x < higherX) {
-          const value = (x - lowerX) / (higherX - lowerX);
-
-          this.displayPositions[this.nodeSelected][0] = value;
-        }
-
-        const lowerY = 0;
-        const higherY = canvas.height;
-
-        if (y > lowerY && y < higherY) {
-          const value = (y - lowerY) / (higherY - lowerY);
-
-          this.displayPositions[this.nodeSelected][1] = value;
-        }
-      }
-
-      this.draw();
-    },
-
     resize() {
       const {
         $refs: { canvas },
@@ -298,8 +227,8 @@ export default {
 
       if (index === 0) {
         return {
-          x: lowerX + Math.floor(position[0] * cw),
-          y: Math.floor(position[1] * canvas.height)
+          x: lowerX + (cw-(-cw*-position[0])),//Math.pow(cw, position[0]),
+          y: Math.floor((1-position[1]) * canvas.height)
         };
       }
 
@@ -315,12 +244,12 @@ export default {
 
       const values = {};
 
-      const ar = Math.floor(127 - positions[0][0] * 127);
-      const tl = Math.floor(127 - positions[0][1] * 127);
-      const dr1 = Math.floor(127 - positions[1][0] * 127);
-      const sa = Math.floor(127 - positions[1][1] * 127);
-      const dr2 = Math.floor(127 - positions[2][0] * 127);
-      const rr = Math.floor(127 - positions[3][0] * 127);
+      const ar = Math.floor(positions[0][0] * (defaultMapping[ADSR_CC_NUMBERS[0]].range - 1));
+      const tl = Math.floor(positions[0][1] * (defaultMapping[ADSR_CC_NUMBERS[1]].range - 1));
+      const dr1 = Math.floor(positions[1][0] * (defaultMapping[ADSR_CC_NUMBERS[2]].range - 1));
+      const sa = Math.floor(positions[1][1] * (defaultMapping[ADSR_CC_NUMBERS[3]].range - 1));
+      const dr2 = Math.floor(positions[2][0] * (defaultMapping[ADSR_CC_NUMBERS[4]].range - 1));
+      const rr = Math.floor(positions[3][0] * (defaultMapping[ADSR_CC_NUMBERS[5]].range - 1));
 
       values[ADSR_CC_NUMBERS[0] + (operator - 1)] = ar;
       values[ADSR_CC_NUMBERS[1] + (operator - 1)] = tl;
@@ -341,3 +270,15 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.asdr-canvas {
+  margin-left: 3px;
+}
+
+.envelope-dials {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+</style>

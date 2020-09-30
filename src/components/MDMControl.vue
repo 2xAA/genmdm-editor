@@ -1,50 +1,19 @@
 <template>
-  <div>
-    <span :content="description" v-tippy="{followCursor : true}">
-      <label v-if="type !== 'bool'">
-        <select v-model.number="value" v-if="type !== 'bool'">
-          <template v-if="enumValues && dataValues">
-            <option
-              v-for="(label, x) in enumValues"
-              :key="label"
-              :value="dataValues[x]"
-              :selected="dataValues[x] === defaultValue"
-            >{{label}}</option>
-          </template>
+  <div class="mdm-control">
+    <template v-if="type !== 'bool'">
+      <DraggableSelect v-if="enumValues && dataValues" :values="dataValues" :default="defaultValue" :labels="enumValues" v-model.number="value" />
+      <DraggableSelect v-else-if="enumValues" :values="rangeValues" :default="defaultValue" :labels="enumValues" v-model.number="value" />
+      <DraggableSelect v-else-if="range > 0" :values="rangeValues" :default="defaultValue" v-model.number="value" />
+    </template>
 
-          <template v-else-if="enumValues">
-            <option
-              v-for="(label, x) in enumValues"
-              :key="label"
-              :value="Math.ceil((x / enumValues.length) * 127)"
-              :selected="Math.ceil((x / enumValues.length) * 127) === defaultValue"
-            >{{label}}</option>
-          </template>
-
-          <template v-else-if="range > 0">
-            <option
-              v-for="x in range"
-              :key="x"
-              :value="Math.ceil(((x-1) / range) * 127)"
-              :selected="Math.ceil(((x-1) / range) * 127) === defaultValue"
-            >{{ x - 1 }}</option>
-          </template>
-        </select>
-
-        <!-- <span>{{ label }}</span> -->
-      </label>
-      <div v-else class="checkbox">
-        <input type="checkbox" v-if="type === 'bool'" v-model="value" :id="cc">
-        <!-- <label :for="cc">
-          <span>{{ label }}</span>
-        </label> -->
-      </div>
-    </span>
+    <LabelledCheckbox v-else :labels="enumValues" v-model.number="value" />
   </div>
 </template>
 
 <script>
 import defaultMapping from "../default-mapping.js";
+import DraggableSelect from "./DraggableSelect";
+import LabelledCheckbox from "./LabelledCheckbox";
 
 export default {
   props: {
@@ -52,6 +21,11 @@ export default {
       type: Number,
       required: true
     }
+  },
+
+  components: {
+    DraggableSelect,
+    LabelledCheckbox
   },
 
   created() {
@@ -113,9 +87,27 @@ export default {
       return this.mapping.default;
     },
 
-    description() {
-      return this.mapping.description;
+    rangeValues() {
+      const { dataValues, range } = this;
+      let values = [];
+
+      if (dataValues) {
+        values = dataValues;
+      } else {
+        for(let i=0; i < range; ++i) {
+          values.push(i);
+        }
+      }
+
+      return values;
     }
   }
 };
 </script>
+
+<style scoped>
+.mdm-control {
+  width: 100%;
+  height: 100%;
+}
+</style>

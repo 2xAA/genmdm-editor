@@ -2,7 +2,7 @@
   <div>
     Load GENM:
     <input type="file" id="input" accept=".genm" @change="fileAdded">
-    
+
     <select v-model="selectedInstrument">
       <option v-for="(data, name) in instrumentData" :value="name" :key="name">{{name}}</option>
     </select>
@@ -11,9 +11,6 @@
 </template>
 
 <script>
-import defaultMapping from "../default-mapping.js";
-import mapToCCRange from "../utils/map-to-cc-range.js";
-
 /* GENM format
  * ----------
  * A .GENM file is used to store GenMDM patch files.
@@ -148,87 +145,58 @@ export default {
 
         const ccData = {
           // algorithm
-          14: mapToCCRange(instrument["algorithm"], defaultMapping[14].range),
+          14: instrument["algorithm"],
 
           // feedback
-          15: mapToCCRange(instrument["fmFeedback"], defaultMapping[15].range),
+          15: instrument["fmFeedback"],
 
           // lfo fm
-          75: mapToCCRange(instrument["lfoFm"], defaultMapping[75].range),
+          75:instrument["lfoFm"],
 
           // lfo am
-          76: mapToCCRange(instrument["lfoAm"], defaultMapping[76].range),
+          76: instrument["lfoAm"],
 
           // panning
-          77: mapToCCRange(instrument["panning"], defaultMapping[77].range)
+          77: instrument["panning"]
         };
 
         for (let i = 0; i < 4; ++i) {
           const j = i + 1;
 
           // Multiple
-          ccData[20 + i] = mapToCCRange(
-            instrument[`op${j}Mul`],
-            defaultMapping[20].range
-          );
+          ccData[20 + i] =
+            instrument[`op${j}Mul`]
+          ;
 
           // Detune
-          ccData[24 + i] = mapToCCRange(
-            instrument[`op${j}Detune`],
-            defaultMapping[24].range
-          );
+          ccData[24 + i] = instrument[`op${j}Detune`];
 
           // Total Level
-          ccData[16 + i] =
-            // 127 -
-            mapToCCRange(instrument[`op${j}Level`], defaultMapping[16].range);
+          ccData[16 + i] = instrument[`op${j}Level`];
 
           // Rate Scaling
-          ccData[39 + i] = mapToCCRange(
-            instrument[`op${j}RateScaling`],
-            defaultMapping[39].range
-          );
+          ccData[39 + i] = instrument[`op${j}RateScaling`];
 
           // Attack Rate
-          ccData[43 + i] = mapToCCRange(
-            instrument[`op${j}Attack`],
-            defaultMapping[43].range
-          );
+          ccData[43 + i] = instrument[`op${j}Attack`];
 
           // First Decay Rate
-          ccData[47 + i] = mapToCCRange(
-            instrument[`op${j}Decay1`],
-            defaultMapping[47].range
-          );
+          ccData[47 + i] = instrument[`op${j}Decay1`];
 
           // Secondary Decay Rate
-          ccData[51 + i] = mapToCCRange(
-            instrument[`op${j}Decay2`],
-            defaultMapping[51].range
-          );
+          ccData[51 + i] = instrument[`op${j}Decay2`];
 
           // Release Rate
-          ccData[59 + i] = mapToCCRange(
-            instrument[`op${j}Release`],
-            defaultMapping[59].range
-          );
+          ccData[59 + i] = instrument[`op${j}Release`];
 
           // Secondary Amplitude Level
-          ccData[55 + i] =
-            // 127 -
-            mapToCCRange(instrument[`op${j}Amp2`], defaultMapping[55].range);
+          ccData[55 + i] = instrument[`op${j}Amp2`];
 
           // SSG-EG Operator
-          ccData[90 + i] = mapToCCRange(
-            instrument[`op${j}SsgData`],
-            defaultMapping[90].range
-          );
+          ccData[90 + i] = instrument[`op${j}SsgData`];
 
           // OP LFO Enable
-          ccData[70 + i] = mapToCCRange(
-            instrument[`op${j}LfoEnable`],
-            defaultMapping[70].range
-          );
+          ccData[70 + i] = instrument[`op${j}LfoEnable`];
         }
 
         instrumentData[instrument.instrumentNameSymbolString] = ccData;

@@ -1,10 +1,19 @@
 <template>
-  <canvas ref="canvas"></canvas>
+  <div class="dial">
+    <canvas ref="canvas" class="ns-resize-cursor"></canvas>
+    {{ scaledValue }}
+  </div>
 </template>
 
 <script>
+import defaultMapping from '../default-mapping';
 export default {
   props: {
+    cc: {
+      type: Number,
+      required: true
+    },
+
     size: {
       type: Number,
       default: 60
@@ -37,6 +46,10 @@ export default {
     };
   },
 
+  created() {
+    this.movementValue = this.value;
+  },
+
   mounted() {
     const { canvas } = this.$refs;
 
@@ -53,6 +66,7 @@ export default {
     canvas.removeEventListener("mousedown", this.down);
     document.removeEventListener("mouseup", this.up);
     document.removeEventListener("mousemove", this.move);
+    document.body.classList.remove('ns-resize-cursor');
   },
 
   computed: {
@@ -66,12 +80,24 @@ export default {
       let value = 0;
 
       if (quantise > -1) {
-        value = Math.round(movementValue / q) * q;
+        if (this.inverse) {
+          value = Math.floor(movementValue / q) * q;
+        } else {
+          value = Math.ceil(movementValue / q) * q;
+        }
       } else {
         value = movementValue;
       }
 
       return value;
+    },
+
+    scaledValue() {
+      if (this.inverse) {
+        return Math.abs(Math.floor((this.value - 1) * (defaultMapping[this.cc].range - 1)))
+      } else {
+        return Math.floor(this.value * (defaultMapping[this.cc].range - 1))
+      }
     }
   },
 
@@ -81,6 +107,7 @@ export default {
 
       this.downY = e.pageY;
       document.addEventListener("mousemove", this.move);
+      document.body.classList.add('ns-resize-cursor');
     },
 
     up(e) {
@@ -89,6 +116,7 @@ export default {
       this.downY = -1;
       document.removeEventListener("mouseup", this.up);
       document.removeEventListener("mousemove", this.move);
+      document.body.classList.remove('ns-resize-cursor');
     },
 
     move(e) {
@@ -106,6 +134,11 @@ export default {
       this.movementValue = clampedNewValue;
 
       this.downY = e.pageY;
+      if (this.inverse) {
+        this.$emit("input", 1 - this.internalValue);
+      } else {
+        this.$emit("input", this.internalValue);
+      }
     },
 
     resize() {
@@ -145,8 +178,8 @@ export default {
         context.arc(cw / 2, ch / 2, ((size - 6) / 2 - 2) * dpr, 0, Math.PI * 2);
         context.stroke();
 
-        if (quantise > -1) {
-          for (let i = 0; i < quantise + 1; ++i) {
+        if (quantise > 0) {
+          for (let i = 0; i < quantise; ++i) {
             context.save();
             context.translate(cw / 2, ch / 2);
             context.rotate((i / quantise) * 270 * (Math.PI / 180));
@@ -188,12 +221,15 @@ export default {
 
   watch: {
     value(value) {
-      this.movementValue = value;
+      if (this.inverse) {
+        this.movementValue = 1 - value;
+      } else {
+        this.movementValue = value;
+      }
     },
 
     movementValue() {
       this.draw();
-      this.$emit("input", this.internalValue);
     }
   }
 };
@@ -202,6 +238,10 @@ export default {
 <style scoped>
 canvas {
   user-select: none;
+}
+
+.dial {
   margin-right: 0.5em;
+  text-align: center;
 }
 </style>

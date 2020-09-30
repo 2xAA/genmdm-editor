@@ -2,15 +2,12 @@
   <div>
     Load TFI:
     <input type="file" id="input" accept=".tfi" @change="fileAdded">
-    
+
     <b>WARNING: this will overwrite your current parameters</b>
   </div>
 </template>
 
 <script>
-import defaultMapping from "../default-mapping.js";
-import mapToCCRange from "../utils/map-to-cc-range.js";
-
 /* TFI format
  * ----------
  * Thank goodness for https://plutiedev.com/format-tfi
@@ -53,71 +50,65 @@ export default {
     parseTfiDataToMappedCC(data) {
       const parsed = {
         // algorithm
-        14: mapToCCRange(data[0], defaultMapping[14].range),
+        14: data[0],
 
         // feedback
-        15: mapToCCRange(data[1], defaultMapping[15].range)
+        15: data[1]
       };
 
       for (let i = 0; i < 4; ++i) {
         // Multiple
-        parsed[20 + i] = mapToCCRange(
-          data[2 + 10 * i],
-          defaultMapping[20].range
-        );
+        parsed[20 + i] =
+          data[2 + 10 * i];
+
 
         // Detune
-        parsed[24 + i] = mapToCCRange(
-          data[3 + 10 * i],
-          defaultMapping[24].range
-        );
+        parsed[24 + i] =
+          data[3 + 10 * i]
+
 
         // Total Level
         parsed[16 + i] =
-          127 - mapToCCRange(data[4 + 10 * i], defaultMapping[16].range);
+          127 - data[4 + 10 * i];
 
         // Rate Scaling
-        parsed[39 + i] = mapToCCRange(
-          data[5 + 10 * i],
-          defaultMapping[39].range
-        );
+        parsed[39 + i] =
+          data[5 + 10 * i]
 
         // Attack Rate
-        parsed[43 + i] = mapToCCRange(
-          data[6 + 10 * i],
-          defaultMapping[43].range
-        );
+        parsed[43 + i] =
+          data[6 + 10 * i]
 
         // First Decay Rate
-        parsed[47 + i] = mapToCCRange(
-          data[7 + 10 * i],
-          defaultMapping[47].range
-        );
+        parsed[47 + i] =
+          31 - data[7 + 10 * i]
 
         // Secondary Decay Rate
-        parsed[51 + i] = mapToCCRange(
-          data[8 + 10 * i],
-          defaultMapping[51].range
-        );
+        parsed[51 + i] =
+          data[8 + 10 * i];
 
         // Release Rate
-        parsed[59 + i] = mapToCCRange(
-          data[9 + 10 * i],
-          defaultMapping[59].range
-        );
+        parsed[59 + i] =
+          data[9 + 10 * i];
 
         // Secondary Amplitude Level
         parsed[55 + i] =
-          127 - mapToCCRange(data[10 + 10 * i], defaultMapping[55].range);
+          data[10 + 10 * i];
 
         // SSG-EG Operator
-        parsed[90 + i] = mapToCCRange(
-          data[11 + 10 * i],
-          defaultMapping[90].range
-        );
+        parsed[90 + i] =
+          data[11 + 10 * i];
+
+        // if less than 8, set to 0
+        // weird line in the tfi spec for this
+        // (tfi spec found in the help section of
+        // tfm maker)
+
+        if (parsed[90 + i] < 8) {
+          parsed[90 + i] = 0;
+        }
       }
 
-      // this.$emit("loaded-data", parsed);
       this.$store.dispatch("setCCValues", parsed);
     }
   }

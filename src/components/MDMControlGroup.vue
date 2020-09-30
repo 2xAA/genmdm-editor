@@ -2,7 +2,7 @@
   <grid columns="8" class="control-group">
     <slot name="header"></slot>
     <template v-for="cc in ccValues">
-      <c span="6" class="control-group__label" :key="`label-${cc}`">{{
+      <c span="6" class="control-group__label" :key="`label-${cc}`" :content="controls[cc].description" v-tippy="{followCursor : true}">{{
         controls[cc].label
       }}</c>
       <c span="2" class="control-group__control" :key="`control-${cc}`">
