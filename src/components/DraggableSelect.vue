@@ -1,5 +1,10 @@
 <template>
-  <div class="draggable-select ns-resize-cursor" ref="draggableSelectBody">
+  <div
+    class="draggable-select ns-resize-cursor"
+    ref="draggableSelectBody"
+    @mousedown="requestPointerLock"
+    @mouseup="exitPointerLock"
+  >
     <template v-if="labels.length">
       {{ currentLabel }}
     </template>
@@ -33,11 +38,8 @@ export default {
 
   data() {
     return {
-      cacheValue: null,
-
-      mouseMovementRangeInPixels: 128,
-      downY: -1,
-      internalValue: 0
+      internalValue: 0,
+      lastCursor: "",
     }
   },
 
@@ -45,77 +47,86 @@ export default {
     this.internalValue = this.value;
   },
 
-  mounted() {
-    this.$refs.draggableSelectBody.addEventListener("mousedown", this.down);
-  },
-
-  beforeDestroy() {
-    this.$refs.draggableSelectBody.removeEventListener("mousedown", this.down);
-    document.removeEventListener("mouseup", this.up);
-    document.removeEventListener("mousemove", this.move);
-    document.body.classList.remove("ns-resize-cursor");
-  },
-
   computed: {
     currentIndex() {
-      return this.value;
+      return this.values[this.internalValue];
     },
 
     currentLabel() {
-      return this.labels[this.currentIndex];
+      return this.labels[this.internalValue];
     },
   },
 
   methods: {
-    down(e) {
-      document.addEventListener("mouseup", this.up);
+    requestPointerLock() {
+      const {
+        $refs: { draggableSelectBody }
+      } = this;
 
-      this.downY = e.pageY;
-      document.addEventListener("mousemove", this.move);
-      document.body.classList.add("ns-resize-cursor");
+      document.addEventListener(
+        "pointerlockchange",
+        this.lockChangeAlert,
+        false
+      );
+      draggableSelectBody.requestPointerLock();
     },
 
-    up(e) {
-      this.updateValue(e);
-
-      this.downY = -1;
-      document.removeEventListener("mouseup", this.up);
-      document.removeEventListener("mousemove", this.move);
-      document.body.classList.remove("ns-resize-cursor");
+    exitPointerLock() {
+      document.exitPointerLock();
+      document.removeEventListener(
+        "pointerlockchange",
+        this.lockChangeAlert,
+        false
+      );
     },
 
-    move(e) {
-      this.updateValue(e);
-    },
+    lockChangeAlert() {
+      const {
+        $refs: { draggableSelectBody }
+      } = this;
 
-    updateValue(e) {
-      const { pageY } = e;
-      const { values, downY, mouseMovementRangeInPixels, internalValue } = this;
-      let differenceInPixels = downY - pageY;
-
-      const valueDifference =
-        differenceInPixels / mouseMovementRangeInPixels;
-
-      const newValue = valueDifference + internalValue;
-      const clampedNewValue = Math.max(0, Math.min(1, newValue));
-      this.internalValue = clampedNewValue;
-
-      this.cacheValue = values[this.currentIndex];
-
-      this.downY = pageY;
-    },
-  },
-
-  watch: {
-    cacheValue(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.$emit("input", newValue);
+      if (document.pointerLockElement === draggableSelectBody) {
+        document.addEventListener("mousemove", this.mouseMove, false);
+        document.addEventListener("mouseup", this.mouseUp);
+      } else {
+        document.removeEventListener("mousemove", this.mouseMove, false);
+        this.mouseUp();
       }
     },
 
+    mouseDown(e) {
+      this.startX = e.clientX;
+
+      window.addEventListener("mousemove", this.mouseMove);
+      window.addEventListener("mouseup", this.mouseUp);
+      this.lastCursor = document.body.style.cursor;
+      document.body.style.cursor = "ew-resize";
+    },
+
+    mouseUp() {
+      document.removeEventListener("mousemove", this.mouseMove, false);
+      document.removeEventListener("mouseup", this.mouseUp);
+      document.body.style.cursor =
+        this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
+
+      this.downY = -1;
+    },
+
+    mouseMove(e) {
+      const { internalValue, values } = this;
+      const newValue = -e.movementY / 1 + internalValue;
+      const clampedNewIndex = Math.floor(Math.max(0, Math.min(values.length - 1, newValue)));
+      const clampedNewMIDIValue = (clampedNewIndex / (values.length  - 1)) * 127;
+
+      this.internalValue = clampedNewIndex;
+
+      this.$emit('value', clampedNewMIDIValue);
+    }
+  },
+
+  watch: {
     value(newValue) {
       if (newValue !== this.cacheValue) {
-        this.cacheValue = newValue;
         this.internalValue = newValue;
       }
     }
