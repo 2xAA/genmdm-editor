@@ -37,9 +37,17 @@ const store = new Vuex.Store({
 
         if (state.polyphonic || isGlobal) {
           for (let i = 1; i < 7; ++i) {
+            if (state[`channel${i}`][cc] === value) {
+              return;
+            }
+
             commit("SET_CC_VALUE", { cc, value, channel: i });
           }
         } else {
+          if (state[`channel${state.channel}`][cc] === value) {
+            return;
+          }
+
           commit("SET_CC_VALUE", { cc, value, channel: state.channel });
         }
       });
