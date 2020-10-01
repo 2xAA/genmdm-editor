@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import defaultMapping from '../default-mapping';
+import mapToCCRange from '../utils/map-to-cc-range';
 /* GENM format
  * ----------
  * A .GENM file is used to store GenMDM patch files.
@@ -145,19 +147,19 @@ export default {
 
         const ccData = {
           // algorithm
-          14: instrument["algorithm"],
+          14: mapToCCRange(instrument["algorithm"], defaultMapping[14].range - 1),
 
           // feedback
-          15: instrument["fmFeedback"],
+          15: mapToCCRange(instrument["fmFeedback"], defaultMapping[14].range - 1),
 
           // lfo fm
-          75:instrument["lfoFm"],
+          75:mapToCCRange(instrument["lfoFm"], defaultMapping[14].range - 1),
 
           // lfo am
-          76: instrument["lfoAm"],
+          76: mapToCCRange(instrument["lfoAm"], defaultMapping[14].range - 1),
 
           // panning
-          77: instrument["panning"]
+          77: mapToCCRange(instrument["panning"], defaultMapping[14].range - 1),
         };
 
         for (let i = 0; i < 4; ++i) {
