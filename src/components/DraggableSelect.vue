@@ -33,6 +33,10 @@ export default {
     value: {
       type: Number,
       required: true
+    },
+
+    emitArrayValue: {
+      type: Boolean
     }
   },
 
@@ -114,21 +118,13 @@ export default {
 
     mouseMove(e) {
       const { internalValue, values } = this;
-      const newValue = -e.movementY / 1 + internalValue;
+      const newValue = -e.movementY + internalValue;
       const clampedNewIndex = Math.floor(Math.max(0, Math.min(values.length - 1, newValue)));
-      const clampedNewMIDIValue = (clampedNewIndex / (values.length  - 1)) * 127;
+      const clampedNewMIDIValue = Math.floor((clampedNewIndex / (values.length  - 1)) * 127);
 
       this.internalValue = clampedNewIndex;
 
-      this.$emit('value', clampedNewMIDIValue);
-    }
-  },
-
-  watch: {
-    value(newValue) {
-      if (newValue !== this.cacheValue) {
-        this.internalValue = newValue;
-      }
+      this.$emit('input', this.emitArrayValue ? values[clampedNewIndex] : clampedNewMIDIValue);
     }
   }
 }

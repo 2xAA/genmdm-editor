@@ -9,13 +9,17 @@ import mapToCCRange from '../utils/map-to-cc-range';
 
 export default {
   computed: {
+    value() {
+      return this.$store.state[`channel${this.$store.state.channel}`][14]
+    },
+
     algorithm() {
-      return this.sources[this.$store.state[`channel${this.$store.state.channel}`][14]];
+      return this.sources[this.value];
     },
 
     sources() {
       return [...Array(8).keys()].reduce((obj, x, index) => {
-        const key = mapToCCRange(x, 8);
+        const key = mapToCCRange(index, 7);
         const value = `/graphics/Algorithm_${index}.svg`;
 
         obj[key] = value;

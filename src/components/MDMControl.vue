@@ -1,7 +1,7 @@
 <template>
   <div class="mdm-control">
     <template v-if="type !== 'bool'">
-      <DraggableSelect v-if="enumValues && dataValues" :values="dataValues" :default="defaultValue" :labels="enumValues" v-model.number="value" />
+      <DraggableSelect v-if="enumValues && dataValues" :values="dataValues" :emitArrayValue="true" :default="defaultValue" :labels="enumValues" v-model.number="value" />
       <DraggableSelect v-else-if="enumValues" :values="rangeValues" :default="defaultValue" :labels="enumValues" v-model.number="value" />
       <DraggableSelect v-else-if="range > 0" :values="rangeValues" :default="defaultValue" v-model.number="value" />
     </template>
