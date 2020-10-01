@@ -1,6 +1,12 @@
 <template>
   <div class="dial">
-    <canvas ref="canvas" class="ns-resize-cursor"></canvas>
+    <canvas
+      :title="title"
+      ref="canvas"
+      class="ns-resize-cursor"
+      @mousedown="requestPointerLock"
+      @mouseup="exitPointerLock"
+    ></canvas>
     {{ scaledValue }}
   </div>
 </template>
@@ -14,14 +20,14 @@ export default {
       required: true
     },
 
+    ccOffset: {
+      type: Number,
+      default: 0
+    },
+
     size: {
       type: Number,
       default: 60
-    },
-
-    value: {
-      type: Number,
-      default: 0
     },
 
     quantise: {
@@ -38,16 +44,13 @@ export default {
   data() {
     return {
       context: null,
-
-      mouseMovementRangeInPixels: 128,
-
-      downY: -1,
       movementValue: 0
     };
   },
 
   created() {
-    this.movementValue = this.value;
+    const { channel } = this.$store.state;
+    this.movementValue = this.$store.state[`channel${channel}`][this.cc + this.ccOffset] / 127;
   },
 
   mounted() {
@@ -57,15 +60,13 @@ export default {
     this.resize();
 
     this.draw();
-
-    canvas.addEventListener("mousedown", this.down);
   },
 
   beforeDestroy() {
     const { canvas } = this.$refs;
-    canvas.removeEventListener("mousedown", this.down);
-    document.removeEventListener("mouseup", this.up);
-    document.removeEventListener("mousemove", this.move);
+    canvas.removeEventListener("mousedown", this.mouseDown);
+    document.removeEventListener("mouseup", this.mouseUp);
+    document.removeEventListener("mousemove", this.mouseMove);
     document.body.classList.remove('ns-resize-cursor');
   },
 
@@ -77,16 +78,14 @@ export default {
     internalValue() {
       const { q, quantise, movementValue } = this;
 
-      let value = 0;
+      let value = movementValue / 127;
 
       if (quantise > -1) {
         if (this.inverse) {
-          value = Math.floor(movementValue / q) * q;
+          value = Math.floor(value / q) * q;
         } else {
-          value = Math.ceil(movementValue / q) * q;
+          value = Math.ceil(value / q) * q;
         }
-      } else {
-        value = movementValue;
       }
 
       return value;
@@ -94,51 +93,77 @@ export default {
 
     scaledValue() {
       if (this.inverse) {
-        return Math.abs(Math.floor((this.value - 1) * (defaultMapping[this.cc].range - 1)))
+        return Math.abs(Math.floor((this.internalValue - 1) * (defaultMapping[this.cc].range - 1)))
       } else {
-        return Math.floor(this.value * (defaultMapping[this.cc].range - 1))
+        return Math.floor(this.internalValue * (defaultMapping[this.cc].range - 1))
       }
+    },
+
+    title() {
+      return defaultMapping[this.cc].label;
     }
   },
 
   methods: {
-    down(e) {
-      document.addEventListener("mouseup", this.up);
+    requestPointerLock() {
+      const {
+        $refs: { canvas }
+      } = this;
 
-      this.downY = e.pageY;
-      document.addEventListener("mousemove", this.move);
-      document.body.classList.add('ns-resize-cursor');
+      document.addEventListener(
+        "pointerlockchange",
+        this.lockChangeAlert,
+        false
+      );
+      canvas.requestPointerLock();
     },
 
-    up(e) {
-      this.updateValue(e);
-
-      this.downY = -1;
-      document.removeEventListener("mouseup", this.up);
-      document.removeEventListener("mousemove", this.move);
-      document.body.classList.remove('ns-resize-cursor');
+    exitPointerLock() {
+      document.exitPointerLock();
+      document.removeEventListener(
+        "pointerlockchange",
+        this.lockChangeAlert,
+        false
+      );
     },
 
-    move(e) {
-      this.updateValue(e);
+    lockChangeAlert() {
+      const {
+        $refs: { canvas }
+      } = this;
+
+      if (document.pointerLockElement === canvas) {
+        document.addEventListener("mousemove", this.mouseMove, false);
+        document.addEventListener("mouseup", this.mouseUp);
+      } else {
+        document.removeEventListener("mousemove", this.mouseMove, false);
+        this.mouseUp();
+      }
     },
 
-    updateValue(e) {
-      let differenceInPixels = this.downY - e.pageY;
+    mouseDown() {
+      window.addEventListener("mousemove", this.mouseMove);
+      window.addEventListener("mouseup", this.mouseUp);
+      this.lastCursor = document.body.style.cursor;
+      document.body.style.cursor = "ew-resize";
+    },
 
-      const valueDifference =
-        differenceInPixels / this.mouseMovementRangeInPixels;
+    mouseUp() {
+      document.removeEventListener("mousemove", this.mouseMove, false);
+      document.removeEventListener("mouseup", this.mouseUp);
+      document.body.style.cursor =
+        this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
+    },
 
-      const newValue = valueDifference + this.movementValue;
-      const clampedNewValue = Math.max(0, Math.min(1, newValue));
+    mouseMove(e) {
+      const newValue = -e.movementY + this.movementValue;
+      console.log(newValue)
+
+      const clampedNewValue = Math.max(0, Math.min(128, newValue));
       this.movementValue = clampedNewValue;
 
       this.downY = e.pageY;
-      if (this.inverse) {
-        this.$emit("input", 1 - this.internalValue);
-      } else {
-        this.$emit("input", this.internalValue);
-      }
+      this.$store.dispatch("setCCValues", { [this.cc + this.ccOffset]: this.scaledValue });
     },
 
     resize() {

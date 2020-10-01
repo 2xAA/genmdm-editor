@@ -13,24 +13,45 @@
     <canvas ref="canvas" class="asdr-canvas"></canvas>
   </c>
   <c span="8" class="envelope-dials">
-    <MDMDial :value="displayPositions[0][0]" @input="setPosition(0, 0, $event)" :inverse="true" :quantise="32" :cc="ADSR_CC_NUMBERS[0]"/>
+    <MDMDial
+      :value="displayPositions[0][0]"
+      :inverse="true"
+      :quantise="32"
+      :cc="ADSR_CC_NUMBERS[0]"
+      :ccOffset="operator - 1"
+    />
     <MDMDial
       :value="displayPositions[0][1]"
-      @input="setPosition(0, 1, $event)"
       :quantise="128"
       :inverse="true"
       :cc="ADSR_CC_NUMBERS[1]"
+      :ccOffset="operator - 1"
     />
-    <MDMDial :value="displayPositions[1][0]" @input="setPosition(1, 0, $event)" :quantise="32" :cc="ADSR_CC_NUMBERS[2]"/>
+    <MDMDial
+      :value="displayPositions[1][0]"
+      :quantise="32"
+      :cc="ADSR_CC_NUMBERS[2]"
+      :ccOffset="operator - 1"
+    />
     <MDMDial
       :value="displayPositions[1][1]"
-      @input="setPosition(1, 1, $event)"
-      :quantise="32"
+      :quantise="16"
       :inverse="true"
       :cc="ADSR_CC_NUMBERS[3]"
+      :ccOffset="operator - 1"
     />
-    <MDMDial :value="displayPositions[2][0]" @input="setPosition(2, 0, $event)" :quantise="16" :cc="ADSR_CC_NUMBERS[4]"/>
-    <MDMDial :value="displayPositions[3][0]" @input="setPosition(3, 0, $event)" :quantise="16" :cc="ADSR_CC_NUMBERS[5]"/>
+    <MDMDial
+      :value="displayPositions[2][0]"
+      :quantise="32"
+      :cc="ADSR_CC_NUMBERS[4]"
+      :ccOffset="operator - 1"
+    />
+    <MDMDial
+      :value="displayPositions[3][0]"
+      :quantise="16"
+      :cc="ADSR_CC_NUMBERS[5]"
+      :ccOffset="operator - 1"
+    />
   </c>
 </grid>
 </template>
@@ -69,25 +90,19 @@ export default {
       return this.$store.state.channel;
     },
 
-    displayPositions: {
-      get() {
-        const channel = this.$store.state[`channel${this.channel}`];
-        const operator = this.operator - 1;
-        const positions = [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 1]];
+    displayPositions() {
+      const channel = this.$store.state[`channel${this.channel}`];
+      const operator = this.operator - 1;
+      const positions = [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 1]];
 
-        positions[0][0] = (channel[ADSR_CC_NUMBERS[0] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[0]].range - 1);
-        positions[0][1] = (channel[ADSR_CC_NUMBERS[1] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[1]].range - 1);
-        positions[1][0] = (channel[ADSR_CC_NUMBERS[2] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[2]].range - 1);
-        positions[1][1] = (channel[ADSR_CC_NUMBERS[3] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[3]].range - 1);
-        positions[2][0] = (channel[ADSR_CC_NUMBERS[4] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[4]].range - 1);
-        positions[3][0] = (channel[ADSR_CC_NUMBERS[5] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[5]].range - 1);
+      positions[0][0] = (channel[ADSR_CC_NUMBERS[0] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[0]].range - 1);
+      positions[0][1] = (channel[ADSR_CC_NUMBERS[1] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[1]].range - 1);
+      positions[1][0] = (channel[ADSR_CC_NUMBERS[2] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[2]].range - 1);
+      positions[1][1] = (channel[ADSR_CC_NUMBERS[3] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[3]].range - 1);
+      positions[2][0] = (channel[ADSR_CC_NUMBERS[4] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[4]].range - 1);
+      positions[3][0] = (channel[ADSR_CC_NUMBERS[5] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[5]].range - 1);
 
-        return positions;
-      },
-
-      set(values) {
-        this.$store.dispatch("setCCValues", values);
-      }
+      return positions;
     }
   },
 

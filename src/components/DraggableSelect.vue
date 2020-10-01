@@ -98,9 +98,7 @@ export default {
       }
     },
 
-    mouseDown(e) {
-      this.startX = e.clientX;
-
+    mouseDown() {
       window.addEventListener("mousemove", this.mouseMove);
       window.addEventListener("mouseup", this.mouseUp);
       this.lastCursor = document.body.style.cursor;
@@ -112,8 +110,6 @@ export default {
       document.removeEventListener("mouseup", this.mouseUp);
       document.body.style.cursor =
         this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
-
-      this.downY = -1;
     },
 
     mouseMove(e) {
