@@ -44,11 +44,12 @@ export default {
     return {
       internalValue: 0,
       lastCursor: "",
+      mouseButtonDown: false
     }
   },
 
   created() {
-    this.internalValue = this.value;
+    this.internalValue = Math.max(0, Math.min(this.values.length - 1, this.default));
   },
 
   computed: {
@@ -73,6 +74,7 @@ export default {
         false
       );
       draggableSelectBody.requestPointerLock();
+      this.mouseButtonDown = true;
     },
 
     exitPointerLock() {
@@ -82,6 +84,7 @@ export default {
         this.lockChangeAlert,
         false
       );
+      this.mouseButtonDown = false;
     },
 
     lockChangeAlert() {
@@ -96,13 +99,6 @@ export default {
         document.removeEventListener("mousemove", this.mouseMove, false);
         this.mouseUp();
       }
-    },
-
-    mouseDown() {
-      window.addEventListener("mousemove", this.mouseMove);
-      window.addEventListener("mouseup", this.mouseUp);
-      this.lastCursor = document.body.style.cursor;
-      document.body.style.cursor = "ew-resize";
     },
 
     mouseUp() {
@@ -121,6 +117,14 @@ export default {
       this.internalValue = clampedNewIndex;
 
       this.$emit('input', this.emitArrayValue ? values[clampedNewIndex] : clampedNewMIDIValue);
+    }
+  },
+
+  watch: {
+    value(value) {
+      if (!this.mouseButtonDown) {
+        this.internalValue = Math.max(0, Math.min(this.values.length - 1, Math.floor(value / 127)));
+      }
     }
   }
 }

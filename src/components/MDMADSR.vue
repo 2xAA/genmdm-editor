@@ -23,13 +23,13 @@
     <MDMDial
       :value="displayPositions[0][1]"
       :quantise="128"
-      :inverse="true"
       :cc="ADSR_CC_NUMBERS[1]"
       :ccOffset="operator - 1"
     />
     <MDMDial
       :value="displayPositions[1][0]"
       :quantise="32"
+      :inverse="true"
       :cc="ADSR_CC_NUMBERS[2]"
       :ccOffset="operator - 1"
     />
@@ -43,12 +43,14 @@
     <MDMDial
       :value="displayPositions[2][0]"
       :quantise="32"
+      :inverse="true"
       :cc="ADSR_CC_NUMBERS[4]"
       :ccOffset="operator - 1"
     />
     <MDMDial
       :value="displayPositions[3][0]"
       :quantise="16"
+      :inverse="true"
       :cc="ADSR_CC_NUMBERS[5]"
       :ccOffset="operator - 1"
     />
@@ -81,6 +83,7 @@ export default {
       context: null,
       mouseDown: true,
       nodeSelected: -1,
+      storeUnsubscribe: null,
       ADSR_CC_NUMBERS
     };
   },
@@ -95,12 +98,12 @@ export default {
       const operator = this.operator - 1;
       const positions = [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 1]];
 
-      positions[0][0] = (channel[ADSR_CC_NUMBERS[0] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[0]].range - 1);
-      positions[0][1] = (channel[ADSR_CC_NUMBERS[1] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[1]].range - 1);
-      positions[1][0] = (channel[ADSR_CC_NUMBERS[2] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[2]].range - 1);
-      positions[1][1] = (channel[ADSR_CC_NUMBERS[3] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[3]].range - 1);
-      positions[2][0] = (channel[ADSR_CC_NUMBERS[4] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[4]].range - 1);
-      positions[3][0] = (channel[ADSR_CC_NUMBERS[5] + operator]) / (defaultMapping[ADSR_CC_NUMBERS[5]].range - 1);
+      positions[0][0] = (channel[ADSR_CC_NUMBERS[0] + operator]) / 127;
+      positions[0][1] = (channel[ADSR_CC_NUMBERS[1] + operator]) / 127;
+      positions[1][0] = 1 - (channel[ADSR_CC_NUMBERS[2] + operator]) / 127;
+      positions[1][1] = 1 - (channel[ADSR_CC_NUMBERS[3] + operator]) / 127;
+      positions[2][0] = 1 - (channel[ADSR_CC_NUMBERS[4] + operator]) / 127;
+      positions[3][0] = 1 - (channel[ADSR_CC_NUMBERS[5] + operator]) / 127;
 
       return positions;
     }
@@ -113,7 +116,7 @@ export default {
     this.resize();
     this.draw();
 
-    this.$store.subscribe((mutation) => {
+    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
       if (mutation.type === "SET_CC_VALUE") {
         const cc = parseInt(mutation.payload.cc, 10) - (this.operator - 1);
 
@@ -122,6 +125,10 @@ export default {
         }
       }
     });
+  },
+
+  beforeDestroy() {
+    this.storeUnsubscribe();
   },
 
   methods: {

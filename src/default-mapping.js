@@ -377,25 +377,25 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
 
   39: {
     label: "Rate Scale",
-    range: 3,
+    range: 4,
     default: 0
   },
 
   40: {
     label: "Rate Scale",
-    range: 3,
+    range: 4,
     default: 0
   },
 
   41: {
     label: "Rate Scale",
-    range: 3,
+    range: 4,
     default: 0
   },
 
   42: {
     label: "Rate Scale",
-    range: 3,
+    range: 4,
     default: 0
   },
 

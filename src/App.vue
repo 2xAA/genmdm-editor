@@ -124,9 +124,7 @@ import GENMFileUpload from "./components/GENMFileUpload";
 import DACSettings from "./components/DACSettings";
 import GlobalSettings from "./components/GlobalSettings";
 import MDMAlgorithmDisplay from "./components/MDMAlgorithmDisplay";
-import MDMSSGEGDisplay from "./components/MDMSSGEGDisplay"
-import mapToCCRange from './utils/map-to-cc-range';
-import defaultMapping from './default-mapping';
+import MDMSSGEGDisplay from "./components/MDMSSGEGDisplay";
 
 export default {
   name: "App",
@@ -152,7 +150,8 @@ export default {
       outputId: null,
 
       notesOn: {},
-      polyphonyChannel: 1
+      polyphonyChannel: 1,
+      storeUnsubscribe: null
     };
   },
 
@@ -197,18 +196,25 @@ export default {
       if (err) {
         console.log("WebMidi could not be enabled.", err);
       } else {
-        console.log("WebMidi enabled!");
-
         WebMidi.addListener("connected", this.populateInputAndOutputPorts);
         WebMidi.addListener("disconnected", this.populateInputAndOutputPorts);
       }
     });
 
-    this.$store.subscribe((mutation) => {
+    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
       if (mutation.type === "SET_CC_VALUE") {
         this.sendCC(mutation.payload);
       }
     });
+  },
+
+  beforeDestroy() {
+    this.storeUnsubscribe();
+
+    const input = this.inputs.find(input => input.id === this.inputId);
+    if (input) {
+      input.removeListener();
+    }
   },
 
   methods: {
@@ -222,18 +228,16 @@ export default {
         return;
       }
 
-      const intChannel = parseInt(channel, 10);
-      const intController = parseInt(cc, 10);
-
-      const mappedValue = mapToCCRange(value,
-        defaultMapping[intController].range - 1
-      );
-
-      this.outputPort.sendControlChange(
-        intController,
-        mappedValue,
-        intChannel
-      );
+      try {
+        this.outputPort.sendControlChange(
+          cc,
+          value,
+          channel
+        );
+      } catch (e) {
+        console.error(e);
+        console.warn(cc, value, channel);
+      }
     },
 
     handleNoteOn(e) {
@@ -329,7 +333,9 @@ export default {
     inputId(newId, oldId) {
       if (oldId) {
         const oldInput = this.inputs.find(input => input.id === oldId);
-        oldInput.removeListener();
+        if (oldInput) {
+          oldInput.removeListener();
+        }
       }
 
       const input = this.inputs.find(input => input.id === newId);

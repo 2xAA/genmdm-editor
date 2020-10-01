@@ -31,14 +31,16 @@ const store = new Vuex.Store({
 
   actions: {
     setCCValues({ commit, state }, values = {}) {
-      Object.keys(values).forEach(cc => {
+      Object.keys(values).forEach(key => {
+        const cc = parseInt(key, 10);
+
         const value = values[cc];
-        const isGlobal = GLOBAL_CC.indexOf(parseInt(cc, 10)) > -1;
+        const isGlobal = GLOBAL_CC.indexOf(cc) > -1;
 
         if (state.polyphonic || isGlobal) {
           for (let i = 1; i < 7; ++i) {
             if (state[`channel${i}`][cc] === value) {
-              return;
+              continue;
             }
 
             commit("SET_CC_VALUE", { cc, value, channel: i });
