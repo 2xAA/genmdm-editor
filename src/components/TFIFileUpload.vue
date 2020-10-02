@@ -21,7 +21,7 @@ import mapToCCRange from '../utils/map-to-cc-range';
  *   0             | Algorithm     | 0 - 7
  *   1             | Feedback      | 0 - 7
  *   2, 12, 22, 32 | Multiplier    | 0 - 15
- *   3, 13, 23, 33 | Detune        | 0 - 6
+ *   3, 13, 23, 33 | Detune        | 0 - 7
  *   4, 14, 24, 34 | Total Level   | 0 - 127
  *   5, 15, 25, 35 | Rate Scaling  | 0 - 3
  *   6, 16, 26, 36 | Attack Rate   | 0 - 31

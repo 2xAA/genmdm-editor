@@ -356,13 +356,28 @@ export default {
 <style>
 @import url("/fonts/kokoro/index.css");
 
+:root {
+  --foreground-color: black;
+  --background-color: white;
+  --background-image: url(assets/images/background.jpg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-color: white;
+    --background-color: black;
+    --background-image: url(assets/images/background-inverted.jpg);
+  }
+}
+
 html,
 body {
   height: 100%;
 }
 
 body {
-  background-image: url(assets/images/background.jpg);
+  background-color: var(--background-color);
+  background-image: var(--background-image);
   background-attachment: fixed;
   background-position: calc(50% - 100px) center;
   background-repeat: no-repeat;
@@ -387,6 +402,8 @@ body {
 
   transform: rotate(-0.2deg);
   margin-top: -0.5px;
+
+  color: var(--foreground-color);
 }
 
 .ns-resize-cursor {
@@ -395,7 +412,7 @@ body {
 
 label span {
   background-color: transparent;
-  color: #000;
+  color: var(--foreground-color);
 }
 
 select {

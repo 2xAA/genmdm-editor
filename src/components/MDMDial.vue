@@ -198,6 +198,7 @@ export default {
 
       requestAnimationFrame(() => {
         context.clearRect(0, 0, cw, ch);
+        context.strokeStyle = this.$colors.foreground;
 
         context.beginPath();
         context.arc(cw / 2, ch / 2, ((size - 6) / 2 - 2) * dpr, 0, Math.PI * 2);

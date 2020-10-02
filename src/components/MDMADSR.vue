@@ -152,16 +152,16 @@ export default {
 
     draw() {
       const dpr = window.devicePixelRatio;
-      const { context, $refs, getXYFromPosition, color } = this;
+      const { context, $refs, getXYFromPosition } = this;
       const {
         canvas: { width: cw, height: ch }
       } = $refs;
 
       context.restore();
+      context.strokeStyle = this.$colors.foreground;
 
       context.clearRect(0, 0, cw, ch);
       context.strokeRect(0, 0, cw, ch);
-      context.strokeStyle = "#000";
 
       context.save();
       context.translate(0, -1);
@@ -178,8 +178,6 @@ export default {
       const pos3Y =
         ch -
         ((ch - pos3.y) * (((ch - pos1.y) / ch) * ((ch - pos2.y) / ch)) + 0.5);
-
-      context.fillStyle = color;
 
       context.beginPath();
       context.moveTo(0 + 0.5, ch + 0.5);

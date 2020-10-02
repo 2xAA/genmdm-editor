@@ -353,25 +353,25 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
 
   24: {
     label: "Detune",
-    range: 7,
+    range: 8,
     default: 0
   },
 
   25: {
     label: "Detune",
-    range: 7,
+    range: 8,
     default: 0
   },
 
   26: {
     label: "Detune",
-    range: 7,
+    range: 8,
     default: 0
   },
 
   27: {
     label: "Detune",
-    range: 7,
+    range: 8,
     default: 0
   },
 
