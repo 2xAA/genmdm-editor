@@ -13,6 +13,11 @@ export default {
     labels: {
       type: Array,
       default: () => []
+    },
+
+    emitBoolean: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -45,7 +50,7 @@ export default {
   watch: {
     value(newValue, oldValue) {
       if (newValue !== oldValue) {
-        this.$emit("input", this.value);
+        this.$emit("input", this.emitBoolean ? !!this.value : this.value);
       }
     }
   }

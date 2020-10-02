@@ -13,11 +13,12 @@
                   <template v-slot:header>
                     <c span="6" class="control-group__label">Channel</c>
                     <c span="2" class="control-group__control">
-                      <select name="channel" v-model.number="channel">
-                        <option v-for="x in 6" :key="x" :value="x">{{
-                          x
-                        }}</option>
-                      </select>
+                      <DraggableSelect
+                        :values="[1, 2, 3, 4, 5, 6]"
+                        :default="1"
+                        :emitArrayValue="true"
+                        v-model.number="channel"
+                      />
                     </c>
                   </template>
                 </MDMControlGroup>
@@ -91,17 +92,21 @@
 
               <c span="6" class="control-group__label">Polyphony Enable</c>
               <c span="2" class="control-group__control">
-                <input type="checkbox" v-model="polyphonic" id="polyphonic" />
+                <LabelledCheckbox
+                  :labels="['Off', 'On']"
+                  :emit-boolean="true"
+                  v-model="polyphonic"
+                />
               </c>
 
               <c span="6" class="control-group__label">Max Poly. Channels</c>
               <c span="2" class="control-group__control">
-                <select
-                  name="maxPolyphonicChannels"
+                <DraggableSelect
+                  :values="[2, 3, 4, 5, 6]"
+                  :default="6"
+                  :emitArrayValue="true"
                   v-model.number="maxPolyphonicChannels"
-                >
-                  <option v-for="x in 6" :key="x" :value="x">{{ x }}</option>
-                </select>
+                />
               </c>
             </template>
           </MDMControlGroup>
@@ -119,6 +124,8 @@
 import WebMidi from "webmidi";
 
 import MDMControlGroup from "./components/MDMControlGroup";
+import DraggableSelect from "./components/DraggableSelect";
+import LabelledCheckbox from "./components/LabelledCheckbox";
 import MDMADSR from "./components/MDMADSR";
 import TFIFileUpload from "./components/TFIFileUpload";
 import TFIFileDownload from "./components/TFIFileDownload";
@@ -142,7 +149,9 @@ export default {
     GlobalSettings,
     MDMAlgorithmDisplay,
     MDMSSGEGDisplay,
-    Arrow
+    Arrow,
+    DraggableSelect,
+    LabelledCheckbox
   },
 
   data() {
