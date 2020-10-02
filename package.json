@@ -2,6 +2,7 @@
   "name": "vue",
   "version": "0.1.0",
   "private": true,
+  "description": "Vue.js example starter project",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -9,6 +10,7 @@
   },
   "dependencies": {
     "vue": "^2.6.11",
+    "vue-svg-loader": "^0.12.0",
     "vue-tippy": "4.4.0",
     "vuex": "3.1.3",
     "webmidi": "2.5.1"
@@ -21,6 +23,7 @@
     "babel-eslint": "^10.0.3",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.2.3",
+    "vue-cli-plugin-svg-loader": "~1.1.0",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
@@ -51,6 +54,5 @@
     "vue",
     "vuejs",
     "starter"
-  ],
-  "description": "Vue.js example starter project"
+  ]
 }
