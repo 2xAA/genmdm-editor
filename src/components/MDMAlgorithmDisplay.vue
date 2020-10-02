@@ -35,7 +35,7 @@ export default {
   width: 262px;
   height: 209px;
 
-  border: 1px dashed #000000;
+  border: 1px dashed var(--foreground-color);
   box-sizing: border-box;
 
   display: flex;
