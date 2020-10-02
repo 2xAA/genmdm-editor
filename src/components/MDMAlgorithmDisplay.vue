@@ -32,7 +32,7 @@ export default {
     },
 
     index() {
-      return Math.floor(this.value / 7);
+      return Math.round((this.value / 127) * 7);
     }
   }
 };

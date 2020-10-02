@@ -12,14 +12,14 @@ export default {
       const tfiData = new Uint8Array(42);
 
       // algorithm
-      tfiData[0] = mapToRange(channel[14], 127, 8);
+      tfiData[0] = mapToRange(channel[14], 127, 7);
 
       // feedback
-      tfiData[1] = mapToRange(channel[15], 127, 8);
+      tfiData[1] = mapToRange(channel[15], 127, 7);
 
       for (let i = 0; i < 4; ++i) {
         // Multiple
-        tfiData[2 + 10 * i] = mapToRange(channel[20 + i], 127, 16);
+        tfiData[2 + 10 * i] = mapToRange(channel[20 + i], 127, 15);
 
         // Detune
         tfiData[3 + 10 * i] = mapToRange(channel[24 + i], 127, 7);
@@ -28,25 +28,25 @@ export default {
         tfiData[4 + 10 * i] = mapToRange(127 - channel[16 + i], 127, 127);
 
         // Rate Scaling
-        tfiData[5 + 10 * i] = mapToRange(channel[39 + i], 127, 4);
+        tfiData[5 + 10 * i] = mapToRange(channel[39 + i], 127, 3);
 
         // Attack Rate
-        tfiData[6 + 10 * i] = mapToRange(channel[43 + i], 127, 32);
+        tfiData[6 + 10 * i] = mapToRange(channel[43 + i], 127, 31);
 
         // First Decay Rate
-        tfiData[7 + 10 * i] = mapToRange(channel[47 + i], 127, 32);
+        tfiData[7 + 10 * i] = mapToRange(127 - channel[47 + i], 127, 31);
 
         // Secondary Decay Rate
-        tfiData[8 + 10 * i] = mapToRange(channel[51 + i], 127, 32);
+        tfiData[8 + 10 * i] = mapToRange(channel[51 + i], 127, 31);
 
         // Release Rate
-        tfiData[9 + 10 * i] = mapToRange(channel[59 + i], 127, 16);
+        tfiData[9 + 10 * i] = mapToRange(channel[59 + i], 127, 15);
 
         // Secondary Amplitude Level
-        tfiData[10 + 10 * i] = mapToRange(channel[55 + i], 127, 16);
+        tfiData[10 + 10 * i] = mapToRange(channel[55 + i], 127, 15);
 
         // SSG-EG Operator
-        tfiData[11 + 10 * i] = mapToRange(channel[90 + i], 127, 16);
+        tfiData[11 + 10 * i] = mapToRange(channel[90 + i], 127, 15);
       }
 
       var downloadBlob, downloadURL;
