@@ -3,33 +3,35 @@
     <grid columns="12">
       <c span="10">
         <grid columns="10">
-          <c span="2">
-            <h2>Channel settings</h2>
+          <c span="8">
+            <grid columns="8">
+              <c span="2"><h2>Channel settings</h2></c>
+              <c span="6"></c>
 
-            <MDMControlGroup :cc-values="[
-              14,
-              15,
-              77,
-              76,
-              75
-            ]">
-              <template v-slot:header>
-                <c span="6" class="control-group__label">Channel</c>
-                <c span="2" class="control-group__control">
-                  <select name="channel" v-model.number="channel">
-                    <option v-for="x in 6" :key="x" :value="x">{{x}}</option>
-                  </select>
-                </c>
-              </template>
-            </MDMControlGroup>
-          </c>
-          <c span="6">
-            <MDMAlgorithmDisplay />
+              <c span="2">
+                <MDMControlGroup :cc-values="[14, 15, 77, 76, 75]">
+                  <template v-slot:header>
+                    <c span="6" class="control-group__label">Channel</c>
+                    <c span="2" class="control-group__control">
+                      <select name="channel" v-model.number="channel">
+                        <option v-for="x in 6" :key="x" :value="x">{{
+                          x
+                        }}</option>
+                      </select>
+                    </c>
+                  </template>
+                </MDMControlGroup>
+              </c>
+              <c></c>
+              <c span="5">
+                <MDMAlgorithmDisplay />
+              </c>
+            </grid>
           </c>
           <c span="2">
-            <TFIFileUpload/>
-            <GENMFileUpload/>
-            <TFIFileDownload/>
+            <TFIFileUpload />
+            <GENMFileUpload />
+            <TFIFileDownload />
           </c>
           <c span="10">
             <grid columns="2">
@@ -37,13 +39,13 @@
                 <div class="operator-controls">
                   <grid columns="6">
                     <c span="1">
-                      <h2>OP {{x}}</h2>
+                      <h2>OP {{ x }}</h2>
                     </c>
                     <c span="5" class="sseg-container">
                       <MDMSSGEGDisplay :operator="x" />
                     </c>
                   </grid>
-                  <MDMADSR :operator="x"/>
+                  <MDMADSR :operator="x" />
                 </div>
               </c>
             </grid>
@@ -69,7 +71,8 @@
                     v-for="(input, index) in inputs"
                     :key="index"
                     :value="input.id"
-                  >{{input.name}} ({{input.manufacturer}})</option>
+                    >{{ input.name }} ({{ input.manufacturer }})</option
+                  >
                 </select>
               </c>
 
@@ -81,13 +84,14 @@
                     v-for="(output, index) in outputs"
                     :key="index"
                     :value="output.id"
-                  >{{output.name}} ({{output.manufacturer}})</option>
+                    >{{ output.name }} ({{ output.manufacturer }})</option
+                  >
                 </select>
               </c>
 
               <c span="6" class="control-group__label">Polyphony Enable</c>
               <c span="2" class="control-group__control">
-                <input type="checkbox" v-model="polyphonic" id="polyphonic">
+                <input type="checkbox" v-model="polyphonic" id="polyphonic" />
               </c>
 
               <c span="6" class="control-group__label">Max Poly. Channels</c>
@@ -96,7 +100,7 @@
                   name="maxPolyphonicChannels"
                   v-model.number="maxPolyphonicChannels"
                 >
-                  <option v-for="x in 6" :key="x" :value="x">{{x}}</option>
+                  <option v-for="x in 6" :key="x" :value="x">{{ x }}</option>
                 </select>
               </c>
             </template>
@@ -108,8 +112,6 @@
         <DACSettings />
       </c>
     </grid>
-
-
   </div>
 </template>
 
@@ -201,7 +203,7 @@ export default {
       }
     });
 
-    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
+    this.storeUnsubscribe = this.$store.subscribe(mutation => {
       if (mutation.type === "SET_CC_VALUE") {
         this.sendCC(mutation.payload);
       }
@@ -229,11 +231,7 @@ export default {
       }
 
       try {
-        this.outputPort.sendControlChange(
-          cc,
-          value,
-          channel
-        );
+        this.outputPort.sendControlChange(cc, value, channel);
       } catch (e) {
         console.error(e);
         console.warn(cc, value, channel);

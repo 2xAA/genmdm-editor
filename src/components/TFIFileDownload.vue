@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import mapToRange from '../utils/map-to-range';
+import mapToRange from "../utils/map-to-range";
 export default {
   methods: {
     generateTFI() {
@@ -19,68 +19,34 @@ export default {
 
       for (let i = 0; i < 4; ++i) {
         // Multiple
-        tfiData[2 + 10 * i] = mapToRange(
-          channel[20 + i],
-          127,
-          16
-        );
+        tfiData[2 + 10 * i] = mapToRange(channel[20 + i], 127, 16);
 
         // Detune
-        tfiData[3 + 10 * i] = mapToRange(
-          channel[24 + i],
-          127,
-          7
-        );
+        tfiData[3 + 10 * i] = mapToRange(channel[24 + i], 127, 7);
 
         // Total Level
-        tfiData[4 + 10 * i] =
-          mapToRange(127 - channel[16 + i],  127, 127);
+        tfiData[4 + 10 * i] = mapToRange(127 - channel[16 + i], 127, 127);
 
         // Rate Scaling
-        tfiData[5 + 10 * i] = mapToRange(
-          channel[39 + i],
-          127,
-          4
-        );
+        tfiData[5 + 10 * i] = mapToRange(channel[39 + i], 127, 4);
 
         // Attack Rate
-        tfiData[6 + 10 * i] = mapToRange(
-          channel[43 + i],
-          127,
-          32
-        );
+        tfiData[6 + 10 * i] = mapToRange(channel[43 + i], 127, 32);
 
         // First Decay Rate
-        tfiData[7 + 10 * i] = mapToRange(
-          channel[47 + i],
-          127,
-          32
-        );
+        tfiData[7 + 10 * i] = mapToRange(channel[47 + i], 127, 32);
 
         // Secondary Decay Rate
-        tfiData[8 + 10 * i]  = mapToRange(
-          channel[51 + i],
-          127,
-          32
-        );
+        tfiData[8 + 10 * i] = mapToRange(channel[51 + i], 127, 32);
 
         // Release Rate
-        tfiData[9 + 10 * i] = mapToRange(
-          channel[59 + i],
-          127,
-          16
-        );
+        tfiData[9 + 10 * i] = mapToRange(channel[59 + i], 127, 16);
 
         // Secondary Amplitude Level
-        tfiData[10 + 10 * i] =
-          mapToRange(channel[55 + i], 127, 16);
+        tfiData[10 + 10 * i] = mapToRange(channel[55 + i], 127, 16);
 
         // SSG-EG Operator
-        tfiData[11 + 10 * i] = mapToRange(
-          channel[90 + i],
-          127,
-          16
-        );
+        tfiData[11 + 10 * i] = mapToRange(channel[90 + i], 127, 16);
       }
 
       var downloadBlob, downloadURL;
@@ -99,19 +65,19 @@ export default {
 
       downloadURL = function(data, fileName) {
         var a;
-        a = document.createElement('a');
+        a = document.createElement("a");
         a.href = data;
         a.download = fileName;
         document.body.appendChild(a);
-        a.style = 'display: none';
+        a.style = "display: none";
         a.click();
         a.remove();
       };
 
-      downloadBlob(tfiData, 'genmdm-patch.tfi', 'application/octet-stream')
+      downloadBlob(tfiData, "genmdm-patch.tfi", "application/octet-stream");
 
       console.log(tfiData);
     }
   }
-}
+};
 </script>

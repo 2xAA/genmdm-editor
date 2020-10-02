@@ -1,15 +1,7 @@
 <template>
   <div>
     <h2>Global Settings</h2>
-    <MDMControlGroup :cc-values="[
-      84,
-      83,
-      74,
-      1,
-      85,
-      81,
-      80
-    ]" />
+    <MDMControlGroup :cc-values="[84, 83, 74, 1, 85, 81, 80]" />
   </div>
 </template>
 
@@ -20,5 +12,5 @@ export default {
   components: {
     MDMControlGroup
   }
-}
+};
 </script>

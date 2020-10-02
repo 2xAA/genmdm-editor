@@ -1,7 +1,7 @@
 <template>
   <label>
     {{ currentLabel }}
-    <input type="checkbox" @change="onChange" :value="checked">
+    <input type="checkbox" @change="onChange" :value="checked" />
   </label>
 </template>
 
@@ -19,7 +19,7 @@ export default {
   data() {
     return {
       value: 0
-    }
+    };
   },
 
   computed: {
@@ -28,7 +28,7 @@ export default {
     },
 
     currentLabel() {
-      return this.labels[this.checked ? 1 : 0]
+      return this.labels[this.checked ? 1 : 0];
     }
   },
 
@@ -45,11 +45,11 @@ export default {
   watch: {
     value(newValue, oldValue) {
       if (newValue !== oldValue) {
-        this.$emit('input', this.value);
+        this.$emit("input", this.value);
       }
     }
   }
-}
+};
 </script>
 
 <style scoped>

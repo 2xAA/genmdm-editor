@@ -1,9 +1,9 @@
 <template>
-  <img :src="envelope" v-show="ssegValue > 0">
+  <img :src="envelope" v-show="ssegValue > 0" />
 </template>
 
 <script>
-import defaultMapping from '../default-mapping';
+import defaultMapping from "../default-mapping";
 
 export default {
   props: {
@@ -15,7 +15,9 @@ export default {
 
   computed: {
     ssegValue() {
-      return this.$store.state[`channel${this.$store.state.channel}`][90 + (this.operator - 1)];
+      return this.$store.state[`channel${this.$store.state.channel}`][
+        90 + (this.operator - 1)
+      ];
     },
 
     envelope() {
@@ -23,14 +25,17 @@ export default {
     },
 
     sources() {
-      return defaultMapping[90 + (this.operator - 1)].values.reduce((obj, x, index) => {
-        const key = x;
-        const value = `/graphics/SSS-EG_${index - 1}.svg`;
+      return defaultMapping[90 + (this.operator - 1)].values.reduce(
+        (obj, x, index) => {
+          const key = x;
+          const value = `/graphics/SSS-EG_${index - 1}.svg`;
 
-        obj[key] = value;
-        return obj;
-      }, {});
+          obj[key] = value;
+          return obj;
+        },
+        {}
+      );
     }
   }
-}
+};
 </script>

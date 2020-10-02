@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import defaultMapping from '../default-mapping';
+import defaultMapping from "../default-mapping";
 export default {
   props: {
     cc: {
@@ -52,16 +52,18 @@ export default {
 
   created() {
     const { channel } = this.$store.state;
-    const value = this.$store.state[`channel${channel}`][this.cc + this.ccOffset];
+    const value = this.$store.state[`channel${channel}`][
+      this.cc + this.ccOffset
+    ];
 
     this.movementValue = this.inverse ? -value + 127 : value;
 
-    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
+    this.storeUnsubscribe = this.$store.subscribe(mutation => {
       if (mutation.type === "SET_CC_VALUE") {
         const { cc, value } = mutation.payload;
 
         if (cc === this.cc + this.ccOffset && !this.mouseButtonDown) {
-          this.movementValue = this.inverse ? -value + 127 : value
+          this.movementValue = this.inverse ? -value + 127 : value;
           this.draw();
         }
       }
@@ -80,7 +82,7 @@ export default {
   beforeDestroy() {
     document.removeEventListener("mouseup", this.mouseUp);
     document.removeEventListener("mousemove", this.mouseMove);
-    document.body.classList.remove('ns-resize-cursor');
+    document.body.classList.remove("ns-resize-cursor");
     this.storeUnsubscribe();
   },
 
@@ -102,7 +104,9 @@ export default {
     },
 
     scaledValue() {
-      return Math.floor(this.internalValue * (defaultMapping[this.cc].range - 1))
+      return Math.floor(
+        this.internalValue * (defaultMapping[this.cc].range - 1)
+      );
     },
 
     title() {
@@ -152,7 +156,7 @@ export default {
       document.removeEventListener("mousemove", this.mouseMove, false);
       document.removeEventListener("mouseup", this.mouseUp);
       document.body.style.cursor =
-      this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
+        this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
       this.mouseButtonDown = false;
     },
 
@@ -163,7 +167,11 @@ export default {
       this.movementValue = clampedNewValue;
       this.downY = e.pageY;
 
-      this.$store.dispatch("setCCValues", { [this.cc + this.ccOffset]: this.inverse ? 127 - clampedNewValue : clampedNewValue });
+      this.$store.dispatch("setCCValues", {
+        [this.cc + this.ccOffset]: this.inverse
+          ? 127 - clampedNewValue
+          : clampedNewValue
+      });
     },
 
     resize() {

@@ -45,11 +45,14 @@ export default {
       internalValue: 0,
       lastCursor: "",
       mouseButtonDown: false
-    }
+    };
   },
 
   created() {
-    this.internalValue = Math.max(0, Math.min(this.values.length - 1, this.default));
+    this.internalValue = Math.max(
+      0,
+      Math.min(this.values.length - 1, this.default)
+    );
   },
 
   computed: {
@@ -59,7 +62,7 @@ export default {
 
     currentLabel() {
       return this.labels[this.internalValue];
-    },
+    }
   },
 
   methods: {
@@ -111,23 +114,33 @@ export default {
     mouseMove(e) {
       const { internalValue, values } = this;
       const newValue = -e.movementY + internalValue;
-      const clampedNewIndex = Math.floor(Math.max(0, Math.min(values.length - 1, newValue)));
-      const clampedNewMIDIValue = Math.floor((clampedNewIndex / (values.length  - 1)) * 127);
+      const clampedNewIndex = Math.floor(
+        Math.max(0, Math.min(values.length - 1, newValue))
+      );
+      const clampedNewMIDIValue = Math.floor(
+        (clampedNewIndex / (values.length - 1)) * 127
+      );
 
       this.internalValue = clampedNewIndex;
 
-      this.$emit('input', this.emitArrayValue ? values[clampedNewIndex] : clampedNewMIDIValue);
+      this.$emit(
+        "input",
+        this.emitArrayValue ? values[clampedNewIndex] : clampedNewMIDIValue
+      );
     }
   },
 
   watch: {
     value(value) {
       if (!this.mouseButtonDown) {
-        this.internalValue = Math.max(0, Math.min(this.values.length - 1, Math.floor(value / 127)));
+        this.internalValue = Math.max(
+          0,
+          Math.min(this.values.length - 1, Math.floor(value / 127))
+        );
       }
     }
   }
-}
+};
 </script>
 
 <style>

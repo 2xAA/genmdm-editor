@@ -1,67 +1,69 @@
 <template>
-<grid columns="8">
-  <c span="2">
-    <MDMControlGroup :cc-values="[
-      20 + operator - 1,
-      24 + operator - 1,
-      39 + operator - 1,
-      70 + operator - 1,
-      90 + operator - 1
-    ]" />
-  </c>
-  <c span="6">
-    <canvas ref="canvas" class="asdr-canvas"></canvas>
-  </c>
-  <c span="8" class="envelope-dials">
-    <MDMDial
-      :value="displayPositions[0][0]"
-      :inverse="true"
-      :quantise="32"
-      :cc="ADSR_CC_NUMBERS[0]"
-      :ccOffset="operator - 1"
-    />
-    <MDMDial
-      :value="displayPositions[0][1]"
-      :quantise="128"
-      :cc="ADSR_CC_NUMBERS[1]"
-      :ccOffset="operator - 1"
-    />
-    <MDMDial
-      :value="displayPositions[1][0]"
-      :quantise="32"
-      :inverse="true"
-      :cc="ADSR_CC_NUMBERS[2]"
-      :ccOffset="operator - 1"
-    />
-    <MDMDial
-      :value="displayPositions[1][1]"
-      :quantise="16"
-      :inverse="true"
-      :cc="ADSR_CC_NUMBERS[3]"
-      :ccOffset="operator - 1"
-    />
-    <MDMDial
-      :value="displayPositions[2][0]"
-      :quantise="32"
-      :inverse="true"
-      :cc="ADSR_CC_NUMBERS[4]"
-      :ccOffset="operator - 1"
-    />
-    <MDMDial
-      :value="displayPositions[3][0]"
-      :quantise="16"
-      :inverse="true"
-      :cc="ADSR_CC_NUMBERS[5]"
-      :ccOffset="operator - 1"
-    />
-  </c>
-</grid>
+  <grid columns="8">
+    <c span="2">
+      <MDMControlGroup
+        :cc-values="[
+          20 + operator - 1,
+          24 + operator - 1,
+          39 + operator - 1,
+          70 + operator - 1,
+          90 + operator - 1
+        ]"
+      />
+    </c>
+    <c span="6">
+      <canvas ref="canvas" class="asdr-canvas"></canvas>
+    </c>
+    <c span="8" class="envelope-dials">
+      <MDMDial
+        :value="displayPositions[0][0]"
+        :inverse="true"
+        :quantise="32"
+        :cc="ADSR_CC_NUMBERS[0]"
+        :ccOffset="operator - 1"
+      />
+      <MDMDial
+        :value="displayPositions[0][1]"
+        :quantise="128"
+        :cc="ADSR_CC_NUMBERS[1]"
+        :ccOffset="operator - 1"
+      />
+      <MDMDial
+        :value="displayPositions[1][0]"
+        :quantise="32"
+        :inverse="true"
+        :cc="ADSR_CC_NUMBERS[2]"
+        :ccOffset="operator - 1"
+      />
+      <MDMDial
+        :value="displayPositions[1][1]"
+        :quantise="16"
+        :inverse="true"
+        :cc="ADSR_CC_NUMBERS[3]"
+        :ccOffset="operator - 1"
+      />
+      <MDMDial
+        :value="displayPositions[2][0]"
+        :quantise="32"
+        :inverse="true"
+        :cc="ADSR_CC_NUMBERS[4]"
+        :ccOffset="operator - 1"
+      />
+      <MDMDial
+        :value="displayPositions[3][0]"
+        :quantise="16"
+        :inverse="true"
+        :cc="ADSR_CC_NUMBERS[5]"
+        :ccOffset="operator - 1"
+      />
+    </c>
+  </grid>
 </template>
 
 <script>
 import MDMDial from "./MDMDial";
 import MDMControlGroup from "./MDMControlGroup";
-import defaultMapping from '../default-mapping';
+import defaultMapping from "../default-mapping";
 
 const ADSR_CC_NUMBERS = [43, 16, 47, 55, 51, 59];
 
@@ -96,14 +98,19 @@ export default {
     displayPositions() {
       const channel = this.$store.state[`channel${this.channel}`];
       const operator = this.operator - 1;
-      const positions = [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 1]];
+      const positions = [
+        [0.5, 0.5],
+        [0.5, 0.5],
+        [0.5, 0.5],
+        [0.5, 1]
+      ];
 
-      positions[0][0] = (channel[ADSR_CC_NUMBERS[0] + operator]) / 127;
-      positions[0][1] = (channel[ADSR_CC_NUMBERS[1] + operator]) / 127;
-      positions[1][0] = 1 - (channel[ADSR_CC_NUMBERS[2] + operator]) / 127;
-      positions[1][1] = 1 - (channel[ADSR_CC_NUMBERS[3] + operator]) / 127;
-      positions[2][0] = 1 - (channel[ADSR_CC_NUMBERS[4] + operator]) / 127;
-      positions[3][0] = 1 - (channel[ADSR_CC_NUMBERS[5] + operator]) / 127;
+      positions[0][0] = channel[ADSR_CC_NUMBERS[0] + operator] / 127;
+      positions[0][1] = channel[ADSR_CC_NUMBERS[1] + operator] / 127;
+      positions[1][0] = 1 - channel[ADSR_CC_NUMBERS[2] + operator] / 127;
+      positions[1][1] = 1 - channel[ADSR_CC_NUMBERS[3] + operator] / 127;
+      positions[2][0] = 1 - channel[ADSR_CC_NUMBERS[4] + operator] / 127;
+      positions[3][0] = 1 - channel[ADSR_CC_NUMBERS[5] + operator] / 127;
 
       return positions;
     }
@@ -116,7 +123,7 @@ export default {
     this.resize();
     this.draw();
 
-    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
+    this.storeUnsubscribe = this.$store.subscribe(mutation => {
       if (mutation.type === "SET_CC_VALUE") {
         const cc = parseInt(mutation.payload.cc, 10) - (this.operator - 1);
 
@@ -189,7 +196,6 @@ export default {
       context.lineTo(pos2.x + 0.5, pos2Y);
       context.stroke();
 
-
       context.beginPath();
       context.moveTo(pos2.x + 0.5, pos2Y);
       context.lineTo(pos3.x + 0.5, pos3Y);
@@ -247,8 +253,8 @@ export default {
 
       if (index === 0) {
         return {
-          x: lowerX + (cw-(-cw*-position[0])),//Math.pow(cw, position[0]),
-          y: Math.floor((1-position[1]) * canvas.height)
+          x: lowerX + (cw - -cw * -position[0]), //Math.pow(cw, position[0]),
+          y: Math.floor((1 - position[1]) * canvas.height)
         };
       }
 
@@ -264,12 +270,24 @@ export default {
 
       const values = {};
 
-      const ar = Math.floor(positions[0][0] * (defaultMapping[ADSR_CC_NUMBERS[0]].range - 1));
-      const tl = Math.floor(positions[0][1] * (defaultMapping[ADSR_CC_NUMBERS[1]].range - 1));
-      const dr1 = Math.floor(positions[1][0] * (defaultMapping[ADSR_CC_NUMBERS[2]].range - 1));
-      const sa = Math.floor(positions[1][1] * (defaultMapping[ADSR_CC_NUMBERS[3]].range - 1));
-      const dr2 = Math.floor(positions[2][0] * (defaultMapping[ADSR_CC_NUMBERS[4]].range - 1));
-      const rr = Math.floor(positions[3][0] * (defaultMapping[ADSR_CC_NUMBERS[5]].range - 1));
+      const ar = Math.floor(
+        positions[0][0] * (defaultMapping[ADSR_CC_NUMBERS[0]].range - 1)
+      );
+      const tl = Math.floor(
+        positions[0][1] * (defaultMapping[ADSR_CC_NUMBERS[1]].range - 1)
+      );
+      const dr1 = Math.floor(
+        positions[1][0] * (defaultMapping[ADSR_CC_NUMBERS[2]].range - 1)
+      );
+      const sa = Math.floor(
+        positions[1][1] * (defaultMapping[ADSR_CC_NUMBERS[3]].range - 1)
+      );
+      const dr2 = Math.floor(
+        positions[2][0] * (defaultMapping[ADSR_CC_NUMBERS[4]].range - 1)
+      );
+      const rr = Math.floor(
+        positions[3][0] * (defaultMapping[ADSR_CC_NUMBERS[5]].range - 1)
+      );
 
       values[ADSR_CC_NUMBERS[0] + (operator - 1)] = ar;
       values[ADSR_CC_NUMBERS[1] + (operator - 1)] = tl;

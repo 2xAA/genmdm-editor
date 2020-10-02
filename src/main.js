@@ -13,11 +13,11 @@ Vue.config.ignoredElements = ["grid", "c"];
 Vue.use(VueTippy);
 Vue.component("tippy", TippyComponent);
 
-Object.defineProperty(Vue.prototype, '$colors', {
+Object.defineProperty(Vue.prototype, "$colors", {
   get() {
-    return getColors()
+    return getColors();
   }
-})
+});
 
 new Vue({
   render: h => h(App),

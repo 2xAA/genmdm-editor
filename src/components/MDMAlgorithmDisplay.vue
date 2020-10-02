@@ -1,16 +1,16 @@
 <template>
   <div class="algorithm">
-    <img :src="algorithm">
+    <img :src="algorithm" />
   </div>
 </template>
 
 <script>
-import mapToCCRange from '../utils/map-to-cc-range';
+import mapToCCRange from "../utils/map-to-cc-range";
 
 export default {
   computed: {
     value() {
-      return this.$store.state[`channel${this.$store.state.channel}`][14]
+      return this.$store.state[`channel${this.$store.state.channel}`][14];
     },
 
     algorithm() {
@@ -27,7 +27,7 @@ export default {
       }, {});
     }
   }
-}
+};
 </script>
 
 <style scoped>

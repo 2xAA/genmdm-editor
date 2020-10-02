@@ -1,15 +1,15 @@
 <template>
   <div>
     Load TFI:
-    <input type="file" id="input" accept=".tfi" @change="fileAdded">
+    <input type="file" id="input" accept=".tfi" @change="fileAdded" />
 
     <b>WARNING: this will overwrite your current parameters</b>
   </div>
 </template>
 
 <script>
-import defaultMapping from '../default-mapping';
-import mapToCCRange from '../utils/map-to-cc-range';
+import defaultMapping from "../default-mapping";
+import mapToCCRange from "../utils/map-to-cc-range";
 /* TFI format
  * ----------
  * Thank goodness for https://plutiedev.com/format-tfi
@@ -50,7 +50,7 @@ export default {
       try {
         reader.readAsArrayBuffer(file);
       } catch (e) {
-        console.log("Can't read file", e)
+        console.log("Can't read file", e);
       }
     },
 
@@ -65,56 +65,74 @@ export default {
 
       for (let i = 0; i < 4; ++i) {
         // Multiple
-        parsed[20 + i] =
-          mapToCCRange(data[2 + 10 * i], defaultMapping[20].range - 1)
-          // data[2 + 10 * i];
-
+        parsed[20 + i] = mapToCCRange(
+          data[2 + 10 * i],
+          defaultMapping[20].range - 1
+        );
+        // data[2 + 10 * i];
 
         // Detune
-        parsed[24 + i] =
-          mapToCCRange(data[3 + 10 * i], defaultMapping[24].range - 1)
-          // data[3 + 10 * i]
-
+        parsed[24 + i] = mapToCCRange(
+          data[3 + 10 * i],
+          defaultMapping[24].range - 1
+        );
+        // data[3 + 10 * i]
 
         // Total Level
-        parsed[16 + i] =
-          mapToCCRange(127 - data[4 + 10 * i], defaultMapping[16].range - 1)
-          // 127 - data[4 + 10 * i];
+        parsed[16 + i] = mapToCCRange(
+          127 - data[4 + 10 * i],
+          defaultMapping[16].range - 1
+        );
+        // 127 - data[4 + 10 * i];
 
         // Rate Scaling
-        parsed[39 + i] =
-          mapToCCRange(data[5 + 10 * i], defaultMapping[39].range - 1)
-          // data[5 + 10 * i]
+        parsed[39 + i] = mapToCCRange(
+          data[5 + 10 * i],
+          defaultMapping[39].range - 1
+        );
+        // data[5 + 10 * i]
 
         // Attack Rate
-        parsed[43 + i] =
-          mapToCCRange(data[6 + 10 * i], defaultMapping[43].range - 1)
-          // data[6 + 10 * i]
+        parsed[43 + i] = mapToCCRange(
+          data[6 + 10 * i],
+          defaultMapping[43].range - 1
+        );
+        // data[6 + 10 * i]
 
         // First Decay Rate
-        parsed[47 + i] =
-          mapToCCRange(31 - data[7 + 10 * i], defaultMapping[47].range - 1)
-          // 31 - data[7 + 10 * i]
+        parsed[47 + i] = mapToCCRange(
+          31 - data[7 + 10 * i],
+          defaultMapping[47].range - 1
+        );
+        // 31 - data[7 + 10 * i]
 
         // Secondary Decay Rate
-        parsed[51 + i] =
-          mapToCCRange(data[8 + 10 * i], defaultMapping[51].range - 1)
-          // data[8 + 10 * i];
+        parsed[51 + i] = mapToCCRange(
+          data[8 + 10 * i],
+          defaultMapping[51].range - 1
+        );
+        // data[8 + 10 * i];
 
         // Release Rate
-        parsed[59 + i] =
-          mapToCCRange(data[9 + 10 * i], defaultMapping[59].range - 1)
-          // data[9 + 10 * i];
+        parsed[59 + i] = mapToCCRange(
+          data[9 + 10 * i],
+          defaultMapping[59].range - 1
+        );
+        // data[9 + 10 * i];
 
         // Secondary Amplitude Level
-        parsed[55 + i] =
-          mapToCCRange(data[10 + 10 * i], defaultMapping[55].range - 1)
-          // data[10 + 10 * i];
+        parsed[55 + i] = mapToCCRange(
+          data[10 + 10 * i],
+          defaultMapping[55].range - 1
+        );
+        // data[10 + 10 * i];
 
         // SSG-EG Operator
-        parsed[90 + i] =
-          mapToCCRange(data[11 + 10 * i], defaultMapping[90].range - 1)
-          // data[11 + 10 * i];
+        parsed[90 + i] = mapToCCRange(
+          data[11 + 10 * i],
+          defaultMapping[90].range - 1
+        );
+        // data[11 + 10 * i];
 
         // if less than 8, set to 0
         // weird line in the tfi spec for this
@@ -131,4 +149,3 @@ export default {
   }
 };
 </script>
-
