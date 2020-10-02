@@ -1,30 +1,38 @@
 <template>
   <div class="algorithm">
-    <img :src="algorithm" />
+    <Component :is="`a${index}`" />
   </div>
 </template>
 
 <script>
-import mapToCCRange from "../utils/map-to-cc-range";
+import a0 from "../assets/graphics/algorithms/Algorithm_0.svg";
+import a1 from "../assets/graphics/algorithms/Algorithm_1.svg";
+import a2 from "../assets/graphics/algorithms/Algorithm_2.svg";
+import a3 from "../assets/graphics/algorithms/Algorithm_3.svg";
+import a4 from "../assets/graphics/algorithms/Algorithm_4.svg";
+import a5 from "../assets/graphics/algorithms/Algorithm_5.svg";
+import a6 from "../assets/graphics/algorithms/Algorithm_6.svg";
+import a7 from "../assets/graphics/algorithms/Algorithm_7.svg";
 
 export default {
+  components: {
+    a0,
+    a1,
+    a2,
+    a3,
+    a4,
+    a5,
+    a6,
+    a7
+  },
+
   computed: {
     value() {
       return this.$store.state[`channel${this.$store.state.channel}`][14];
     },
 
-    algorithm() {
-      return this.sources[this.value];
-    },
-
-    sources() {
-      return [...Array(8).keys()].reduce((obj, x, index) => {
-        const key = mapToCCRange(index, 7);
-        const value = `/graphics/Algorithm_${index}.svg`;
-
-        obj[key] = value;
-        return obj;
-      }, {});
+    index() {
+      return Math.floor(this.value / 7);
     }
   }
 };
@@ -41,5 +49,11 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  svg {
+    filter: invert();
+  }
 }
 </style>

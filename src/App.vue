@@ -22,7 +22,7 @@
                   </template>
                 </MDMControlGroup>
               </c>
-              <c></c>
+              <c class="arrow-container"><Arrow /></c>
               <c span="5">
                 <MDMAlgorithmDisplay />
               </c>
@@ -127,6 +127,7 @@ import DACSettings from "./components/DACSettings";
 import GlobalSettings from "./components/GlobalSettings";
 import MDMAlgorithmDisplay from "./components/MDMAlgorithmDisplay";
 import MDMSSGEGDisplay from "./components/MDMSSGEGDisplay";
+import Arrow from "./components/Arrow";
 
 export default {
   name: "App",
@@ -140,7 +141,8 @@ export default {
     DACSettings,
     GlobalSettings,
     MDMAlgorithmDisplay,
-    MDMSSGEGDisplay
+    MDMSSGEGDisplay,
+    Arrow
   },
 
   data() {
@@ -431,5 +433,10 @@ h2 {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+}
+
+.arrow-container {
+  display: flex;
+  justify-content: center;
 }
 </style>

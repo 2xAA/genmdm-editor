@@ -29,7 +29,7 @@ import mapToCCRange from "../utils/map-to-cc-range";
  *   8, 18, 28, 38 | Decay Rate 2  | 0 - 31
  *   9, 19, 29, 39 | Release Rate  | 0 - 15
  *  10, 20, 30, 40 | Sustain Level | 0 - 15
- *  11, 21, 31, 41 | SSG-EG        | 0 - 15
+ *  11, 21, 31, 41 | SSG-EG        | 0 - 15 [0-7 disabled, 8-15 enabled]
  *
  */
 export default {
