@@ -7,7 +7,7 @@ export default {
   props: {
     size: {
       type: Number,
-      default: 196
+      default: 188
     }
   },
 
@@ -15,7 +15,8 @@ export default {
     return {
       context: null,
       segments: 14,
-      values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ccValues: {}
     };
   },
 
@@ -53,6 +54,7 @@ export default {
 
       document.removeEventListener("mouseup", this.up);
       document.removeEventListener("mousemove", this.move);
+      this.$store.dispatch("setCCValues", this.ccValues);
     },
 
     move(e) {
@@ -86,8 +88,8 @@ export default {
         }
       } = this;
       context.clearRect(0, 0, cw, ch);
+      context.strokeStyle = this.$colors.foreground;
       context.strokeRect(0, 0, cw, ch);
-      context.fillStyle = "#000";
 
       for (let i = 0; i < this.values.length; ++i) {
         context.strokeRect(
@@ -121,12 +123,14 @@ export default {
 
       requestAnimationFrame(this.draw);
 
-      const ccValues = {};
-      ccValues[100 + segment] = value * 127;
-      this.$store.dispatch("setCCValues", ccValues);
+      this.ccValues[100 + segment] = value * 127;
     }
   }
 };
 </script>
 
-<style></style>
+<style scoped>
+canvas {
+  margin-top: 8px;
+}
+</style>
