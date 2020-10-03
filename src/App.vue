@@ -448,7 +448,7 @@ export default {
 </script>
 
 <style>
-@import url("/fonts/kokoro/index.css");
+@import url("./assets/fonts/kokoro/index.css");
 
 :root {
   --foreground-color: black;
