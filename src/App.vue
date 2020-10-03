@@ -239,7 +239,7 @@ export default {
       ramSlot: 1,
 
       patchSlotValues: [...new Array(128).keys()].map((x, i) => i + 1),
-      patchSlotIndex: 1
+      patchSlotIndex: 0
     };
   },
 
@@ -313,10 +313,10 @@ export default {
 
     writeToSlot() {
       this.$store.dispatch("writePatch", {
-        index: this.patchSlotIndex - 1,
+        index: this.patchSlotIndex,
         patch: {
           data: { ...this.$store.state[`channel${this.channel}`] },
-          name: "yo" + this.patchSlotIndex
+          name: "instrument " + this.patchSlotIndex
         }
       });
     },
