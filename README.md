@@ -18,7 +18,7 @@ genMDM editor is a web-based interface for genMDM, a MIDI controller for the Seg
 genMDM editor currently only works in Chromuim based browsers as WebMIDI is a requirement.
 This includes Google Chrome, Opera, Brave and Microsoft Edge.
 
-1. Navigate to https://2xaa.github.io/genmdm-editor.
+1. Navigate to [https://2xaa.github.io/genmdm-editor/](https://2xaa.github.io/genmdm-editor/).
 2. Select the genMDM or MIDI device connected to genMDM in the MIDI Output select input.
 
 Docs to follow.
