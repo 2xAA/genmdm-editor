@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <grid columns="12">
-      <c span="10">
+      <c span="10" class="main-column">
         <grid columns="10">
           <c span="8">
             <grid columns="8">
@@ -557,5 +557,13 @@ h2 {
 .arrow-container {
   display: flex;
   justify-content: center;
+}
+
+.editor-title h1 {
+  margin-top: 0;
+}
+
+.main-column {
+  padding-right: 2em;
 }
 </style>
