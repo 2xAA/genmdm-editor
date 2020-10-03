@@ -2,10 +2,10 @@
   "name": "vue",
   "version": "0.0.1",
   "private": true,
-  "description": "Vue.js example starter project",
+  "description": "genMDM editor is a web-based interface for genMDM, a MIDI controller for the Sega Mega Drive and Genesis",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build --dest docs",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -26,33 +26,12 @@
     "vue-cli-plugin-svg-loader": "~1.1.0",
     "vue-template-compiler": "^2.6.11"
   },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
-  },
   "postcss": {
     "plugins": {
       "autoprefixer": {}
     }
   },
   "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ],
-  "keywords": [
-    "vue",
-    "vuejs",
-    "starter"
+    "last 1 Chrome version"
   ]
 }
