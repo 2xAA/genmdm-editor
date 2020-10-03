@@ -46,6 +46,7 @@ yarn build
 ## Contributing
 
 Contributions, issues and feature requests are welcome!
+
 Feel free to check [issues page](https://github.com/2xAA/genmdm-editor/issues).
 
 
@@ -53,6 +54,7 @@ Feel free to check [issues page](https://github.com/2xAA/genmdm-editor/issues).
 ## Show your support
 
 Give a ⭐️  if this project helped you!
+
 Consider sponsoring me on GitHub: [https://github.com/sponsors/2xAA](https://github.com/sponsors/2xAA).
 
 
@@ -60,4 +62,5 @@ Consider sponsoring me on GitHub: [https://github.com/sponsors/2xAA](https://git
 ## License
 
 Copyright © 2020 [2xAA](https://github.com/2xAA).
+
 This project is [MIT](https://github.com/2xAA/genmdm-editor/blob/main/LICENSE) licensed.
