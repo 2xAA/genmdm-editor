@@ -1,5 +1,3 @@
-import mapToCCRange from "./utils/map-to-cc-range";
-
 export default {
   // YM2612 Global Control
 
@@ -8,6 +6,7 @@ export default {
     range: 2,
     type: "bool",
     default: 0,
+    enum: ["Off", "On"],
     description: `2 values over the range of 0 to 127. A CC value of less than 64 disables the LFO on a global scale.
 A value of more than 63 enables the LFO on a global scale. In addition to this parameter, each
  individual channel requires an LFO enable for either amplitude or frequency LFO modulation.`
@@ -16,7 +15,7 @@ A value of more than 63 enables the LFO on a global scale. In addition to this p
   1: {
     label: "LFO Speed",
     range: 8,
-    default: mapToCCRange(3, 8),
+    default: 4,
     description: `8 values over the range of 0 to 127. This CC sets the speed of the LFO. 0 is the slowest speed. 127
  is the fastest speed.`
   },
@@ -42,7 +41,7 @@ A value of more than 63 enables the LFO on a global scale. In addition to this p
     label: "Region Tuning",
     range: 2,
     enum: ["PAL", "NTSC"],
-    type: "enum",
+    type: "bool",
     default: 0,
     description: `2 values over the range of 0 to 127. A CC value of less than 64 sets the interface to the PAL tuning.
 A value of more than 63 sets the interface to the NTSC tuning. The default setting is PAL.`
@@ -52,6 +51,7 @@ A value of more than 63 sets the interface to the NTSC tuning. The default setti
     label: "Voice 3 Special Mode",
     range: 2,
     type: "bool",
+    enum: ["Off", "On"],
     default: false,
     description: `When Voice 3 is in Special Mode, each operator of Voice 3 has its own frequency.
 In this case, the frequency for each is controlled using MIDI ch 3, 11, 12 and 13.
@@ -63,6 +63,7 @@ In this case, the TL / volume of each operator is controlled via velocity.`
     label: "Enable",
     range: 2,
     type: "bool",
+    enum: ["Off", "On"],
     default: false,
     description: `2 values over the range of 0 to 127. A CC value of less than 64 disables the DAC on channel 6. A
  value of more than 63 enables the DAC on channel 6. Note that with the DAC enabled, MIDI notes
@@ -132,6 +133,7 @@ From MIDI note 0 to MIDI note 59, the DAC is used to play either a noise wavefor
     label: "Noise / Wave Toggle",
     range: 2,
     type: "bool",
+    enum: ["Off", "On"],
     default: 0
   },
 
@@ -270,7 +272,7 @@ Note that the following parameters are affected by recalling one of the above pr
     label: "Stereo Configuration",
     range: 4,
     type: "enum",
-    default: mapToCCRange(3, 4),
+    default: 3,
     enum: ["Mute", "Left", "Right", "Center"],
     description: `4 values over a range of 0 to 127. This parameter sets the stereo output (panning) of the specified
  channel. Note that the stereo placement of a channel will have no effect if a mono cable is used
@@ -285,7 +287,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
   },
 
   76: {
-    label: "AM Level",
+    label: "AM LFO Level",
     range: 8,
     default: 0,
     description: `8 values over a range of 0 to 127. This parameter sets the depth of amplitude modulation by the
@@ -293,7 +295,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
   },
 
   75: {
-    label: "FM Level",
+    label: "FM LFO Level",
     range: 8,
     default: 0,
     description: `8 values over a range of 0 to 127. This parameter sets the depth of frequency modulation by the
@@ -303,22 +305,26 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
   // YM2612 Operator Control
   16: {
     label: "Total Level",
-    range: 128
+    range: 128,
+    default: 127
   },
 
   17: {
     label: "Total Level",
-    range: 128
+    range: 128,
+    default: 127
   },
 
   18: {
     label: "Total Level",
-    range: 128
+    range: 128,
+    default: 127
   },
 
   19: {
     label: "Total Level",
-    range: 128
+    range: 128,
+    default: 127
   },
 
   20: {
@@ -347,25 +353,25 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
 
   24: {
     label: "Detune",
-    range: 7,
+    range: 8,
     default: 0
   },
 
   25: {
     label: "Detune",
-    range: 7,
+    range: 8,
     default: 0
   },
 
   26: {
     label: "Detune",
-    range: 7,
+    range: 8,
     default: 0
   },
 
   27: {
     label: "Detune",
-    range: 7,
+    range: 8,
     default: 0
   },
 
@@ -390,28 +396,31 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
   42: {
     label: "Rate Scale",
     range: 4,
-
     default: 0
   },
 
   43: {
     label: "Attack Rate",
-    range: 32
+    range: 32,
+    default: 0
   },
 
   44: {
     label: "Attack Rate",
-    range: 32
+    range: 32,
+    default: 0
   },
 
   45: {
     label: "Attack Rate",
-    range: 32
+    range: 32,
+    default: 0
   },
 
   46: {
     label: "Attack Rate",
-    range: 32
+    range: 32,
+    default: 0
   },
 
   47: {
@@ -498,6 +507,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
     label: "AM",
     range: 2,
     type: "bool",
+    enum: ["Off", "On"],
     default: 0
   },
 
@@ -505,6 +515,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
     label: "AM",
     range: 2,
     type: "bool",
+    enum: ["Off", "On"],
     default: 0
   },
 
@@ -512,6 +523,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
     label: "AM",
     range: 2,
     type: "bool",
+    enum: ["Off", "On"],
     default: 0
   },
 
@@ -519,12 +531,13 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
     label: "AM",
     range: 2,
     type: "bool",
+    enum: ["Off", "On"],
     default: 0
   },
 
   90: {
     label: "SSG-EG",
-    values: [0, 98, 102, 106, 110, 114, 118, 122, 127],
+    values: [0, 8, 9, 10, 11, 12, 13, 14, 15],
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
     range: 16,
     default: 0
@@ -532,7 +545,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
 
   91: {
     label: "SSG-EG",
-    values: [0, 98, 102, 106, 110, 114, 118, 122, 127],
+    values: [0, 8, 9, 10, 11, 12, 13, 14, 15],
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
     range: 16,
     default: 0
@@ -540,7 +553,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
 
   92: {
     label: "SSG-EG",
-    values: [0, 98, 102, 106, 110, 114, 118, 122, 127],
+    values: [0, 8, 9, 10, 11, 12, 13, 14, 15],
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
     range: 16,
     default: 0
@@ -548,7 +561,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
 
   93: {
     label: "SSG-EG",
-    values: [0, 98, 102, 106, 110, 114, 118, 122, 127],
+    values: [0, 8, 9, 10, 11, 12, 13, 14, 15],
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
     range: 16,
     default: 0

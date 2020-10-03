@@ -1,18 +1,33 @@
 <template>
-  <canvas ref="canvas"></canvas>
+  <div class="dial">
+    <canvas
+      :title="title"
+      ref="canvas"
+      class="ns-resize-cursor"
+      @mousedown="requestPointerLock"
+      @mouseup="exitPointerLock"
+    ></canvas>
+    {{ scaledValue }}
+  </div>
 </template>
 
 <script>
+import defaultMapping from "../default-mapping";
 export default {
   props: {
+    cc: {
+      type: Number,
+      required: true
+    },
+
+    ccOffset: {
+      type: Number,
+      default: 0
+    },
+
     size: {
       type: Number,
       default: 60
-    },
-
-    value: {
-      type: Number,
-      default: 0
     },
 
     quantise: {
@@ -29,12 +44,30 @@ export default {
   data() {
     return {
       context: null,
-
-      mouseMovementRangeInPixels: 128,
-
-      downY: -1,
-      movementValue: 0
+      movementValue: 0,
+      storeUnsubscribe: null,
+      mouseButtonDown: false
     };
+  },
+
+  created() {
+    const { channel } = this.$store.state;
+    const value = this.$store.state[`channel${channel}`][
+      this.cc + this.ccOffset
+    ];
+
+    this.movementValue = this.inverse ? -value + 127 : value;
+
+    this.storeUnsubscribe = this.$store.subscribe(mutation => {
+      if (mutation.type === "SET_CC_VALUE") {
+        const { cc, value } = mutation.payload;
+
+        if (cc === this.cc + this.ccOffset && !this.mouseButtonDown) {
+          this.movementValue = this.inverse ? -value + 127 : value;
+          this.draw();
+        }
+      }
+    });
   },
 
   mounted() {
@@ -44,15 +77,13 @@ export default {
     this.resize();
 
     this.draw();
-
-    canvas.addEventListener("mousedown", this.down);
   },
 
   beforeDestroy() {
-    const { canvas } = this.$refs;
-    canvas.removeEventListener("mousedown", this.down);
-    document.removeEventListener("mouseup", this.up);
-    document.removeEventListener("mousemove", this.move);
+    document.removeEventListener("mouseup", this.mouseUp);
+    document.removeEventListener("mousemove", this.mouseMove);
+    document.body.classList.remove("ns-resize-cursor");
+    this.storeUnsubscribe();
   },
 
   computed: {
@@ -63,49 +94,84 @@ export default {
     internalValue() {
       const { q, quantise, movementValue } = this;
 
-      let value = 0;
+      let value = movementValue / 127;
 
       if (quantise > -1) {
-        value = Math.round(movementValue / q) * q;
-      } else {
-        value = movementValue;
+        value = Math.floor(value / q) * q;
       }
 
       return value;
+    },
+
+    scaledValue() {
+      return Math.floor(
+        this.internalValue * (defaultMapping[this.cc].range - 1)
+      );
+    },
+
+    title() {
+      return defaultMapping[this.cc].label;
     }
   },
 
   methods: {
-    down(e) {
-      document.addEventListener("mouseup", this.up);
+    requestPointerLock() {
+      const {
+        $refs: { canvas }
+      } = this;
 
-      this.downY = e.pageY;
-      document.addEventListener("mousemove", this.move);
+      document.addEventListener(
+        "pointerlockchange",
+        this.lockChangeAlert,
+        false
+      );
+      canvas.requestPointerLock();
+      this.mouseButtonDown = true;
     },
 
-    up(e) {
-      this.updateValue(e);
-
-      this.downY = -1;
-      document.removeEventListener("mouseup", this.up);
-      document.removeEventListener("mousemove", this.move);
+    exitPointerLock() {
+      document.exitPointerLock();
+      document.removeEventListener(
+        "pointerlockchange",
+        this.lockChangeAlert,
+        false
+      );
     },
 
-    move(e) {
-      this.updateValue(e);
+    lockChangeAlert() {
+      const {
+        $refs: { canvas }
+      } = this;
+
+      if (document.pointerLockElement === canvas) {
+        document.addEventListener("mousemove", this.mouseMove, false);
+        document.addEventListener("mouseup", this.mouseUp);
+      } else {
+        document.removeEventListener("mousemove", this.mouseMove, false);
+        this.mouseUp();
+      }
     },
 
-    updateValue(e) {
-      let differenceInPixels = this.downY - e.pageY;
+    mouseUp() {
+      document.removeEventListener("mousemove", this.mouseMove, false);
+      document.removeEventListener("mouseup", this.mouseUp);
+      document.body.style.cursor =
+        this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
+      this.mouseButtonDown = false;
+    },
 
-      const valueDifference =
-        differenceInPixels / this.mouseMovementRangeInPixels;
+    mouseMove(e) {
+      const newValue = -e.movementY + this.movementValue;
+      const clampedNewValue = Math.max(0, Math.min(127, newValue));
 
-      const newValue = valueDifference + this.movementValue;
-      const clampedNewValue = Math.max(0, Math.min(1, newValue));
       this.movementValue = clampedNewValue;
-
       this.downY = e.pageY;
+
+      this.$store.dispatch("setCCValues", {
+        [this.cc + this.ccOffset]: this.inverse
+          ? 127 - clampedNewValue
+          : clampedNewValue
+      });
     },
 
     resize() {
@@ -140,13 +206,14 @@ export default {
 
       requestAnimationFrame(() => {
         context.clearRect(0, 0, cw, ch);
+        context.strokeStyle = this.$colors.foreground;
 
         context.beginPath();
         context.arc(cw / 2, ch / 2, ((size - 6) / 2 - 2) * dpr, 0, Math.PI * 2);
         context.stroke();
 
-        if (quantise > -1) {
-          for (let i = 0; i < quantise + 1; ++i) {
+        if (quantise > 0) {
+          for (let i = 0; i < quantise; ++i) {
             context.save();
             context.translate(cw / 2, ch / 2);
             context.rotate((i / quantise) * 270 * (Math.PI / 180));
@@ -188,12 +255,15 @@ export default {
 
   watch: {
     value(value) {
-      this.movementValue = value;
+      if (this.inverse) {
+        this.movementValue = 1 - value;
+      } else {
+        this.movementValue = value;
+      }
     },
 
     movementValue() {
       this.draw();
-      this.$emit("input", this.internalValue);
     }
   }
 };
@@ -202,6 +272,10 @@ export default {
 <style scoped>
 canvas {
   user-select: none;
+}
+
+.dial {
   margin-right: 0.5em;
+  text-align: center;
 }
 </style>

@@ -4,7 +4,13 @@ import defaultMapping from "../default-mapping";
 
 const GLOBAL_CC = [1, 74, 78, 79, 80, 81, 83, 84, 85, 86, 88, 89];
 
+function createBlankPatchesArray() {
+  return [...new Array(128).keys()].map(() => ({ name: "", data: undefined }));
+}
+
 const state = {
+  patches: createBlankPatchesArray(),
+
   polyphonic: false,
   maxPolyphonicChannels: 6,
   channel: 1
@@ -31,15 +37,25 @@ const store = new Vuex.Store({
 
   actions: {
     setCCValues({ commit, state }, values = {}) {
-      Object.keys(values).forEach(cc => {
+      Object.keys(values).forEach(key => {
+        const cc = parseInt(key, 10);
+
         const value = values[cc];
-        const isGlobal = GLOBAL_CC.indexOf(parseInt(cc, 10)) > -1;
+        const isGlobal = GLOBAL_CC.indexOf(cc) > -1;
 
         if (state.polyphonic || isGlobal) {
           for (let i = 1; i < 7; ++i) {
+            if (state[`channel${i}`][cc] === value) {
+              continue;
+            }
+
             commit("SET_CC_VALUE", { cc, value, channel: i });
           }
         } else {
+          if (state[`channel${state.channel}`][cc] === value) {
+            return;
+          }
+
           commit("SET_CC_VALUE", { cc, value, channel: state.channel });
         }
       });
@@ -55,6 +71,22 @@ const store = new Vuex.Store({
 
     setMaxPolyphonicChannels({ commit }, value) {
       commit("SET_MAX_POLYPHONIC_CHANNELS", value);
+    },
+
+    async setPatches({ commit, dispatch }, patches = []) {
+      commit("CLEAR_PATCHES");
+
+      for (let i = 0; i < patches.length; i += 1) {
+        await dispatch("writePatch", { index: i, patch: patches[i] });
+      }
+    },
+
+    writePatch({ commit }, { index, patch }) {
+      if (index > 127) {
+        throw new Error("Slot index is > 127. 128 slots available only.");
+      }
+
+      commit("WRITE_TO_SLOT", { index, patch });
     }
   },
 
@@ -73,6 +105,15 @@ const store = new Vuex.Store({
 
     SET_MAX_POLYPHONIC_CHANNELS(state, value) {
       state.maxPolyphonicChannels = value;
+    },
+
+    CLEAR_PATCHES(state) {
+      state.patches = createBlankPatchesArray();
+    },
+
+    WRITE_TO_SLOT(state, { index, patch }) {
+      state.patches[index].name = patch.name;
+      state.patches[index].data = patch.data;
     }
   }
 });
