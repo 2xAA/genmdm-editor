@@ -1,18 +1,7 @@
 <template>
-  <div>
-    Load GENM:
+  <label>
     <input type="file" id="input" accept=".genm" @change="fileAdded" />
-
-    <select v-model="selectedInstrument">
-      <option
-        v-for="(data, name) in instrumentData"
-        :value="name"
-        :key="name"
-        >{{ name }}</option
-      >
-    </select>
-    <button @click="loadInstrument">Load instrument</button>
-  </div>
+  </label>
 </template>
 
 <script>
@@ -91,13 +80,6 @@ const labels = [
 ];
 
 export default {
-  data() {
-    return {
-      instrumentData: {},
-      selectedInstrument: null
-    };
-  },
-
   methods: {
     fileAdded(e) {
       const {
@@ -145,7 +127,7 @@ export default {
         data[i] = parsed;
       }
 
-      const instrumentData = {};
+      const instrumentData = [];
 
       for (let i = 0; i < data.length; ++i) {
         const instrument = data[i];
@@ -244,20 +226,40 @@ export default {
           );
         }
 
-        instrumentData[instrument.instrumentNameSymbolString] = ccData;
+        instrumentData.push({
+          name: instrument.instrumentNameSymbolString,
+          data: ccData
+        });
       }
 
-      this.instrumentData = instrumentData;
-    },
-
-    loadInstrument() {
-      const ccValues = this.instrumentData[this.selectedInstrument];
-      if (!ccValues) {
-        return;
-      }
-
-      this.$store.dispatch("setCCValues", ccValues);
+      this.$store.dispatch("setPatches", instrumentData);
     }
   }
 };
 </script>
+
+<style scoped>
+input {
+  display: none;
+}
+
+label::before {
+  appearance: button;
+  padding: 1px 6px;
+
+  content: "Load GENM";
+  display: inline-block;
+  border: 1px solid var(--foreground-color);
+  color: var(--foreground-color);
+
+  outline: none;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  font-size: 10pt;
+  text-transform: uppercase;
+
+  display: inline-block;
+  text-align: center;
+  width: -webkit-fill-available;
+}
+</style>

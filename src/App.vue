@@ -15,13 +15,70 @@
                     <c span="2" class="control-group__control">
                       <DraggableSelect
                         :values="[1, 2, 3, 4, 5, 6]"
-                        :default="1"
+                        :default="0"
                         :emitArrayValue="true"
                         v-model.number="channel"
                       />
                     </c>
                   </template>
+
+                  <template v-slot:footer>
+                    <c span="6" class="control-group__label">RAM Slot</c>
+                    <c span="2" class="control-group__control">
+                      <DraggableSelect
+                        :values="[
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          7,
+                          8,
+                          9,
+                          10,
+                          11,
+                          12,
+                          13,
+                          14,
+                          15,
+                          16
+                        ]"
+                        :default="0"
+                        :emitArrayValue="true"
+                        v-model.number="ramSlot"
+                      />
+                    </c>
+                  </template>
                 </MDMControlGroup>
+                <grid columns="2">
+                  <c>
+                    <button
+                      @click="
+                        sendCC({
+                          cc: 9,
+                          value: Math.round((ramSlot / 16) * 127),
+                          channel
+                        })
+                      "
+                    >
+                      Load from RAM
+                    </button>
+                  </c>
+                  <c>
+                    <button
+                      @click="
+                        sendCC({
+                          cc: 6,
+                          value: Math.round((ramSlot / 16) * 127),
+                          channel
+                        })
+                      "
+                    >
+                      Write to RAM
+                    </button>
+                  </c>
+                </grid>
               </c>
               <c class="arrow-container"><Arrow /></c>
               <c span="5">
@@ -30,9 +87,20 @@
             </grid>
           </c>
           <c span="2">
-            <TFIFileUpload />
-            <GENMFileUpload />
-            <TFIFileDownload />
+            <grid columns="1">
+              <c>
+                <h2>Patch Management</h2>
+              </c>
+              <c>
+                <PatchList @input="val => (patchSlotIndex = val)" />
+                <grid columns="2">
+                  <c><button @click="writeToSlot">Write slot</button></c>
+                  <c><TFIFileUpload /></c>
+                </grid>
+
+                <GENMFileUpload />
+              </c>
+            </grid>
           </c>
           <c span="10">
             <grid columns="2">
@@ -55,8 +123,8 @@
       </c>
       <c span="2">
         <div class="editor-title">
-          <h2>GenMDM Editor</h2>
-          <h2>By 2xAA</h2>
+          <h1>genMDM Editor</h1>
+          <span class="subtitle">version {{ version }}</span>
         </div>
 
         <div class="editor-settings">
@@ -123,18 +191,19 @@
 <script>
 import WebMidi from "webmidi";
 
+import pkg from "../package.json";
 import MDMControlGroup from "./components/MDMControlGroup";
 import DraggableSelect from "./components/DraggableSelect";
 import LabelledCheckbox from "./components/LabelledCheckbox";
 import MDMADSR from "./components/MDMADSR";
 import TFIFileUpload from "./components/TFIFileUpload";
-import TFIFileDownload from "./components/TFIFileDownload";
 import GENMFileUpload from "./components/GENMFileUpload";
 import DACSettings from "./components/DACSettings";
 import GlobalSettings from "./components/GlobalSettings";
 import MDMAlgorithmDisplay from "./components/MDMAlgorithmDisplay";
 import MDMSSGEGDisplay from "./components/MDMSSGEGDisplay";
 import Arrow from "./components/Arrow";
+import PatchList from "./components/PatchList";
 
 export default {
   name: "App",
@@ -143,7 +212,6 @@ export default {
     MDMControlGroup,
     MDMADSR,
     TFIFileUpload,
-    TFIFileDownload,
     GENMFileUpload,
     DACSettings,
     GlobalSettings,
@@ -151,11 +219,13 @@ export default {
     MDMSSGEGDisplay,
     Arrow,
     DraggableSelect,
-    LabelledCheckbox
+    LabelledCheckbox,
+    PatchList
   },
 
   data() {
     return {
+      version: pkg.version,
       inputs: [],
       outputs: [],
 
@@ -164,7 +234,12 @@ export default {
 
       notesOn: {},
       polyphonyChannel: 1,
-      storeUnsubscribe: null
+      storeUnsubscribe: null,
+
+      ramSlot: 1,
+
+      patchSlotValues: [...new Array(128).keys()].map((x, i) => i + 1),
+      patchSlotIndex: 1
     };
   },
 
@@ -234,6 +309,16 @@ export default {
     populateInputAndOutputPorts() {
       this.outputs = WebMidi.outputs;
       this.inputs = WebMidi.inputs;
+    },
+
+    writeToSlot() {
+      this.$store.dispatch("writePatch", {
+        index: this.patchSlotIndex - 1,
+        patch: {
+          data: { ...this.$store.state[`channel${this.channel}`] },
+          name: "yo" + this.patchSlotIndex
+        }
+      });
     },
 
     sendCC({ cc, value, channel }) {
@@ -398,6 +483,15 @@ body {
   margin: 0;
 }
 
+#app,
+button,
+input {
+  font-family: "Kokoro";
+  letter-spacing: -1px;
+
+  color: var(--foreground-color);
+}
+
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -406,13 +500,8 @@ body {
   min-width: 1120px;
   margin: 0 auto;
 
-  font-family: "Kokoro";
-  letter-spacing: -1px;
-
   transform: rotate(-0.2deg);
   margin-top: -0.5px;
-
-  color: var(--foreground-color);
 }
 
 .ns-resize-cursor {
@@ -426,6 +515,27 @@ label span {
 
 select {
   width: 100%;
+}
+
+button {
+  background: none;
+  border: 1px var(--foreground-color) solid;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: normal;
+  text-align: right;
+  margin: 0.67em 0;
+}
+
+h1 + .subtitle {
+  display: block;
+  font-size: 14px;
+  margin-top: -0.67em;
+  text-align: right;
 }
 
 h2 {
