@@ -39,7 +39,7 @@ export default {
     },
 
     index() {
-      return Math.max(0, this.ssgegValue - 8);
+      return Math.round((this.ssgegValue / 127) * 9) - 2;
     }
   }
 };

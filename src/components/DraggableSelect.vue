@@ -133,9 +133,8 @@ export default {
   watch: {
     value(value) {
       if (!this.mouseButtonDown) {
-        this.internalValue = Math.max(
-          0,
-          Math.min(this.values.length - 1, Math.floor(value / 127))
+        this.internalValue = Math.round(
+          (value / 127) * (this.values.length - 1)
         );
       }
     }

@@ -142,17 +142,17 @@ export default {
           // feedback
           15: mapToCCRange(
             instrument["fmFeedback"],
-            defaultMapping[14].range - 1
+            defaultMapping[15].range - 1
           ),
 
           // lfo fm
-          75: mapToCCRange(instrument["lfoFm"], defaultMapping[14].range - 1),
+          75: mapToCCRange(instrument["lfoFm"], defaultMapping[75].range - 1),
 
           // lfo am
-          76: mapToCCRange(instrument["lfoAm"], defaultMapping[14].range - 1),
+          76: mapToCCRange(instrument["lfoAm"], defaultMapping[76].range - 1),
 
           // panning
-          77: mapToCCRange(instrument["panning"], defaultMapping[14].range - 1)
+          77: mapToCCRange(instrument["panning"], defaultMapping[77].range - 1)
         };
 
         for (let i = 0; i < 4; ++i) {

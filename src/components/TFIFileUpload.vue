@@ -65,14 +65,14 @@ export default {
         // Multiple
         parsed[20 + i] = mapToCCRange(
           data[2 + 10 * i],
-          defaultMapping[20].range - 1
+          defaultMapping[20].range
         );
         // data[2 + 10 * i];
 
         // Detune
         parsed[24 + i] = mapToCCRange(
           data[3 + 10 * i],
-          defaultMapping[24].range - 1
+          defaultMapping[24].range
         );
         // data[3 + 10 * i]
 
@@ -99,7 +99,7 @@ export default {
 
         // First Decay Rate
         parsed[47 + i] = mapToCCRange(
-          31 - data[7 + 10 * i],
+          data[7 + 10 * i],
           defaultMapping[47].range - 1
         );
         // 31 - data[7 + 10 * i]
@@ -128,7 +128,7 @@ export default {
         // SSG-EG Operator
         parsed[90 + i] = mapToCCRange(
           data[11 + 10 * i],
-          defaultMapping[90].range - 1
+          defaultMapping[90].range
         );
         // data[11 + 10 * i];
 
@@ -141,6 +141,19 @@ export default {
           parsed[90 + i] = 0;
         }
       }
+
+      parsed[75] = mapToCCRange(
+        defaultMapping[75].default,
+        defaultMapping[75].range - 1
+      );
+      parsed[76] = mapToCCRange(
+        defaultMapping[76].default,
+        defaultMapping[76].range - 1
+      );
+      parsed[77] = mapToCCRange(
+        defaultMapping[77].default,
+        defaultMapping[77].range - 1
+      );
 
       this.$store.dispatch("setCCValues", parsed);
     }
