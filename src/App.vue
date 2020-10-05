@@ -96,9 +96,9 @@
                 <grid columns="2">
                   <c><button @click="writeToSlot">Write slot</button></c>
                   <c><TFIFileUpload /></c>
+                  <c><GENMFileUpload /></c>
+                  <c><GENMFileDownload /></c>
                 </grid>
-
-                <GENMFileUpload />
               </c>
             </grid>
           </c>
@@ -204,6 +204,7 @@ import MDMAlgorithmDisplay from "./components/MDMAlgorithmDisplay";
 import MDMSSGEGDisplay from "./components/MDMSSGEGDisplay";
 import Arrow from "./components/Arrow";
 import PatchList from "./components/PatchList";
+import GENMFileDownload from "./components/GENMFileDownload";
 
 export default {
   name: "App",
@@ -220,7 +221,8 @@ export default {
     Arrow,
     DraggableSelect,
     LabelledCheckbox,
-    PatchList
+    PatchList,
+    GENMFileDownload
   },
 
   data() {
