@@ -34,7 +34,7 @@ export default {
         tfiData[6 + 10 * i] = mapToRange(channel[43 + i], 127, 31);
 
         // First Decay Rate
-        tfiData[7 + 10 * i] = mapToRange(127 - channel[47 + i], 127, 31);
+        tfiData[7 + 10 * i] = mapToRange(channel[47 + i], 127, 31);
 
         // Secondary Decay Rate
         tfiData[8 + 10 * i] = mapToRange(channel[51 + i], 127, 31);
