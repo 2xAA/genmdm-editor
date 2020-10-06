@@ -98,6 +98,8 @@
                   <c><TFIFileUpload /></c>
                   <c><GENMFileUpload /></c>
                   <c><GENMFileDownload /></c>
+                  <c><DMPFileUpload /></c>
+                  <c><DMPFileDownload /></c>
                 </grid>
               </c>
             </grid>
@@ -205,6 +207,8 @@ import MDMSSGEGDisplay from "./components/MDMSSGEGDisplay";
 import Arrow from "./components/Arrow";
 import PatchList from "./components/PatchList";
 import GENMFileDownload from "./components/GENMFileDownload";
+import DMPFileUpload from "./components/DMPFileUpload";
+import DMPFileDownload from "./components/DMPFileDownload";
 
 export default {
   name: "App",
@@ -222,7 +226,9 @@ export default {
     DraggableSelect,
     LabelledCheckbox,
     PatchList,
-    GENMFileDownload
+    GENMFileDownload,
+    DMPFileUpload,
+    DMPFileDownload
   },
 
   data() {
