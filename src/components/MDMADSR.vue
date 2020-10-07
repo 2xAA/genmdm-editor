@@ -238,10 +238,7 @@ export default {
     },
 
     getXYFromPosition(index = 0) {
-      const {
-        canvas,
-        canvas: { width: cw }
-      } = this.$refs;
+      const { canvas } = this.$refs;
       const qw = Math.floor(canvas.width / 4);
 
       let lowerX = 0;
