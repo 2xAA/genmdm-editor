@@ -5,7 +5,7 @@
   "description": "genMDM editor is a web-based interface for genMDM, a MIDI controller for the Sega Mega Drive and Genesis",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --dest docs",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
