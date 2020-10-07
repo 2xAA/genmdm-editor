@@ -253,7 +253,7 @@ export default {
 
       if (index === 0) {
         return {
-          x: lowerX + (cw - -cw * -position[0]), //Math.pow(cw, position[0]),
+          x: lowerX + (1 - position[0]) * qw, //Math.pow(cw, position[0]),
           y: Math.floor((1 - position[1]) * canvas.height)
         };
       }
