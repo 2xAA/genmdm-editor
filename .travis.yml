@@ -3,7 +3,7 @@ node_js: '10'
 jobs:
   include:
     - stage: Create release
-      if: branch = master
+      if: branch = main
       name: Semantic release
       os: linux
       dist: xenial
@@ -11,7 +11,7 @@ jobs:
       script: skip
       deploy:
         on:
-          branch: master
+          branch: main
         provider: script
         skip_cleanup: true
         script: npx semantic-release
