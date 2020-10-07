@@ -1,5 +1,5 @@
 <h1 align="center">genMDM Editor</h1>
-<p align="center"><img alt="genmdm-editor logo" src="https://github.com/2xAA/genmdm-editor/raw/master/src/assets/images/genmdm-editor.png" width="256" /></p>
+<p align="center"><img alt="genmdm-editor logo" src="https://github.com/2xAA/genmdm-editor/raw/main/src/assets/images/genmdm-editor.png" width="256" /></p>
 
 <p align="center">
   <a href="https://github.com/2xAA/genmdm-editor/graphs/commit-activity" target="_blank">
