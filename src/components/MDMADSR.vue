@@ -302,6 +302,12 @@ export default {
 
       this.displayPositions = this.generateValues(positions);
     }
+  },
+
+  watch: {
+    displayPositions() {
+      this.draw();
+    }
   }
 };
 </script>

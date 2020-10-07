@@ -51,12 +51,7 @@ export default {
   },
 
   created() {
-    const { channel } = this.$store.state;
-    const value = this.$store.state[`channel${channel}`][
-      this.cc + this.ccOffset
-    ];
-
-    this.movementValue = this.inverse ? -value + 127 : value;
+    this.updateFromStore();
 
     this.storeUnsubscribe = this.$store.subscribe(mutation => {
       if (mutation.type === "SET_CC_VALUE") {
@@ -250,16 +245,21 @@ export default {
         context.stroke();
         context.restore();
       });
+    },
+
+    updateFromStore() {
+      const { channel } = this.$store.state;
+      const value = this.$store.state[`channel${channel}`][
+        this.cc + this.ccOffset
+      ];
+
+      this.movementValue = this.inverse ? -value + 127 : value;
     }
   },
 
   watch: {
-    value(value) {
-      if (this.inverse) {
-        this.movementValue = 1 - value;
-      } else {
-        this.movementValue = value;
-      }
+    "$store.state.channel"() {
+      this.updateFromStore();
     },
 
     movementValue() {
