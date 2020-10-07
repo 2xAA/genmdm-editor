@@ -29,6 +29,8 @@ jobs:
         github_token: $GH_TOKEN
         keep_history: true
         local_dir: dist
+        on:
+          tags: true
 cache:
   directories:
   - node_modules
