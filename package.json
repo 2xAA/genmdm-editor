@@ -1,6 +1,6 @@
 {
   "name": "vue",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "description": "genMDM editor is a web-based interface for genMDM, a MIDI controller for the Sega Mega Drive and Genesis",
   "scripts": {
