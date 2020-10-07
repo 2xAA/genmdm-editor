@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import defaultMapping from "../default-mapping";
+import genmdmMapping from "../genmdm-mapping";
 
 const GLOBAL_CC = [1, 74, 78, 79, 80, 81, 83, 84, 85, 86, 88, 89];
 
@@ -16,10 +16,10 @@ const state = {
   channel: 1
 };
 
-const mappedCCNumbers = Object.keys(defaultMapping);
+const mappedCCNumbers = Object.keys(genmdmMapping);
 
 function setKeyToDefault(channel, key) {
-  state[`channel${channel + 1}`][key] = defaultMapping[key].default || 0;
+  state[`channel${channel + 1}`][key] = genmdmMapping[key].default || 0;
 }
 
 for (let i = 0; i < 6; ++i) {

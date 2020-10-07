@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import defaultMapping from "../default-mapping";
+import genmdmMapping from "../genmdm-mapping";
 export default {
   props: {
     cc: {
@@ -105,12 +105,12 @@ export default {
 
     scaledValue() {
       return Math.floor(
-        this.internalValue * (defaultMapping[this.cc].range - 1)
+        this.internalValue * (genmdmMapping[this.cc].range - 1)
       );
     },
 
     title() {
-      return defaultMapping[this.cc].label;
+      return genmdmMapping[this.cc].label;
     }
   },
 

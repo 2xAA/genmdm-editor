@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import defaultMapping from "../default-mapping";
+import genmdmMapping from "../genmdm-mapping";
 import mapToCCRange from "../utils/map-to-cc-range";
 /* TFI format
  * ----------
@@ -55,80 +55,80 @@ export default {
     parseTfiDataToMappedCC(data) {
       const parsed = {
         // algorithm
-        14: mapToCCRange(data[0], defaultMapping[14].range - 1),
+        14: mapToCCRange(data[0], genmdmMapping[14].range - 1),
 
         // feedback
-        15: mapToCCRange(data[1], defaultMapping[15].range - 1)
+        15: mapToCCRange(data[1], genmdmMapping[15].range - 1)
       };
 
       for (let i = 0; i < 4; ++i) {
         // Multiple
         parsed[20 + i] = mapToCCRange(
           data[2 + 10 * i],
-          defaultMapping[20].range
+          genmdmMapping[20].range
         );
         // data[2 + 10 * i];
 
         // Detune
         parsed[24 + i] = mapToCCRange(
           data[3 + 10 * i],
-          defaultMapping[24].range
+          genmdmMapping[24].range
         );
         // data[3 + 10 * i]
 
         // Total Level
         parsed[16 + i] = mapToCCRange(
           127 - data[4 + 10 * i],
-          defaultMapping[16].range - 1
+          genmdmMapping[16].range - 1
         );
         // 127 - data[4 + 10 * i];
 
         // Rate Scaling
         parsed[39 + i] = mapToCCRange(
           data[5 + 10 * i],
-          defaultMapping[39].range - 1
+          genmdmMapping[39].range - 1
         );
         // data[5 + 10 * i]
 
         // Attack Rate
         parsed[43 + i] = mapToCCRange(
           data[6 + 10 * i],
-          defaultMapping[43].range - 1
+          genmdmMapping[43].range - 1
         );
         // data[6 + 10 * i]
 
         // First Decay Rate
         parsed[47 + i] = mapToCCRange(
           data[7 + 10 * i],
-          defaultMapping[47].range - 1
+          genmdmMapping[47].range - 1
         );
         // 31 - data[7 + 10 * i]
 
         // Secondary Decay Rate
         parsed[51 + i] = mapToCCRange(
           data[8 + 10 * i],
-          defaultMapping[51].range - 1
+          genmdmMapping[51].range - 1
         );
         // data[8 + 10 * i];
 
         // Release Rate
         parsed[59 + i] = mapToCCRange(
           data[9 + 10 * i],
-          defaultMapping[59].range - 1
+          genmdmMapping[59].range - 1
         );
         // data[9 + 10 * i];
 
         // Secondary Amplitude Level
         parsed[55 + i] = mapToCCRange(
           data[10 + 10 * i],
-          defaultMapping[55].range - 1
+          genmdmMapping[55].range - 1
         );
         // data[10 + 10 * i];
 
         // SSG-EG Operator
         parsed[90 + i] = mapToCCRange(
           data[11 + 10 * i],
-          defaultMapping[90].range
+          genmdmMapping[90].range
         );
         // data[11 + 10 * i];
 
@@ -143,16 +143,16 @@ export default {
       }
 
       parsed[75] = mapToCCRange(
-        defaultMapping[75].default,
-        defaultMapping[75].range - 1
+        genmdmMapping[75].default,
+        genmdmMapping[75].range - 1
       );
       parsed[76] = mapToCCRange(
-        defaultMapping[76].default,
-        defaultMapping[76].range - 1
+        genmdmMapping[76].default,
+        genmdmMapping[76].range - 1
       );
       parsed[77] = mapToCCRange(
-        defaultMapping[77].default,
-        defaultMapping[77].range - 1
+        genmdmMapping[77].default,
+        genmdmMapping[77].range - 1
       );
 
       this.$store.dispatch("setCCValues", parsed);

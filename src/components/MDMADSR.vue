@@ -63,7 +63,7 @@
 <script>
 import MDMDial from "./MDMDial";
 import MDMControlGroup from "./MDMControlGroup";
-import defaultMapping from "../default-mapping";
+import genmdmMapping from "../genmdm-mapping";
 
 const ADSR_CC_NUMBERS = [43, 16, 47, 55, 51, 59];
 
@@ -271,22 +271,22 @@ export default {
       const values = {};
 
       const ar = Math.floor(
-        positions[0][0] * (defaultMapping[ADSR_CC_NUMBERS[0]].range - 1)
+        positions[0][0] * (genmdmMapping[ADSR_CC_NUMBERS[0]].range - 1)
       );
       const tl = Math.floor(
-        positions[0][1] * (defaultMapping[ADSR_CC_NUMBERS[1]].range - 1)
+        positions[0][1] * (genmdmMapping[ADSR_CC_NUMBERS[1]].range - 1)
       );
       const dr1 = Math.floor(
-        positions[1][0] * (defaultMapping[ADSR_CC_NUMBERS[2]].range - 1)
+        positions[1][0] * (genmdmMapping[ADSR_CC_NUMBERS[2]].range - 1)
       );
       const sa = Math.floor(
-        positions[1][1] * (defaultMapping[ADSR_CC_NUMBERS[3]].range - 1)
+        positions[1][1] * (genmdmMapping[ADSR_CC_NUMBERS[3]].range - 1)
       );
       const dr2 = Math.floor(
-        positions[2][0] * (defaultMapping[ADSR_CC_NUMBERS[4]].range - 1)
+        positions[2][0] * (genmdmMapping[ADSR_CC_NUMBERS[4]].range - 1)
       );
       const rr = Math.floor(
-        positions[3][0] * (defaultMapping[ADSR_CC_NUMBERS[5]].range - 1)
+        positions[3][0] * (genmdmMapping[ADSR_CC_NUMBERS[5]].range - 1)
       );
 
       values[ADSR_CC_NUMBERS[0] + (operator - 1)] = ar;

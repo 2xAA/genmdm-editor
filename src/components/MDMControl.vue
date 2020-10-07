@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import defaultMapping from "../default-mapping.js";
+import genmdmMapping from "../genmdm-mapping.js";
 import DraggableSelect from "./DraggableSelect";
 import LabelledCheckbox from "./LabelledCheckbox";
 
@@ -47,7 +47,7 @@ export default {
   },
 
   created() {
-    if (!defaultMapping[this.cc]) {
+    if (!genmdmMapping[this.cc]) {
       throw new Error(`CC mapping doesn't exist for ${this.cc}`);
     }
 
@@ -78,7 +78,7 @@ export default {
     },
 
     mapping() {
-      return defaultMapping[this.cc];
+      return genmdmMapping[this.cc];
     },
 
     type() {
