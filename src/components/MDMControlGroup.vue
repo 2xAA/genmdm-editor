@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import defaultMapping from "../default-mapping.js";
+import genmdmMapping from "../genmdm-mapping.js";
 import MDMControl from "./MDMControl";
 
 export default {
@@ -39,7 +39,7 @@ export default {
       const controls = {};
 
       this.ccValues.forEach(cc => {
-        controls[cc] = defaultMapping[cc];
+        controls[cc] = genmdmMapping[cc];
       });
 
       return controls;

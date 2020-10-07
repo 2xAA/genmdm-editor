@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import defaultMapping from "../default-mapping";
+import genmdmMapping from "../genmdm-mapping";
 import mapToRange from "../utils/map-to-range";
 /* DMP format
  * 0x00 1 Byte:  FILE_VERSION, must be 11 (0x0B) for DefleMask v0.12.0
@@ -35,7 +35,7 @@ export default {
   methods: {
     getUnscaledValue(cc) {
       const channel = this.$store.state[`channel${this.$store.state.channel}`];
-      return mapToRange(channel[cc], 127, defaultMapping[cc].range - 1);
+      return mapToRange(channel[cc], 127, genmdmMapping[cc].range - 1);
     },
 
     generateDMP() {

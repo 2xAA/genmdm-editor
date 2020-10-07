@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import defaultMapping from "../default-mapping";
+import genmdmMapping from "../genmdm-mapping";
 import mapToCCRange from "../utils/map-to-cc-range";
 /* DMP format
  * 0x00 1 Byte:  FILE_VERSION, must be 11 (0x0B) for DefleMask v0.12.0
@@ -72,83 +72,83 @@ export default {
 
       const parsed = {
         // LFO FM
-        75: mapToCCRange(data[0x03], defaultMapping[75].range - 1),
+        75: mapToCCRange(data[0x03], genmdmMapping[75].range - 1),
 
         // feedback
-        15: mapToCCRange(data[0x04], defaultMapping[15].range - 1),
+        15: mapToCCRange(data[0x04], genmdmMapping[15].range - 1),
 
         // algorithm
-        14: mapToCCRange(data[0x05], defaultMapping[14].range - 1),
+        14: mapToCCRange(data[0x05], genmdmMapping[14].range - 1),
 
         // LFO AM
-        76: mapToCCRange(data[0x06], defaultMapping[76].range - 1)
+        76: mapToCCRange(data[0x06], genmdmMapping[76].range - 1)
       };
 
       for (let i = 0; i < 4; ++i) {
         // Multiple
         parsed[20 + i] = mapToCCRange(
           data[0x07 + 11 * i],
-          defaultMapping[20].range
+          genmdmMapping[20].range
         );
 
         // Total Level
         parsed[16 + i] = mapToCCRange(
           127 - data[0x08 + 11 * i],
-          defaultMapping[16].range - 1
+          genmdmMapping[16].range - 1
         );
 
         // Attack Rate
         parsed[43 + i] = mapToCCRange(
           data[0x09 + 11 * i],
-          defaultMapping[43].range - 1
+          genmdmMapping[43].range - 1
         );
 
         // First Decay Rate
         parsed[47 + i] = mapToCCRange(
           data[0x0a + 11 * i],
-          defaultMapping[47].range - 1
+          genmdmMapping[47].range - 1
         );
 
         // Secondary Amplitude Level (Sustain Level)
         parsed[55 + i] = mapToCCRange(
           data[0x0b + 11 * i],
-          defaultMapping[55].range - 1
+          genmdmMapping[55].range - 1
         );
 
         // Release Rate
         parsed[59 + i] = mapToCCRange(
           data[0x0c + 11 * i],
-          defaultMapping[59].range - 1
+          genmdmMapping[59].range - 1
         );
 
         // AM
         parsed[70 + i] = mapToCCRange(
           data[0x0d + 11 * i],
-          defaultMapping[70].range
+          genmdmMapping[70].range
         );
 
         // Rate Scaling
         parsed[39 + i] = mapToCCRange(
           data[0x0e + 11 * i],
-          defaultMapping[39].range - 1
+          genmdmMapping[39].range - 1
         );
 
         // Detune
         parsed[24 + i] = mapToCCRange(
           data[0x0f + 11 * i],
-          defaultMapping[24].range
+          genmdmMapping[24].range
         );
 
         // Secondary Decay Rate
         parsed[51 + i] = mapToCCRange(
           data[0x10 + 11 * i],
-          defaultMapping[51].range - 1
+          genmdmMapping[51].range - 1
         );
 
         // SSG-EG Operator
         parsed[90 + i] = mapToCCRange(
           data[0x11 + 11 * i],
-          defaultMapping[90].range
+          genmdmMapping[90].range
         );
 
         // // if less than 8, set to 0
@@ -162,16 +162,16 @@ export default {
       }
 
       parsed[75] = mapToCCRange(
-        defaultMapping[75].default,
-        defaultMapping[75].range - 1
+        genmdmMapping[75].default,
+        genmdmMapping[75].range - 1
       );
       parsed[76] = mapToCCRange(
-        defaultMapping[76].default,
-        defaultMapping[76].range - 1
+        genmdmMapping[76].default,
+        genmdmMapping[76].range - 1
       );
       parsed[77] = mapToCCRange(
-        defaultMapping[77].default,
-        defaultMapping[77].range - 1
+        genmdmMapping[77].default,
+        genmdmMapping[77].range - 1
       );
 
       this.$store.dispatch("setCCValues", parsed);

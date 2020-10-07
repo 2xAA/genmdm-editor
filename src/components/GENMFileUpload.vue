@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import defaultMapping from "../default-mapping";
+import genmdmMapping from "../genmdm-mapping";
 import mapToCCRange from "../utils/map-to-cc-range";
 /* GENM format
  * ----------
@@ -136,23 +136,23 @@ export default {
           // algorithm
           14: mapToCCRange(
             instrument["algorithm"],
-            defaultMapping[14].range - 1
+            genmdmMapping[14].range - 1
           ),
 
           // feedback
           15: mapToCCRange(
             instrument["fmFeedback"],
-            defaultMapping[15].range - 1
+            genmdmMapping[15].range - 1
           ),
 
           // lfo fm
-          75: mapToCCRange(instrument["lfoFm"], defaultMapping[75].range - 1),
+          75: mapToCCRange(instrument["lfoFm"], genmdmMapping[75].range - 1),
 
           // lfo am
-          76: mapToCCRange(instrument["lfoAm"], defaultMapping[76].range - 1),
+          76: mapToCCRange(instrument["lfoAm"], genmdmMapping[76].range - 1),
 
           // panning
-          77: mapToCCRange(instrument["panning"], defaultMapping[77].range - 1)
+          77: mapToCCRange(instrument["panning"], genmdmMapping[77].range - 1)
         };
 
         for (let i = 0; i < 4; ++i) {
@@ -161,68 +161,68 @@ export default {
           // Multiple
           ccData[20 + i] = mapToCCRange(
             instrument[`op${j}Mul`],
-            defaultMapping[20].range - 1
+            genmdmMapping[20].range - 1
           );
           // instrument[`op${j}Mul`]
 
           // Detune
           ccData[24 + i] = mapToCCRange(
             instrument[`op${j}Detune`],
-            defaultMapping[24].range - 1
+            genmdmMapping[24].range - 1
           );
 
           // Total Level
           ccData[16 + i] = mapToCCRange(
             instrument[`op${j}Level`],
-            defaultMapping[16].range - 1
+            genmdmMapping[16].range - 1
           );
 
           // Rate Scaling
           ccData[39 + i] = mapToCCRange(
             instrument[`op${j}RateScaling`],
-            defaultMapping[39].range - 1
+            genmdmMapping[39].range - 1
           );
 
           // Attack Rate
           ccData[43 + i] = mapToCCRange(
             instrument[`op${j}Attack`],
-            defaultMapping[43].range - 1
+            genmdmMapping[43].range - 1
           );
 
           // First Decay Rate
           ccData[47 + i] = mapToCCRange(
             instrument[`op${j}Decay1`],
-            defaultMapping[47].range - 1
+            genmdmMapping[47].range - 1
           );
 
           // Secondary Decay Rate
           ccData[51 + i] = mapToCCRange(
             instrument[`op${j}Decay2`],
-            defaultMapping[51].range - 1
+            genmdmMapping[51].range - 1
           );
 
           // Release Rate
           ccData[59 + i] = mapToCCRange(
             instrument[`op${j}Release`],
-            defaultMapping[59].range - 1
+            genmdmMapping[59].range - 1
           );
 
           // Secondary Amplitude Level
           ccData[55 + i] = mapToCCRange(
             instrument[`op${j}Amp2`],
-            defaultMapping[55].range - 1
+            genmdmMapping[55].range - 1
           );
 
           // SSG-EG Operator
           ccData[90 + i] = mapToCCRange(
             instrument[`op${j}SsgData`],
-            defaultMapping[90].range - 1
+            genmdmMapping[90].range - 1
           );
 
           // OP LFO Enable
           ccData[70 + i] = mapToCCRange(
             instrument[`op${j}LfoEnable`],
-            defaultMapping[70].range - 1
+            genmdmMapping[70].range - 1
           );
         }
 
