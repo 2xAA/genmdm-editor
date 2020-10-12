@@ -414,17 +414,17 @@ export default {
 
       let nextChannel = this.polyphonyChannel + 1;
 
-      if (nextChannel > this.maxPolyphonicChannels) {
-        nextChannel = 1;
+      const freeChannel = this.freeChannels();
+      if (freeChannel > 0) {
+        nextChannel = freeChannel;
       }
 
       if (nextChannel === lowestNoteChannel) {
-        const freeChannel = this.freeChannels();
-        if (!freeChannel) {
-          return nextChannel;
-        }
+        nextChannel = lowestNoteChannel + 1;
+      }
 
-        nextChannel = freeChannel;
+      if (nextChannel > this.maxPolyphonicChannels) {
+        nextChannel = 1;
       }
 
       this.polyphonyChannel = nextChannel;
