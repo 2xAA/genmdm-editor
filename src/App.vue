@@ -348,7 +348,8 @@ export default {
       }
 
       const {
-        note: { number, name, octave }
+        note: { number, name, octave },
+        velocity
       } = e;
       const note = `${name}${octave}`;
 
@@ -361,7 +362,7 @@ export default {
       this.notesOn[number] = channel;
 
       this.outputPort.playNote(note, channel, {
-        velocity: 1
+        velocity
       });
     },
 
@@ -399,7 +400,7 @@ export default {
         channels[channel] = false;
       });
 
-      return Object.keys(channels.filter(channel => channel));
+      return channels.findIndex(channel => channel);
     },
 
     nextPolyphonyChannel(newNoteNumber) {
@@ -418,7 +419,7 @@ export default {
       }
 
       if (nextChannel === lowestNoteChannel) {
-        const freeChannel = this.freeChannels()[0];
+        const freeChannel = this.freeChannels();
         if (!freeChannel) {
           return nextChannel;
         }
