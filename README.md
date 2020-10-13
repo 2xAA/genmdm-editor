@@ -21,6 +21,8 @@ This includes Google Chrome, Opera, Brave and Microsoft Edge.
 1. Navigate to [https://2xaa.github.io/genmdm-editor/](https://2xaa.github.io/genmdm-editor/).
 2. Select the genMDM or MIDI device connected to genMDM in the MIDI Output select input.
 
+Check out the overview video on how to use the editor: [https://youtu.be/btzQHaF8cU4](https://youtu.be/btzQHaF8cU4)
+
 Docs to follow.
 
 ## Project development setup
