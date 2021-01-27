@@ -393,6 +393,13 @@ export default {
       }
     },
 
+    handleCC(e) {
+      console.log(e.value);
+      if (!this.outputPort) {
+        return;
+      }
+    },
+
     freeChannels() {
       const channels = [false, true, true, true, true, true];
 
@@ -451,6 +458,8 @@ export default {
 
       // Listen to pitch bend message on channel 3
       input.addListener("pitchbend", "all", this.handlePitchBend);
+
+      input.addListener("controlchange", "all", this.handleCC);
     }
   }
 };
