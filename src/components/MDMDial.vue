@@ -156,14 +156,15 @@ export default {
     },
 
     mouseMove(e) {
+      console.log(this.cc + this.ccOffset);
+
       const newValue = -e.movementY + this.movementValue;
       const clampedNewValue = Math.max(0, Math.min(127, newValue));
 
       this.movementValue = clampedNewValue;
       this.downY = e.pageY;
-
       this.$store.dispatch("setCCValues", {
-        [this.cc + this.ccOffset]: this.inverse
+        [e.cc]: this.inverse
           ? 127 - clampedNewValue
           : clampedNewValue
       });
