@@ -353,7 +353,9 @@ export default {
       } = e;
       const note = `${name}${octave}`;
 
-      let channel = this.channel;
+
+    //let channel = this.channel;
+    let channel = e.channel;
 
       if (this.polyphonic) {
         channel = this.nextPolyphonyChannel(number);

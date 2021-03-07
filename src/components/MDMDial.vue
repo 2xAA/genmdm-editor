@@ -156,7 +156,7 @@ export default {
     },
 
     mouseMove(e) {
-      console.log(this.cc + this.ccOffset);
+      //console.log(this.cc + this.ccOffset);
 
       const newValue = -e.movementY + this.movementValue;
       const clampedNewValue = Math.max(0, Math.min(127, newValue));
@@ -164,7 +164,7 @@ export default {
       this.movementValue = clampedNewValue;
       this.downY = e.pageY;
       this.$store.dispatch("setCCValues", {
-        [e.cc]: this.inverse
+        [this.cc + this.ccOffset]: this.inverse
           ? 127 - clampedNewValue
           : clampedNewValue
       });
