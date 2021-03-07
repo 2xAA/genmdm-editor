@@ -55,9 +55,9 @@ export default {
 
     this.storeUnsubscribe = this.$store.subscribe(mutation => {
       if (mutation.type === "SET_CC_VALUE") {
-        const { cc, value } = mutation.payload;
+        const { cc, value, channel } = mutation.payload;
 
-        if (cc === this.cc + this.ccOffset && !this.mouseButtonDown) {
+        if (cc === this.cc + this.ccOffset && !this.mouseButtonDown && channel === this.$store.state.channel) {
           this.movementValue = this.inverse ? -value + 127 : value;
           this.draw();
         }

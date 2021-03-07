@@ -397,11 +397,19 @@ export default {
 
     handleCC(e) {
       // console.log("Received 'controlchange' message.", e);
-      this.$store.dispatch("setCCValues", {
+      // this.$store.dispatch("setCCValues", {
+      //   [e.controller.number]: this.inverse
+      //     ? 127 - e.value
+      //     : e.value
+      // });
+
+      this.$store.dispatch("setCCValuesOnChannel", {
         [e.controller.number]: this.inverse
           ? 127 - e.value
-          : e.value
+          : e.value,
+        channel: e.channel
       });
+
       if (!this.outputPort) {
         return;
       }
