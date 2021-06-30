@@ -353,7 +353,7 @@ export default {
       } = e;
       const note = `${name}${octave}`;
 
-
+    //add ability to play several channel simultaneously
     //let channel = this.channel;
     let channel = e.channel;
 
@@ -375,8 +375,15 @@ export default {
 
       const { name, octave, number } = e.note;
       const note = `${name}${octave}`;
-
-      this.outputPort.stopNote(note, this.notesOn[number]);
+      let channel;
+      if (this.polyphonic) {
+        channel = this.notesOn[number];
+      } else {
+        channel = e.channel;
+      }
+      //add ability to play several channel simultaneously
+      //this.outputPort.stopNote(note, this.notesOn[number]);
+      this.outputPort.stopNote(note, channel);
 
       delete this.notesOn[number];
     },
