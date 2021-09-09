@@ -401,6 +401,15 @@ export default {
   },
 
   methods: {
+    loadInstrument() {
+      const { data } = this.instrumentData[this.patchSlotIndex];
+      if (!data) {
+        return;
+      }
+
+      this.$store.dispatch("setCCValues", data);
+    },
+
     populateInputAndOutputPorts() {
       this.outputs = WebMidi.outputs;
       this.inputs = WebMidi.inputs;
