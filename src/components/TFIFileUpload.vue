@@ -35,6 +35,7 @@ export default {
       const parsed = parser.parseTfi(data);
       const ccValues = Object.fromEntries(parsed.toGenMDM());
 
+      ccValues[70] = 0;
       ccValues[71] = 0;
       ccValues[72] = 0;
       ccValues[73] = 0;
@@ -43,7 +44,10 @@ export default {
       ccValues[76] = 0;
       ccValues[77] = 127;
 
-      this.$store.dispatch("setCCValues", ccValues);
+      this.$store.dispatch("setCCValues", {
+        values: ccValues,
+        ignoreSameValues: false
+      });
     }
   }
 };

@@ -174,7 +174,10 @@ export default {
         genmdmMapping[77].range - 1
       );
 
-      this.$store.dispatch("setCCValues", parsed);
+      this.$store.dispatch("setCCValues", {
+        values: parsed,
+        ignoreSameValues: false
+      });
     }
   }
 };

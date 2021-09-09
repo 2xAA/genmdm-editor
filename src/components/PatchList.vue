@@ -9,7 +9,7 @@
         />
         <select ref="select" v-model="selectedInstrument">
           <option
-            v-for="({ name }, i) in instrumentData"
+            v-for="({ name }, i) in patches"
             :value="i"
             :key="`${i}+${name}`"
             >{{ `${i + 1}`.padStart(3, "0") }}: {{ name }}</option
@@ -40,13 +40,13 @@ export default {
   },
 
   computed: {
-    instrumentData() {
+    patches() {
       return this.$store.state.patches;
     },
 
     instrumentName: {
       get() {
-        return this.instrumentData[this.selectedInstrument].name;
+        return this.patches[this.selectedInstrument].name;
       },
 
       set(value) {

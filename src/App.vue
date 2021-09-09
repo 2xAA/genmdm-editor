@@ -371,6 +371,10 @@ export default {
       // expression using this.showAboutDialog makes Vue run the shuffle
       // function each time this.showAboutDialog updates :)
       return this.showAboutDialog && shuffle(this.friendsNames).join(", ");
+    },
+
+    patches() {
+      return this.$store.state.patches;
     }
   },
 
@@ -402,12 +406,15 @@ export default {
 
   methods: {
     loadInstrument() {
-      const { data } = this.instrumentData[this.patchSlotIndex];
+      const { data } = this.patches[this.patchSlotIndex];
       if (!data) {
         return;
       }
 
-      this.$store.dispatch("setCCValues", data);
+      this.$store.dispatch("setCCValues", {
+        values: data,
+        ignoreSameValues: false
+      });
     },
 
     populateInputAndOutputPorts() {
@@ -416,11 +423,15 @@ export default {
     },
 
     writeToSlot() {
+      const { name: existingName } = this.patches[this.patchSlotIndex];
+
+      const name = existingName || "instrument " + this.patchSlotIndex;
+
       this.$store.dispatch("writePatch", {
         index: this.patchSlotIndex,
         patch: {
           data: { ...this.$store.state[`channel${this.channel}`] },
-          name: "instrument " + this.patchSlotIndex
+          name
         }
       });
     },

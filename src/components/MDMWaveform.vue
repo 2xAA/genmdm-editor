@@ -54,7 +54,9 @@ export default {
 
       document.removeEventListener("mouseup", this.up);
       document.removeEventListener("mousemove", this.move);
-      this.$store.dispatch("setCCValues", this.ccValues);
+      this.$store.dispatch("setCCValues", {
+        values: this.ccValues
+      });
     },
 
     move(e) {

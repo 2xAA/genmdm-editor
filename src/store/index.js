@@ -36,7 +36,7 @@ const store = new Vuex.Store({
   state,
 
   actions: {
-    setCCValues({ commit, state }, values = {}) {
+    setCCValues({ commit, state }, { values, ignoreSameValues = true }) {
       Object.keys(values).forEach(key => {
         const cc = parseInt(key, 10);
 
@@ -52,7 +52,10 @@ const store = new Vuex.Store({
             commit("SET_CC_VALUE", { cc, value, channel: i });
           }
         } else {
-          if (state[`channel${state.channel}`][cc] === value) {
+          if (
+            ignoreSameValues &&
+            state[`channel${state.channel}`][cc] === value
+          ) {
             return;
           }
 
