@@ -1,5 +1,5 @@
 <template>
-  <label>
+  <label class="button">
     <input type="file" id="input" accept=".tfi" @change="fileAdded" />
   </label>
 </template>
@@ -55,22 +55,6 @@ input {
 }
 
 label::before {
-  appearance: button;
-  padding: 1px 6px;
-
   content: "Import TFI";
-  display: inline-block;
-  border: 1px solid var(--foreground-color);
-  color: var(--foreground-color);
-
-  outline: none;
-  white-space: nowrap;
-  -webkit-user-select: none;
-  font-size: 10pt;
-  text-transform: uppercase;
-
-  display: inline-block;
-  text-align: center;
-  width: -webkit-fill-available;
 }
 </style>

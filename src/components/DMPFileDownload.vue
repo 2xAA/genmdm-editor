@@ -1,5 +1,5 @@
 <template>
-  <button @click="generateDMP">Export DMP</button>
+  <button class="button" @click="generateDMP">Export DMP</button>
 </template>
 
 <script>

@@ -1,0 +1,23 @@
+.button {
+  appearance: button;
+  border: 1px solid var(--foreground-color);
+  box-sizing: border-box;
+  color: var(--foreground-color);
+  font-size: 10pt;
+  height: 30px;
+  margin-bottom: 10px;
+  outline: none;
+  padding: inherit;
+  text-align: center;
+  text-transform: uppercase;
+  width: -webkit-fill-available;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.button:before {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

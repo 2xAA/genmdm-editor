@@ -10,21 +10,11 @@
         >
       </select>
     </c>
-    <c>
-      <button @click="loadInstrument">Load slot</button>
-    </c>
-    <c><TFIFileDownload /></c>
   </grid>
 </template>
 
 <script>
-import TFIFileDownload from "./TFIFileDownload";
-
 export default {
-  components: {
-    TFIFileDownload
-  },
-
   data() {
     return {
       selectedInstrument: 0
@@ -45,6 +35,16 @@ export default {
       }
 
       this.$store.dispatch("setCCValues", data);
+    },
+
+    writeToSlot() {
+      this.$store.dispatch("writePatch", {
+        index: this.selectedInstrument,
+        patch: {
+          data: { ...this.$store.state[`channel${this.channel}`] },
+          name: "instrument " + this.selectedInstrument
+        }
+      });
     }
   },
 

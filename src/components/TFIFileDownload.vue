@@ -1,5 +1,5 @@
 <template>
-  <button @click="generateTFI">Export TFI</button>
+  <button class="button" @click="generateTFI">Export TFI</button>
 </template>
 
 <script>

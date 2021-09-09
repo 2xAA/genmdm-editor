@@ -1,5 +1,5 @@
 <template>
-  <button @click="generateGENM">Export GENM</button>
+  <button class="button" @click="generateGENM">Save GENM</button>
 </template>
 
 <script>
