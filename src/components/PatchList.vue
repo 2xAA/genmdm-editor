@@ -1,42 +1,64 @@
 <template>
   <grid columns="2">
     <c span="2">
-      <select v-model="selectedInstrument">
-        <option
-          v-for="({ name }, i) in instrumentData"
-          :value="i"
-          :key="`${i}+${name}`"
-          >{{ `${i + 1}`.padStart(3, "0") }}: {{ name }}</option
-        >
-      </select>
+      <label class="select" @mousedown="openSelect">
+        <input
+          class="instrument-name-input"
+          type="text"
+          v-model="instrumentName"
+        />
+        <select ref="select" v-model="selectedInstrument">
+          <option
+            v-for="({ name }, i) in instrumentData"
+            :value="i"
+            :key="`${i}+${name}`"
+            >{{ `${i + 1}`.padStart(3, "0") }}: {{ name }}</option
+          >
+        </select>
+        <DropdownArrow />
+        <div class="blocker"></div>
+      </label>
     </c>
   </grid>
 </template>
 
 <script>
+import DropdownArrow from "../assets/graphics/select-dropdown.svg";
+
 export default {
+  components: {
+    DropdownArrow
+  },
+
   data() {
     return {
-      selectedInstrument: 0
+      selectedInstrument: 0,
+      selectStyles: {
+        pointerEvents: "none"
+      }
     };
   },
 
   computed: {
     instrumentData() {
       return this.$store.state.patches;
+    },
+
+    instrumentName: {
+      get() {
+        return this.instrumentData[this.selectedInstrument].name;
+      },
+
+      set(value) {
+        this.$store.dispatch("setPatchName", {
+          index: this.selectedInstrument,
+          name: value
+        });
+      }
     }
   },
 
   methods: {
-    loadInstrument() {
-      const { data } = this.instrumentData[this.selectedInstrument];
-      if (!data) {
-        return;
-      }
-
-      this.$store.dispatch("setCCValues", data);
-    },
-
     writeToSlot() {
       this.$store.dispatch("writePatch", {
         index: this.selectedInstrument,
@@ -45,6 +67,17 @@ export default {
           name: "instrument " + this.selectedInstrument
         }
       });
+    },
+
+    openSelect() {
+      this.selectStyles.pointerEvents = "auto";
+      this.$nextTick(() => {
+        this.$refs.select.click();
+      });
+    },
+
+    closeSelect() {
+      this.selectStyles.pointerEvents = "none";
     }
   },
 
@@ -56,4 +89,20 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+input[type="text"].instrument-name-input {
+  background-color: var(--background-color);
+  position: absolute;
+  height: 28px;
+  left: 28px;
+  top: 1px;
+  width: 99px;
+  border: none;
+}
+
+.blocker {
+  position: absolute;
+  height: 30px;
+  width: 28px;
+}
+</style>

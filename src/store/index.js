@@ -81,6 +81,10 @@ const store = new Vuex.Store({
       }
     },
 
+    setPatchName({ commit }, { index, name }) {
+      commit("SET_PATCH_NAME", { index, name });
+    },
+
     writePatch({ commit }, { index, patch }) {
       if (index > 127) {
         throw new Error("Slot index is > 127. 128 slots available only.");
@@ -109,6 +113,10 @@ const store = new Vuex.Store({
 
     CLEAR_PATCHES(state) {
       state.patches = createBlankPatchesArray();
+    },
+
+    SET_PATCH_NAME(state, { index, name }) {
+      state.patches[index].name = name;
     },
 
     WRITE_TO_SLOT(state, { index, patch }) {

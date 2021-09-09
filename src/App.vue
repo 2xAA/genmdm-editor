@@ -598,7 +598,8 @@ body {
 
 #app,
 button,
-input {
+input,
+label.select select {
   font-family: "Kokoro";
   letter-spacing: -1.4px;
 
