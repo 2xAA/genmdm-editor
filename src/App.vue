@@ -694,7 +694,12 @@ h2 {
 }
 
 .about-dialog-text {
+  color: var(--foreground-color);
   grid-gap: 25px;
+}
+
+.about-dialog-text a {
+  color: var(--foreground-color);
 }
 
 .patch-management-buttons {

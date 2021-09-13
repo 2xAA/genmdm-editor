@@ -2,7 +2,7 @@
   <dialog ref="dialog">
     <header>
       <button @click="close" class="close" aria-label="Close Dialog">
-        <CloseIcon width="14" height="15" />
+        <CloseIcon class="close-icon" width="14" height="15" />
       </button>
     </header>
 
@@ -90,5 +90,9 @@ button.close {
 div.body {
   min-height: 72px;
   padding: 8px;
+}
+
+.close-icon path {
+  fill: var(--foreground-color);
 }
 </style>
