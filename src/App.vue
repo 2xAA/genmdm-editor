@@ -125,7 +125,7 @@
       </c>
       <c span="2">
         <div class="editor-title">
-          <h1>genMDM Editor</h1>
+          <h1 @click="openAboutDialog">genMDM Editor</h1>
           <span class="subtitle">version {{ version }}</span>
         </div>
 
@@ -187,6 +187,51 @@
         <DACSettings />
       </c>
     </grid>
+
+    <Dialog :show="showAboutDialog" @close="closeAboutDialog">
+      <grid columns="3" class="about-dialog-text">
+        <c span="3">
+          <h1>genMDM Editor</h1>
+          <span class="subtitle">version {{ version }} by 2xAA</span>
+        </c>
+        <c>
+          This editor's design was inspired by the scan of the Japanese
+          technical documentation of the YM2608, which is said to be the closest
+          documentation to the Sega Mega Drive's YM2612 as they share the same
+          FM package.<br /><br />I created this editor to further the genMDM's
+          usability and to understand the Sega MD's capabilities. I hope you
+          find this useful.
+        </c>
+        <c>
+          Special thanks to catskull and littlescale for the genMDM itself.<br /><br />
+          Greetz to: {{ friends }} and all chippers and genMDM users around the
+          world.<br /><br />ALWAYS BACK UP YOUR SAVES.
+        </c>
+        <c>
+          Found a bug or would like to suggest an improvement?
+          <a
+            href="https://github.com/2xAA/genmdm-editor/issues/new/choose"
+            nofollow
+            noreferrer
+            target="_blank"
+            >Create an issue on GitHub</a
+          >.<br /><br />Like this software?<br /><br />Consider supporting the
+          development of this and other projects by donating or buying/streaming
+          my music on the links below:<br /><br />
+          <a
+            href="https://github.com/sponsors/2xAA"
+            nofollow
+            noreferrer
+            target="_blank"
+            >github.com/sponsors/2xAA</a
+          >
+          <br />
+          <a href="https://2xaa.fm/" nofollow noreferrer target="_blank"
+            >2xaa.fm</a
+          >
+        </c>
+      </grid>
+    </Dialog>
   </div>
 </template>
 
@@ -194,6 +239,7 @@
 import WebMidi from "webmidi";
 
 import pkg from "../package.json";
+import shuffle from "./utils/shuffle";
 import MDMControlGroup from "./components/MDMControlGroup";
 import DraggableSelect from "./components/DraggableSelect";
 import LabelledCheckbox from "./components/LabelledCheckbox";
@@ -209,6 +255,7 @@ import PatchList from "./components/PatchList";
 import GENMFileDownload from "./components/GENMFileDownload";
 import DMPFileUpload from "./components/DMPFileUpload";
 import DMPFileDownload from "./components/DMPFileDownload";
+import Dialog from "./components/Dialog";
 
 export default {
   name: "App",
@@ -228,7 +275,8 @@ export default {
     PatchList,
     GENMFileDownload,
     DMPFileUpload,
-    DMPFileDownload
+    DMPFileDownload,
+    Dialog
   },
 
   data() {
@@ -247,7 +295,25 @@ export default {
       ramSlot: 1,
 
       patchSlotValues: [...new Array(128).keys()].map((x, i) => i + 1),
-      patchSlotIndex: 0
+      patchSlotIndex: 0,
+
+      showAboutDialog: false,
+      friendsNames: [
+        "Mum",
+        "James",
+        "Emmoi",
+        "NERDDISCO",
+        "Lazer Sausage",
+        "cTrix",
+        "Infotoxin",
+        "Henry Homesweet",
+        "Leon",
+        "Jamatar",
+        "gwEm",
+        "Cyanide Dansen",
+        "Polyop",
+        "jonic"
+      ]
     };
   },
 
@@ -284,6 +350,12 @@ export default {
       set(value) {
         this.$store.dispatch("setMaxPolyphonicChannels", value);
       }
+    },
+
+    friends() {
+      // expression using this.showAboutDialog makes Vue run the shuffle
+      // function each time this.showAboutDialog updates :)
+      return this.showAboutDialog && shuffle(this.friendsNames).join(", ");
     }
   },
 
@@ -458,6 +530,14 @@ export default {
 
       this.polyphonyChannel = nextChannel;
       return nextChannel;
+    },
+
+    openAboutDialog() {
+      this.showAboutDialog = true;
+    },
+
+    closeAboutDialog() {
+      this.showAboutDialog = false;
     }
   },
 
@@ -601,9 +681,14 @@ h2 {
 
 .editor-title h1 {
   margin-top: 0;
+  cursor: pointer;
 }
 
 .main-column {
   padding-right: 2em;
+}
+
+.about-dialog-text {
+  grid-gap: 25px;
 }
 </style>
