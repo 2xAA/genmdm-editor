@@ -228,20 +228,27 @@
             noreferrer
             target="_blank"
             >Create an issue on GitHub</a
-          >.<br /><br />Like this software?<br /><br />Consider supporting the
-          development of this and other projects by donating or buying/streaming
-          my music on the links below:<br /><br />
+          >.<br /><br />Need some help?<br /><br />Check out
+          <a
+            href="https://github.com/2xAA/genmdm-editor/discussions"
+            nofollow
+            noreferrer
+            target="_blank"
+            >Discussions</a
+          >
+          for an answer to your question.<br /><br />Like this software?<br /><br />Consider
+          supporting the development of this and other projects by
           <a
             href="https://github.com/sponsors/2xAA"
             nofollow
             noreferrer
             target="_blank"
-            >github.com/sponsors/2xAA</a
+            >donating</a
           >
-          <br />
+          or
           <a href="https://2xaa.fm/" nofollow noreferrer target="_blank"
-            >2xaa.fm</a
-          >
+            >buying/streaming my music</a
+          >.
         </c>
       </grid>
     </Dialog>
