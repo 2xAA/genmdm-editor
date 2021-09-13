@@ -87,7 +87,7 @@ export default {
 
   computed: {
     q() {
-      return 1 / this.quantise;
+      return 1 / (this.quantise - 1);
     },
 
     internalValue() {
@@ -217,7 +217,7 @@ export default {
           for (let i = 0; i < quantise; ++i) {
             context.save();
             context.translate(cw / 2, ch / 2);
-            context.rotate((i / quantise) * 270 * (Math.PI / 180));
+            context.rotate((i / (quantise - 1)) * 270 * (Math.PI / 180));
             context.translate(-cw / 2, -ch / 2);
 
             context.beginPath();
