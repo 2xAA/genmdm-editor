@@ -36,7 +36,7 @@ const store = new Vuex.Store({
   state,
 
   actions: {
-    setCCValues({ commit, state }, values = {}) {
+    setCCValues({ commit, state }, { values, ignoreSameValues = true }) {
       Object.keys(values).forEach(key => {
         const cc = parseInt(key, 10);
 
@@ -52,7 +52,10 @@ const store = new Vuex.Store({
             commit("SET_CC_VALUE", { cc, value, channel: i });
           }
         } else {
-          if (state[`channel${state.channel}`][cc] === value) {
+          if (
+            ignoreSameValues &&
+            state[`channel${state.channel}`][cc] === value
+          ) {
             return;
           }
 
@@ -79,6 +82,10 @@ const store = new Vuex.Store({
       for (let i = 0; i < patches.length; i += 1) {
         await dispatch("writePatch", { index: i, patch: patches[i] });
       }
+    },
+
+    setPatchName({ commit }, { index, name }) {
+      commit("SET_PATCH_NAME", { index, name });
     },
 
     writePatch({ commit }, { index, patch }) {
@@ -109,6 +116,10 @@ const store = new Vuex.Store({
 
     CLEAR_PATCHES(state) {
       state.patches = createBlankPatchesArray();
+    },
+
+    SET_PATCH_NAME(state, { index, name }) {
+      state.patches[index].name = name;
     },
 
     WRITE_TO_SLOT(state, { index, patch }) {

@@ -73,7 +73,9 @@ export default {
           values[this.cc] = value;
         }
 
-        this.$store.dispatch("setCCValues", values);
+        this.$store.dispatch("setCCValues", {
+          values
+        });
       }
     },
 

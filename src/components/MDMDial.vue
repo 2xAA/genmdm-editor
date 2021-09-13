@@ -163,9 +163,11 @@ export default {
       this.downY = e.pageY;
 
       this.$store.dispatch("setCCValues", {
-        [this.cc + this.ccOffset]: this.inverse
-          ? 127 - clampedNewValue
-          : clampedNewValue
+        values: {
+          [this.cc + this.ccOffset]: this.inverse
+            ? 127 - clampedNewValue
+            : clampedNewValue
+        }
       });
     },
 

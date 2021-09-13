@@ -5,6 +5,7 @@ import store from "./store";
 
 import "./assets/css/raster.css";
 import "tippy.js/themes/light.css";
+import "./assets/css/genmdm.css";
 import { getColors } from "./utils/get-colors";
 
 Vue.config.productionTip = false;
