@@ -3,7 +3,11 @@
 </template>
 
 <script>
+import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
+
 export default {
+  mixins: [redrawOnColorschemeChange],
+
   props: {
     size: {
       type: Number,

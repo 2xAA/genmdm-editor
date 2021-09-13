@@ -13,7 +13,11 @@
 
 <script>
 import genmdmMapping from "../genmdm-mapping";
+import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
+
 export default {
+  mixins: [redrawOnColorschemeChange],
+
   props: {
     cc: {
       type: Number,
