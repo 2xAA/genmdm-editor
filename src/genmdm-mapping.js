@@ -243,7 +243,7 @@ Note that the following parameters are affected by recalling one of the above pr
   81: {
     label: "Pitch Bend Range",
     range: 10,
-    default: 0,
+    default: 3,
     description: `10 values of the range of 0 to 127. This parameter sets the bend amount in semitones, from 0
  semitones to 10 semitones.`
   },
