@@ -94,7 +94,7 @@
                 <h2>Patch Management</h2>
               </c>
               <c>
-                <PatchList @input="val => (patchSlotIndex = val)" />
+                <PatchList />
                 <grid columns="2" class="patch-management-buttons">
                   <c>
                     <button class="button" @click="loadInstrument">
@@ -316,9 +316,6 @@ export default {
 
       ramSlot: 1,
 
-      patchSlotValues: [...new Array(128).keys()].map((x, i) => i + 1),
-      patchSlotIndex: 0,
-
       showAboutDialog: false,
       friendsNames: [
         "Mum",
@@ -382,6 +379,10 @@ export default {
 
     patches() {
       return this.$store.state.patches;
+    },
+
+    instrumentIndex() {
+      return this.$store.state.instrumentIndex;
     }
   },
 
@@ -413,7 +414,7 @@ export default {
 
   methods: {
     loadInstrument() {
-      const { data } = this.patches[this.patchSlotIndex];
+      const { data } = this.patches[this.instrumentIndex];
       if (!data) {
         return;
       }
@@ -430,12 +431,12 @@ export default {
     },
 
     writeToSlot() {
-      const { name: existingName } = this.patches[this.patchSlotIndex];
+      const { name: existingName } = this.patches[this.instrumentIndex];
 
-      const name = existingName || "instrument " + this.patchSlotIndex;
+      const name = existingName || "instrument " + this.instrumentIndex;
 
       this.$store.dispatch("writePatch", {
-        index: this.patchSlotIndex,
+        index: this.instrumentIndex,
         patch: {
           data: { ...this.$store.state[`channel${this.channel}`] },
           name
@@ -535,6 +536,16 @@ export default {
         return;
       }
     },
+    
+    async handleProgramChange(e) {
+      if (!this.outputPort) {
+        return;
+      }
+
+      const { value } = e;
+      await this.$store.dispatch("setInstrumentIndex", value);
+      this.loadInstrument();
+    },
 
     freeChannels() {
       const channels = [false, true, true, true, true, true];
@@ -600,10 +611,13 @@ export default {
       // Listen for a 'note off' message on all channels
       input.addListener("noteoff", "all", this.handleNoteOff);
 
-      // Listen to pitch bend message on channel 3
+      // Listen for a pitch bend message on all channels
       input.addListener("pitchbend", "all", this.handlePitchBend);
 
       input.addListener("controlchange", "all", this.handleCC);
+
+      // Listen for a program change message on all channels
+      input.addListener("programchange", "all", this.handleProgramChange);
     }
   }
 };
