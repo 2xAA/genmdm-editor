@@ -1,0 +1,75 @@
+.button {
+  appearance: button;
+  border: 1px solid var(--foreground-color);
+  box-sizing: border-box;
+  color: var(--foreground-color);
+  font-size: 10pt;
+  height: 30px;
+  outline: none;
+  padding: inherit;
+  text-align: center;
+  text-transform: uppercase;
+  width: -webkit-fill-available;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.button:before {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+input[type=text] {
+  background-color: transparent;
+  border: 1px solid var(--foreground-color);
+  box-sizing: border-box;
+  color: var(--foreground-color);
+  font-size: 10pt;
+  height: 30px;
+  width: -webkit-fill-available;
+}
+
+label.select select {
+  -webkit-appearance: none;
+  background-color: transparent;
+  border: 1px solid var(--foreground-color);
+  box-sizing: border-box;
+  color: var(--foreground-color);
+  font-size: 10pt;
+  height: 30px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+label.select {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  display: flex;
+}
+
+label.select::before {
+  content: "";
+  height: 28px;
+  width: 51px;
+  top: 1px;
+  right: 1px;
+  border-left: 1px solid var(--foreground-color);
+  position: absolute;
+  background-color: var(--background-color);
+  pointer-events: none;
+}
+
+label.select svg {
+  pointer-events: none;
+  top: 6px;
+  right: 17px;
+  position: absolute;
+}
+
+label.select svg path {
+  stroke: var(--foreground-color);
+}

@@ -54,6 +54,7 @@
                 <grid columns="2">
                   <c>
                     <button
+                      class="button"
                       @click="
                         sendCC({
                           cc: 9,
@@ -67,6 +68,7 @@
                   </c>
                   <c>
                     <button
+                      class="button"
                       @click="
                         sendCC({
                           cc: 6,
@@ -93,11 +95,22 @@
               </c>
               <c>
                 <PatchList @input="val => (patchSlotIndex = val)" />
-                <grid columns="2">
-                  <c><button @click="writeToSlot">Write slot</button></c>
-                  <c><TFIFileUpload /></c>
+                <grid columns="2" class="patch-management-buttons">
+                  <c>
+                    <button class="button" @click="loadInstrument">
+                      Load slot
+                    </button>
+                  </c>
+                  <c
+                    ><button class="button" @click="writeToSlot">
+                      Write slot
+                    </button></c
+                  >
                   <c><GENMFileUpload /></c>
                   <c><GENMFileDownload /></c>
+
+                  <c><TFIFileUpload /></c>
+                  <c><TFIFileDownload /></c>
                   <c><DMPFileUpload /></c>
                   <c><DMPFileDownload /></c>
                 </grid>
@@ -215,20 +228,27 @@
             noreferrer
             target="_blank"
             >Create an issue on GitHub</a
-          >.<br /><br />Like this software?<br /><br />Consider supporting the
-          development of this and other projects by donating or buying/streaming
-          my music on the links below:<br /><br />
+          >.<br /><br />Need some help?<br /><br />Check out
+          <a
+            href="https://github.com/2xAA/genmdm-editor/discussions"
+            nofollow
+            noreferrer
+            target="_blank"
+            >Discussions</a
+          >
+          for an answer to your question.<br /><br />Like this software?<br /><br />Consider
+          supporting the development of this and other projects by
           <a
             href="https://github.com/sponsors/2xAA"
             nofollow
             noreferrer
             target="_blank"
-            >github.com/sponsors/2xAA</a
+            >donating</a
           >
-          <br />
+          or
           <a href="https://2xaa.fm/" nofollow noreferrer target="_blank"
-            >2xaa.fm</a
-          >
+            >buying/streaming my music</a
+          >.
         </c>
       </grid>
     </Dialog>
@@ -244,6 +264,7 @@ import MDMControlGroup from "./components/MDMControlGroup";
 import DraggableSelect from "./components/DraggableSelect";
 import LabelledCheckbox from "./components/LabelledCheckbox";
 import MDMADSR from "./components/MDMADSR";
+import TFIFileDownload from "./components/TFIFileDownload";
 import TFIFileUpload from "./components/TFIFileUpload";
 import GENMFileUpload from "./components/GENMFileUpload";
 import DACSettings from "./components/DACSettings";
@@ -263,6 +284,7 @@ export default {
   components: {
     MDMControlGroup,
     MDMADSR,
+    TFIFileDownload,
     TFIFileUpload,
     GENMFileUpload,
     DACSettings,
@@ -356,6 +378,10 @@ export default {
       // expression using this.showAboutDialog makes Vue run the shuffle
       // function each time this.showAboutDialog updates :)
       return this.showAboutDialog && shuffle(this.friendsNames).join(", ");
+    },
+
+    patches() {
+      return this.$store.state.patches;
     }
   },
 
@@ -386,17 +412,33 @@ export default {
   },
 
   methods: {
+    loadInstrument() {
+      const { data } = this.patches[this.patchSlotIndex];
+      if (!data) {
+        return;
+      }
+
+      this.$store.dispatch("setCCValues", {
+        values: data,
+        ignoreSameValues: false
+      });
+    },
+
     populateInputAndOutputPorts() {
       this.outputs = WebMidi.outputs;
       this.inputs = WebMidi.inputs;
     },
 
     writeToSlot() {
+      const { name: existingName } = this.patches[this.patchSlotIndex];
+
+      const name = existingName || "instrument " + this.patchSlotIndex;
+
       this.$store.dispatch("writePatch", {
         index: this.patchSlotIndex,
         patch: {
           data: { ...this.$store.state[`channel${this.channel}`] },
-          name: "instrument " + this.patchSlotIndex
+          name
         }
       });
     },
@@ -605,9 +647,10 @@ body {
 
 #app,
 button,
-input {
+input,
+label.select select {
   font-family: "Kokoro";
-  letter-spacing: -1px;
+  letter-spacing: -1.4px;
 
   color: var(--foreground-color);
 }
@@ -689,6 +732,15 @@ h2 {
 }
 
 .about-dialog-text {
+  color: var(--foreground-color);
   grid-gap: 25px;
+}
+
+.about-dialog-text a {
+  color: var(--foreground-color);
+}
+
+.patch-management-buttons {
+  grid-template-columns: repeat(2, 50%);
 }
 </style>

@@ -36,7 +36,7 @@ const store = new Vuex.Store({
   state,
 
   actions: {
-    setCCValues({ commit, state }, values = {}) {
+    setCCValues({ commit, state }, { values, ignoreSameValues = true }) {
       Object.keys(values).forEach(key => {
         const cc = parseInt(key, 10);
 
@@ -52,7 +52,10 @@ const store = new Vuex.Store({
             commit("SET_CC_VALUE", { cc, value, channel: i });
           }
         } else {
-          if (state[`channel${state.channel}`][cc] === value) {
+          if (
+            ignoreSameValues &&
+            state[`channel${state.channel}`][cc] === value
+          ) {
             return;
           }
 
@@ -110,6 +113,10 @@ const store = new Vuex.Store({
       }
     },
 
+    setPatchName({ commit }, { index, name }) {
+      commit("SET_PATCH_NAME", { index, name });
+    },
+
     writePatch({ commit }, { index, patch }) {
       if (index > 127) {
         throw new Error("Slot index is > 127. 128 slots available only.");
@@ -138,6 +145,10 @@ const store = new Vuex.Store({
 
     CLEAR_PATCHES(state) {
       state.patches = createBlankPatchesArray();
+    },
+
+    SET_PATCH_NAME(state, { index, name }) {
+      state.patches[index].name = name;
     },
 
     WRITE_TO_SLOT(state, { index, patch }) {

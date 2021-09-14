@@ -64,10 +64,13 @@
 import MDMDial from "./MDMDial";
 import MDMControlGroup from "./MDMControlGroup";
 import genmdmMapping from "../genmdm-mapping";
+import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
 
 const ADSR_CC_NUMBERS = [43, 16, 47, 55, 51, 59];
 
 export default {
+  mixins: [redrawOnColorschemeChange],
+
   props: {
     color: { type: String, default: "#000000" },
     operator: { type: Number, required: true },

@@ -13,7 +13,11 @@
 
 <script>
 import genmdmMapping from "../genmdm-mapping";
+import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
+
 export default {
+  mixins: [redrawOnColorschemeChange],
+
   props: {
     cc: {
       type: Number,
@@ -83,7 +87,7 @@ export default {
 
   computed: {
     q() {
-      return 1 / this.quantise;
+      return 1 / (this.quantise - 1);
     },
 
     internalValue() {
@@ -164,9 +168,11 @@ export default {
       this.movementValue = clampedNewValue;
       this.downY = e.pageY;
       this.$store.dispatch("setCCValues", {
-        [this.cc + this.ccOffset]: this.inverse
-          ? 127 - clampedNewValue
-          : clampedNewValue
+        values: {
+          [this.cc + this.ccOffset]: this.inverse
+            ? 127 - clampedNewValue
+            : clampedNewValue
+        }
       });
     },
 
@@ -212,7 +218,7 @@ export default {
           for (let i = 0; i < quantise; ++i) {
             context.save();
             context.translate(cw / 2, ch / 2);
-            context.rotate((i / quantise) * 270 * (Math.PI / 180));
+            context.rotate((i / (quantise - 1)) * 270 * (Math.PI / 180));
             context.translate(-cw / 2, -ch / 2);
 
             context.beginPath();
