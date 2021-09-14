@@ -13,7 +13,8 @@ const state = {
 
   polyphonic: false,
   maxPolyphonicChannels: 6,
-  channel: 1
+  channel: 1,
+  instrumentIndex: 0
 };
 
 const mappedCCNumbers = Object.keys(genmdmMapping);
@@ -94,6 +95,10 @@ const store = new Vuex.Store({
       }
 
       commit("WRITE_TO_SLOT", { index, patch });
+    },
+
+    setInstrumentIndex({ commit }, index) {
+      commit("SET_INSTRUMENT_INDEX", index);
     }
   },
 
@@ -125,6 +130,10 @@ const store = new Vuex.Store({
     WRITE_TO_SLOT(state, { index, patch }) {
       state.patches[index].name = patch.name;
       state.patches[index].data = patch.data;
+    },
+
+    SET_INSTRUMENT_INDEX(state, index) {
+      state.instrumentIndex = index;
     }
   }
 });

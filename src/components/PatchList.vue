@@ -7,7 +7,7 @@
           type="text"
           v-model="instrumentName"
         />
-        <select ref="select" v-model="selectedInstrument">
+        <select ref="select" v-model="instrumentIndex">
           <option
             v-for="({ name }, i) in patches"
             :value="i"
@@ -32,7 +32,6 @@ export default {
 
   data() {
     return {
-      selectedInstrument: 0,
       selectStyles: {
         pointerEvents: "none"
       }
@@ -46,14 +45,24 @@ export default {
 
     instrumentName: {
       get() {
-        return this.patches[this.selectedInstrument].name;
+        return this.patches[this.instrumentIndex].name;
       },
 
       set(value) {
         this.$store.dispatch("setPatchName", {
-          index: this.selectedInstrument,
+          index: this.instrumentIndex,
           name: value
         });
+      }
+    },
+
+    instrumentIndex: {
+      get() {
+        return this.$store.state.instrumentIndex;
+      },
+
+      set(value) {
+        this.$store.dispatch("setInstrumentIndex", value);
       }
     }
   },
@@ -61,10 +70,10 @@ export default {
   methods: {
     writeToSlot() {
       this.$store.dispatch("writePatch", {
-        index: this.selectedInstrument,
+        index: this.instrumentIndex,
         patch: {
           data: { ...this.$store.state[`channel${this.channel}`] },
-          name: "instrument " + this.selectedInstrument
+          name: "instrument " + this.instrumentIndex
         }
       });
     },
@@ -78,12 +87,6 @@ export default {
 
     closeSelect() {
       this.selectStyles.pointerEvents = "none";
-    }
-  },
-
-  watch: {
-    selectedInstrument(value) {
-      this.$emit("input", value);
     }
   }
 };
