@@ -65,7 +65,6 @@ const store = new Vuex.Store({
       });
     },
 
-  //since actions doesn't take more than one argument i add channel to the end of an array (stupid, but it works)
     setCCValuesOnChannel({ commit, state }, values = {}) {
       Object.keys(values).forEach(key => {
         if (parseInt(key, 10) === NaN) {
