@@ -65,6 +65,34 @@ const store = new Vuex.Store({
       });
     },
 
+    setCCValuesOnChannel({ commit, state }, values = {}) {
+      Object.keys(values).forEach(key => {
+        if (parseInt(key, 10) === NaN) {
+          return;
+        }
+        const cc = parseInt(key, 10);
+
+        const value = values[cc];
+        const isGlobal = GLOBAL_CC.indexOf(cc) > -1;
+
+        if (state.polyphonic || isGlobal) {
+          for (let i = 1; i < 7; ++i) {
+            if (state[`channel${i}`][cc] === value) {
+              continue;
+            }
+
+            commit("SET_CC_VALUE", { cc, value, channel: i });
+          }
+        } else {
+          if (state[`channel${values.channel}`][cc] === value) {
+            return;
+          }
+
+          commit("SET_CC_VALUE", { cc, value, channel: values.channel });
+        }
+      });
+    },
+
     setChannel({ commit }, channel) {
       commit("SET_CHANNEL", channel);
     },
