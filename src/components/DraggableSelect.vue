@@ -122,7 +122,6 @@ export default {
       );
 
       this.internalValue = clampedNewIndex;
-
       this.$emit(
         "input",
         this.emitArrayValue ? values[clampedNewIndex] : clampedNewMIDIValue

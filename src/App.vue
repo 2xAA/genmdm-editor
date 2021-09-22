@@ -468,7 +468,7 @@ export default {
       } = e;
       const note = `${name}${octave}`;
 
-      let channel = this.channel;
+    let channel = e.channel;
 
       if (this.polyphonic) {
         channel = this.nextPolyphonyChannel(number);
@@ -488,8 +488,14 @@ export default {
 
       const { name, octave, number } = e.note;
       const note = `${name}${octave}`;
+      let channel;
+      if (this.polyphonic) {
+        channel = this.notesOn[number];
+      } else {
+        channel = e.channel;
+      }
 
-      this.outputPort.stopNote(note, this.notesOn[number]);
+      this.outputPort.stopNote(note, channel);
 
       delete this.notesOn[number];
     },
@@ -505,6 +511,19 @@ export default {
         }
       } else {
         this.outputPort.sendPitchBend(e.value, this.channel);
+      }
+    },
+
+    handleCC(e) {
+      this.$store.dispatch("setCCValuesOnChannel", {
+        [e.controller.number]: this.inverse
+          ? 127 - e.value
+          : e.value,
+        channel: e.channel
+      });
+
+      if (!this.outputPort) {
+        return;
       }
     },
 
@@ -584,6 +603,8 @@ export default {
 
       // Listen for a pitch bend message on all channels
       input.addListener("pitchbend", "all", this.handlePitchBend);
+
+      input.addListener("controlchange", "all", this.handleCC);
 
       // Listen for a program change message on all channels
       input.addListener("programchange", "all", this.handleProgramChange);
