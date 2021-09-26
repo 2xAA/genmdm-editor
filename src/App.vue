@@ -468,9 +468,9 @@ export default {
       } = e;
       const note = `${name}${octave}`;
 
-    let channel = e.channel;
+      let channel = e.channel;
 
-      if (this.polyphonic) {
+      if (this.polyphonic && channel < this.maxPolyphonicChannels) {
         channel = this.nextPolyphonyChannel(number);
       }
 
@@ -516,9 +516,7 @@ export default {
 
     handleCC(e) {
       this.$store.dispatch("setCCValuesOnChannel", {
-        [e.controller.number]: this.inverse
-          ? 127 - e.value
-          : e.value,
+        [e.controller.number]: this.inverse ? 127 - e.value : e.value,
         channel: e.channel
       });
 
