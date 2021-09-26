@@ -470,7 +470,7 @@ export default {
 
       let channel = e.channel;
 
-      if (this.polyphonic) {
+      if (this.polyphonic && channel < this.maxPolyphonicChannels) {
         channel = this.nextPolyphonyChannel(number);
       }
 
