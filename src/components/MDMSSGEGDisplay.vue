@@ -39,7 +39,7 @@ export default {
     },
 
     index() {
-      return Math.round((this.ssgegValue / 127) * 9) - 2;
+      return [0, 32, 36, 40, 44, 48, 52, 56, 60].indexOf(this.ssgegValue) - 1;
     }
   }
 };

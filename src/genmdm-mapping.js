@@ -538,6 +538,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
   90: {
     label: "SSG-EG",
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
+    values: [0, 32, 36, 40, 44, 48, 52, 56, 60],
     range: 9,
     default: 0
   },
@@ -545,6 +546,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
   91: {
     label: "SSG-EG",
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
+    values: [0, 32, 36, 40, 44, 48, 52, 56, 60],
     range: 9,
     default: 0
   },
@@ -552,6 +554,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
   92: {
     label: "SSG-EG",
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
+    values: [0, 32, 36, 40, 44, 48, 52, 56, 60],
     range: 9,
     default: 0
   },
@@ -559,6 +562,7 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
   93: {
     label: "SSG-EG",
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
+    values: [0, 32, 36, 40, 44, 48, 52, 56, 60],
     range: 9,
     default: 0
   }
