@@ -331,7 +331,8 @@ export default {
         "gwEm",
         "Cyanide Dansen",
         "Polyop",
-        "jonic"
+        "jonic",
+        "Robert Hargreaves"
       ]
     };
   },
@@ -394,7 +395,7 @@ export default {
         WebMidi.addListener("connected", this.populateInputAndOutputPorts);
         WebMidi.addListener("disconnected", this.populateInputAndOutputPorts);
       }
-    });
+    }, true);
 
     this.storeUnsubscribe = this.$store.subscribe(mutation => {
       if (mutation.type === "SET_CC_VALUE") {
@@ -447,6 +448,16 @@ export default {
     sendCC({ cc, value, channel }) {
       if (!this.outputPort) {
         return;
+      }
+
+      // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
+      // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
+      if (cc > 15 && cc < 20) {
+        try {
+          this.outputPort.sendSysex([0x00, 0x22, 0x77, 0x07, 0x01], []);
+        } catch (e) {
+          console.error(e);
+        }
       }
 
       try {
@@ -606,6 +617,18 @@ export default {
 
       // Listen for a program change message on all channels
       input.addListener("programchange", "all", this.handleProgramChange);
+    },
+
+    channel(value, oldValue) {
+      if (oldValue !== value) {
+        // Show FM parameters for the channel when using SEGA Mega Drive MIDI Interface
+        // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/UI-Features
+        try {
+          this.outputPort.sendControlChange(83, 127, value);
+        } catch (e) {
+          console.error(e);
+        }
+      }
     }
   }
 };
