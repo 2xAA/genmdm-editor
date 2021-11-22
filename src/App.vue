@@ -191,6 +191,15 @@
                   v-model.number="maxPolyphonicChannels"
                 />
               </c>
+
+              <c span="6" class="control-group__label">MDMI Compatibility</c>
+              <c span="2" class="control-group__control">
+                <LabelledCheckbox
+                  :labels="['Off', 'On']"
+                  :emit-boolean="true"
+                  v-model="mmdiCompatibility"
+                />
+              </c>
             </template>
           </MDMControlGroup>
         </div>
@@ -312,6 +321,7 @@ export default {
 
       notesOn: {},
       polyphonyChannel: 1,
+      mmdiCompatibility: false,
       storeUnsubscribe: null,
 
       ramSlot: 1,
@@ -452,7 +462,7 @@ export default {
 
       // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
       // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
-      if (cc > 15 && cc < 20) {
+      if (this.mmdiCompatibility && cc > 15 && cc < 20) {
         try {
           this.outputPort.sendSysex([0x00, 0x22, 0x77, 0x07, 0x01], []);
         } catch (e) {
@@ -620,7 +630,7 @@ export default {
     },
 
     channel(value, oldValue) {
-      if (oldValue !== value) {
+      if (this.mmdiCompatibility && oldValue !== value) {
         // Show FM parameters for the channel when using SEGA Mega Drive MIDI Interface
         // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/UI-Features
         try {
