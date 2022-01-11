@@ -1,3 +1,5 @@
+const webpack = require("webpack");
+
 const publishingOptions = {
   provider: "github",
   releaseType: "prerelease",
@@ -19,6 +21,18 @@ module.exports = {
     },
 
     electronBuilder: {
+      nodeIntegration: true,
+
+      chainWebpackRendererProcess: config => {
+        config.plugin("define").use(
+          new webpack.DefinePlugin({
+            "process.env.ELECTRON_BUILD": true
+          })
+        );
+
+        config.node.set("fs", "empty");
+      },
+
       builderOptions: {
         // options placed here will be merged with default configuration and passed to electron-builder
         appId: "fm.2xaa.genmdmeditor",

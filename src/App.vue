@@ -231,32 +231,40 @@
         </c>
         <c>
           Found a bug or would like to suggest an improvement?
-          <a
+          <FlexibleLink
+            :native="isElectronBuild"
             href="https://github.com/2xAA/genmdm-editor/issues/new/choose"
             nofollow
             noreferrer
             target="_blank"
-            >Create an issue on GitHub</a
+            >Create an issue on GitHub</FlexibleLink
           >.<br /><br />Need some help?<br /><br />Check out
-          <a
+          <FlexibleLink
+            :native="isElectronBuild"
             href="https://github.com/2xAA/genmdm-editor/discussions"
             nofollow
             noreferrer
             target="_blank"
-            >Discussions</a
+            >Discussions</FlexibleLink
           >
           for an answer to your question.<br /><br />Like this software?<br /><br />Consider
           supporting the development of this and other projects by
-          <a
+          <FlexibleLink
+            :native="isElectronBuild"
             href="https://github.com/sponsors/2xAA"
             nofollow
             noreferrer
             target="_blank"
-            >donating</a
+            >donating</FlexibleLink
           >
           or
-          <a href="https://2xaa.fm/" nofollow noreferrer target="_blank"
-            >buying/streaming my music</a
+          <FlexibleLink
+            :native="isElectronBuild"
+            href="https://2xaa.fm/"
+            nofollow
+            noreferrer
+            target="_blank"
+            >buying/streaming my music</FlexibleLink
           >.
         </c>
       </grid>
@@ -266,6 +274,7 @@
 
 <script>
 import WebMidi from "webmidi";
+import FlexibleLink from "vue-flexible-link/src/FlexibleLink.vue";
 
 import pkg from "../package.json";
 import shuffle from "./utils/shuffle";
@@ -291,6 +300,7 @@ export default {
   name: "App",
 
   components: {
+    FlexibleLink,
     MDMControlGroup,
     MDMADSR,
     TFIFileDownload,
@@ -313,6 +323,8 @@ export default {
   data() {
     return {
       version: pkg.version,
+      isElectronBuild: !!process.env.ELECTRON_BUILD,
+
       inputs: [],
       outputs: [],
 
@@ -773,6 +785,8 @@ h2 {
 
 .about-dialog-text a {
   color: var(--foreground-color);
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .patch-management-buttons {
