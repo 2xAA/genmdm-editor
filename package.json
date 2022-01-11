@@ -18,6 +18,7 @@
   "dependencies": {
     "genmdm-parser": "1.0.1",
     "vue": "^2.6.11",
+    "vue-flexible-link": "^1.0.2",
     "vue-svg-loader": "^0.12.0",
     "vue-tippy": "4.4.0",
     "vuex": "3.1.3",
