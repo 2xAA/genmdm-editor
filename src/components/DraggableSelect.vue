@@ -2,8 +2,12 @@
   <div
     class="draggable-select ns-resize-cursor"
     ref="draggableSelectBody"
-    @mousedown="requestPointerLock"
-    @mouseup="exitPointerLock"
+    @pointerdown="requestPointerLock"
+    @pointerup="exitPointerLock"
+    @touchstart.prevent
+    @touchmove.prevent
+    @touchend.prevent
+    @touchcancel.prevent
   >
     <template v-if="labels.length">
       {{ currentLabel }}
@@ -44,7 +48,8 @@ export default {
     return {
       internalValue: 0,
       lastCursor: "",
-      mouseButtonDown: false
+      mouseButtonDown: false,
+      lastPointerPosition: { x: 0, y: 0 }
     };
   },
 
@@ -66,7 +71,7 @@ export default {
   },
 
   methods: {
-    requestPointerLock() {
+    requestPointerLock(e) {
       const {
         $refs: { draggableSelectBody }
       } = this;
@@ -76,12 +81,24 @@ export default {
         this.lockChangeAlert,
         false
       );
-      draggableSelectBody.requestPointerLock();
+
+      if (draggableSelectBody.requestPointerLock) {
+        draggableSelectBody.requestPointerLock();
+      } else {
+        // Only used for browsers without the Pointer Lock API, such as the WebMIDI Browser for iOS
+        e.preventDefault();
+        document.addEventListener("pointermove", this.mouseMove, false);
+        document.addEventListener("pointerup", this.mouseUp);
+      }
+
       this.mouseButtonDown = true;
     },
 
     exitPointerLock() {
-      document.exitPointerLock();
+      if (document.exitPointerLock) {
+        document.exitPointerLock();
+      }
+
       document.removeEventListener(
         "pointerlockchange",
         this.lockChangeAlert,
@@ -96,24 +113,39 @@ export default {
       } = this;
 
       if (document.pointerLockElement === draggableSelectBody) {
-        document.addEventListener("mousemove", this.mouseMove, false);
-        document.addEventListener("mouseup", this.mouseUp);
+        document.addEventListener("pointermove", this.mouseMove, false);
+        document.addEventListener("pointerup", this.mouseUp);
       } else {
-        document.removeEventListener("mousemove", this.mouseMove, false);
+        document.removeEventListener("pointermove", this.mouseMove, false);
         this.mouseUp();
       }
     },
 
     mouseUp() {
-      document.removeEventListener("mousemove", this.mouseMove, false);
-      document.removeEventListener("mouseup", this.mouseUp);
+      document.removeEventListener("pointermove", this.mouseMove, false);
+      document.removeEventListener("pointerup", this.mouseUp);
       document.body.style.cursor =
         this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
     },
 
     mouseMove(e) {
+      // first touch
+      // I feel I've overengineered this somewhat
+      let firstTouch = false;
+      if (this.lastPointerPosition.x < 0) {
+        firstTouch = true;
+        this.lastPointerPosition.x = e.clientX;
+        this.lastPointerPosition.y = e.clientY;
+      }
+
+      const yDelta = e.movementY || -this.lastPointerPosition.y + e.clientY;
+
+      this.lastPointerPosition.x = e.clientX;
+      this.lastPointerPosition.y = e.clientY;
+
       const { internalValue, values } = this;
-      const newValue = -e.movementY + internalValue;
+      const newValue =
+        (firstTouch && yDelta !== 0 ? 0 : -yDelta) + internalValue;
       const clampedNewIndex = Math.floor(
         Math.max(0, Math.min(values.length - 1, newValue))
       );
