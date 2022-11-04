@@ -1,7 +1,7 @@
 <template>
   <grid columns="2">
     <c span="2">
-      <label class="select" @mousedown="openSelect">
+      <label class="select" @pointerdown="openSelect">
         <input
           class="instrument-name-input"
           type="text"

@@ -13,6 +13,12 @@ module.exports = {
     devtool: "source-map"
   },
 
+  chainWebpack: config => {
+    if (process.env.NODE_ENV === "development") {
+      config.plugins.delete("preload");
+    }
+  },
+
   pluginOptions: {
     svgLoader: {
       svgo: {

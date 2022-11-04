@@ -684,12 +684,16 @@ body {
   background-attachment: fixed;
   background-position: calc(50% - 100px) center;
   background-repeat: no-repeat;
+}
 
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-
-  margin: 0;
+/* big screens */
+@media only screen and (min-width: 1280px) {
+  body {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0;
+  }
 }
 
 #app,
