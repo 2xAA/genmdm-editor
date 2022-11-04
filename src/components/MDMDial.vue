@@ -4,8 +4,12 @@
       :title="title"
       ref="canvas"
       class="ns-resize-cursor"
-      @mousedown="requestPointerLock"
-      @mouseup="exitPointerLock"
+      @pointerdown="requestPointerLock"
+      @pointerup="exitPointerLock"
+      @touchstart.prevent
+      @touchmove.prevent
+      @touchend.prevent
+      @touchcancel.prevent
     ></canvas>
     {{ scaledValue }}
   </div>
@@ -50,7 +54,8 @@ export default {
       context: null,
       movementValue: 0,
       storeUnsubscribe: null,
-      mouseButtonDown: false
+      mouseButtonDown: false,
+      lastPointerPosition: { x: -1, y: -1 }
     };
   },
 
@@ -61,7 +66,11 @@ export default {
       if (mutation.type === "SET_CC_VALUE") {
         const { cc, value, channel } = mutation.payload;
 
-        if (cc === this.cc + this.ccOffset && !this.mouseButtonDown && channel === this.$store.state.channel) {
+        if (
+          cc === this.cc + this.ccOffset &&
+          !this.mouseButtonDown &&
+          channel === this.$store.state.channel
+        ) {
           this.movementValue = this.inverse ? -value + 127 : value;
           this.draw();
         }
@@ -79,8 +88,8 @@ export default {
   },
 
   beforeDestroy() {
-    document.removeEventListener("mouseup", this.mouseUp);
-    document.removeEventListener("mousemove", this.mouseMove);
+    document.removeEventListener("pointerup", this.mouseUp);
+    document.removeEventListener("pointermove", this.mouseMove);
     document.body.classList.remove("ns-resize-cursor");
     this.storeUnsubscribe();
   },
@@ -114,7 +123,7 @@ export default {
   },
 
   methods: {
-    requestPointerLock() {
+    requestPointerLock(e) {
       const {
         $refs: { canvas }
       } = this;
@@ -124,12 +133,24 @@ export default {
         this.lockChangeAlert,
         false
       );
-      canvas.requestPointerLock();
+
+      if (canvas.requestPointerLock) {
+        canvas.requestPointerLock();
+      } else {
+        // Only used for browsers without the Pointer Lock API, such as the WebMIDI Browser for iOS
+        e.preventDefault();
+        document.addEventListener("pointermove", this.mouseMove, false);
+        document.addEventListener("pointerup", this.mouseUp);
+      }
+
       this.mouseButtonDown = true;
     },
 
     exitPointerLock() {
-      document.exitPointerLock();
+      if (document.exitPointerLock) {
+        document.exitPointerLock();
+      }
+
       document.removeEventListener(
         "pointerlockchange",
         this.lockChangeAlert,
@@ -143,24 +164,40 @@ export default {
       } = this;
 
       if (document.pointerLockElement === canvas) {
-        document.addEventListener("mousemove", this.mouseMove, false);
-        document.addEventListener("mouseup", this.mouseUp);
+        document.addEventListener("pointermove", this.mouseMove, false);
+        document.addEventListener("pointerup", this.mouseUp);
       } else {
-        document.removeEventListener("mousemove", this.mouseMove, false);
+        document.removeEventListener("pointermove", this.mouseMove, false);
         this.mouseUp();
       }
     },
 
     mouseUp() {
-      document.removeEventListener("mousemove", this.mouseMove, false);
-      document.removeEventListener("mouseup", this.mouseUp);
+      document.removeEventListener("pointermove", this.mouseMove, false);
+      document.removeEventListener("pointerup", this.mouseUp);
       document.body.style.cursor =
         this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
       this.mouseButtonDown = false;
+      this.lastPointerPosition = { x: -1, y: -1 };
     },
 
     mouseMove(e) {
-      const newValue = -e.movementY + this.movementValue;
+      // first touch
+      // I feel I've overengineered this somewhat
+      let firstTouch = false;
+      if (this.lastPointerPosition.x < 0) {
+        firstTouch = true;
+        this.lastPointerPosition.x = e.clientX + this.movementValue;
+        this.lastPointerPosition.y = e.clientY + this.movementValue;
+      }
+
+      const yDelta = e.movementY || -this.lastPointerPosition.y + e.clientY;
+
+      this.lastPointerPosition.x = e.clientX;
+      this.lastPointerPosition.y = e.clientY;
+
+      const newValue =
+        (firstTouch && yDelta !== 0 ? 0 : -yDelta) + this.movementValue;
       const clampedNewValue = Math.max(0, Math.min(127, newValue));
 
       this.movementValue = clampedNewValue;
@@ -277,6 +314,7 @@ export default {
 <style scoped>
 canvas {
   user-select: none;
+  touch-action: none;
 }
 
 .dial {

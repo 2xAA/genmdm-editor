@@ -31,14 +31,14 @@ export default {
 
     this.resize();
 
-    canvas.addEventListener("mousedown", this.down);
+    canvas.addEventListener("pointerdown", this.down);
   },
 
   beforeDestroy() {
     const { canvas } = this.$refs;
-    canvas.removeEventListener("mousedown", this.down);
-    document.removeEventListener("mouseup", this.up);
-    document.removeEventListener("mousemove", this.move);
+    canvas.removeEventListener("pointerdown", this.down);
+    document.removeEventListener("pointerup", this.up);
+    document.removeEventListener("pointermove", this.move);
   },
 
   computed: {
@@ -49,15 +49,15 @@ export default {
 
   methods: {
     down() {
-      document.addEventListener("mouseup", this.up);
-      document.addEventListener("mousemove", this.move);
+      document.addEventListener("pointerup", this.up);
+      document.addEventListener("pointermove", this.move);
     },
 
     up(e) {
       this.updateValue(e);
 
-      document.removeEventListener("mouseup", this.up);
-      document.removeEventListener("mousemove", this.move);
+      document.removeEventListener("pointerup", this.up);
+      document.removeEventListener("pointermove", this.move);
       this.$store.dispatch("setCCValues", {
         values: this.ccValues
       });
@@ -93,15 +93,18 @@ export default {
           canvas: { width: cw, height: ch }
         }
       } = this;
+
+      const dpr = window.devicePixelRatio;
+
       context.clearRect(0, 0, cw, ch);
       context.strokeStyle = this.$colors.foreground;
       context.strokeRect(0, 0, cw, ch);
 
       for (let i = 0; i < this.values.length; ++i) {
         context.strokeRect(
-          Math.floor(this.segmentWidth * i) + 0.5,
+          Math.floor(this.segmentWidth * dpr * i) + 0.5,
           ch,
-          Math.floor(this.segmentWidth),
+          Math.floor(this.segmentWidth * dpr),
           Math.floor(-this.values[i] * ch) + 0.5
         );
       }
@@ -138,5 +141,6 @@ export default {
 <style scoped>
 canvas {
   margin-top: 8px;
+  touch-action: none;
 }
 </style>

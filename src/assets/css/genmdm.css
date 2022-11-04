@@ -12,6 +12,8 @@
   width: -webkit-fill-available;
   white-space: nowrap;
   user-select: none;
+  display: block;
+  margin: 0;
 }
 
 .button:before {

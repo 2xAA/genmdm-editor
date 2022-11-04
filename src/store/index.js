@@ -67,7 +67,7 @@ const store = new Vuex.Store({
 
     setCCValuesOnChannel({ commit, state }, values = {}) {
       Object.keys(values).forEach(key => {
-        if (parseInt(key, 10) === NaN) {
+        if (isNaN(parseInt(key, 10))) {
           return;
         }
         const cc = parseInt(key, 10);
