@@ -61,7 +61,11 @@ export default {
       if (mutation.type === "SET_CC_VALUE") {
         const { cc, value, channel } = mutation.payload;
 
-        if (cc === this.cc + this.ccOffset && !this.mouseButtonDown && channel === this.$store.state.channel) {
+        if (
+          cc === this.cc + this.ccOffset &&
+          !this.mouseButtonDown &&
+          channel === this.$store.state.channel
+        ) {
           this.movementValue = this.inverse ? -value + 127 : value;
           this.draw();
         }
