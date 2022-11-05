@@ -16,10 +16,11 @@ exports.default = async function notarizing(context) {
   console.log("Notarizing macOS application…");
 
   return await notarize({
+    tool: "notarytool",
     appBundleId: "gl.vcync.modv",
     appPath: `${appOutDir}/${appName}.app`,
     appleId: process.env.APPLEID,
     appleIdPassword: process.env.APPLEIDPASS,
-    ascProvider: process.env.APPLE_TEAM_ID
+    teamId: process.env.APPLE_TEAM_ID
   });
 };
