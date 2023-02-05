@@ -1,40 +1,57 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import vuejsStorage from "vuejs-storage";
 import genmdmMapping from "../genmdm-mapping";
 
+function sleep(milliseconds = 0) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
 const GLOBAL_CC = [1, 74, 78, 79, 80, 81, 83, 84, 85, 86, 88, 89];
+const NUM_CHANNELS = 6;
 
 function createBlankPatchesArray() {
   return [...new Array(128).keys()].map(() => ({ name: "", data: undefined }));
 }
 
-const state = {
-  patches: createBlankPatchesArray(),
+function createDefaultState() {
+  const defaultState = {
+    patches: createBlankPatchesArray(),
 
-  polyphonic: false,
-  maxPolyphonicChannels: 6,
-  channel: 1,
-  instrumentIndex: 0
-};
+    polyphonic: false,
+    maxPolyphonicChannels: 6,
+    channel: 1,
+    instrumentIndex: 0,
+    mdmiCompatibility: false
+  };
 
-const mappedCCNumbers = Object.keys(genmdmMapping);
+  const mappedCCNumbers = Object.keys(genmdmMapping);
 
-function setKeyToDefault(channel, key) {
-  state[`channel${channel + 1}`][key] = genmdmMapping[key].default || 0;
+  for (let i = 0; i < NUM_CHANNELS; ++i) {
+    defaultState[`channel${i + 1}`] = {};
+
+    mappedCCNumbers.forEach(key => {
+      defaultState[`channel${i + 1}`][key] = genmdmMapping[key].default || 0;
+    });
+  }
+
+  return defaultState;
 }
 
-for (let i = 0; i < 6; ++i) {
-  state[`channel${i + 1}`] = {};
-
-  mappedCCNumbers.forEach(key => {
-    setKeyToDefault(i, key);
-  });
-}
+const state = createDefaultState();
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state,
+
+  plugins: [
+    vuejsStorage({
+      keys: Object.keys(state),
+      //keep state.count in localStorage
+      namespace: "genmdm_autosave"
+    })
+  ],
 
   actions: {
     setCCValues({ commit, state }, { values, ignoreSameValues = true }) {
@@ -127,10 +144,78 @@ const store = new Vuex.Store({
 
     setInstrumentIndex({ commit }, index) {
       commit("SET_INSTRUMENT_INDEX", index);
+    },
+
+    async sendState({ commit }) {
+      for (let i = 0; i < NUM_CHANNELS; ++i) {
+        const channelKey = `channel${i + 1}`;
+        const channel = state[channelKey];
+        const channelEntries = Object.entries(channel);
+
+        for (let j = 0; j < channelEntries.length; ++j) {
+          const [cc, value] = channelEntries[j];
+          // throttle to avoid webmidi spamming the port
+          await sleep(0);
+          commit("SET_CC_VALUE", { cc: Number(cc), value, channel: i + 1 });
+        }
+      }
+    },
+
+    // resetChannel = undefined - don't reset channel data
+    // resetChannel = 0         - reset all channels
+    // resetChannel = 1-6       - reset defined channel
+    resetState(
+      { commit, dispatch },
+      { resetChannel = undefined, resetEditor = false, resetPatches = false }
+    ) {
+      const defaultState = createDefaultState();
+      const newState = Vue.observable({});
+
+      let syncWithDevice = false;
+
+      if (resetChannel === 0) {
+        syncWithDevice = true;
+
+        newState.channel1 = defaultState.channel1;
+        newState.channel2 = defaultState.channel2;
+        newState.channel3 = defaultState.channel3;
+        newState.channel4 = defaultState.channel4;
+        newState.channel5 = defaultState.channel5;
+        newState.channel6 = defaultState.channel6;
+      }
+
+      if (resetChannel > 0 && resetChannel < 7) {
+        syncWithDevice = true;
+
+        newState[`channel${resetChannel}`] =
+          defaultState[`channel${resetChannel}`];
+      }
+
+      if (resetEditor) {
+        newState.polyphonic = defaultState.polyphonic;
+        newState.maxPolyphonicChannels = defaultState.maxPolyphonicChannels;
+        newState.channel = defaultState.channel;
+        newState.instrumentIndex = defaultState.instrumentIndex;
+        newState.mdmiCompatibility = defaultState.mdmiCompatibility;
+      }
+
+      if (resetPatches) {
+        newState.patches = defaultState.patches;
+      }
+
+      commit("SET_STATE", newState);
+
+      if (syncWithDevice) {
+        dispatch("sendState");
+      }
     }
   },
 
   mutations: {
+    SET_STATE(state, newState) {
+      state = newState;
+    },
+
     SET_CC_VALUE(state, { cc, value, channel }) {
       state[`channel${channel}`][cc] = value;
     },
@@ -162,6 +247,10 @@ const store = new Vuex.Store({
 
     SET_INSTRUMENT_INDEX(state, index) {
       state.instrumentIndex = index;
+    },
+
+    SET_MDMICOMPATIBILITY(state, value) {
+      state.mdmiCompatibility = value;
     }
   }
 });

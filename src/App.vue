@@ -116,6 +116,20 @@
                 </grid>
               </c>
             </grid>
+
+            <grid columns="2" class="patch-management-buttons">
+              <c span="2"><hr /></c>
+              <c>
+                <button class="button" @click="sendState">
+                  Send State
+                </button>
+              </c>
+              <c
+                ><button class="button" @click="resetState">
+                  Reset State
+                </button></c
+              >
+            </grid>
           </c>
           <c span="10">
             <grid columns="2">
@@ -197,7 +211,7 @@
                 <LabelledCheckbox
                   :labels="['Off', 'On']"
                   :emit-boolean="true"
-                  v-model="mmdiCompatibility"
+                  v-model="mdmiCompatibility"
                 />
               </c>
             </template>
@@ -333,7 +347,6 @@ export default {
 
       notesOn: {},
       polyphonyChannel: 1,
-      mmdiCompatibility: false,
       storeUnsubscribe: null,
 
       ramSlot: 1,
@@ -391,6 +404,16 @@ export default {
 
       set(value) {
         this.$store.dispatch("setMaxPolyphonicChannels", value);
+      }
+    },
+
+    mdmiCompatibility: {
+      get() {
+        return this.$store.state.mdmiCompatibility;
+      },
+
+      set(value) {
+        this.$store.commit("SET_MDMICOMPATIBILITY", value);
       }
     },
 
@@ -474,7 +497,7 @@ export default {
 
       // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
       // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
-      if (this.mmdiCompatibility && cc > 15 && cc < 20) {
+      if (this.mdmiCompatibility && cc > 15 && cc < 20) {
         try {
           this.outputPort.sendSysex([0x00, 0x22, 0x77, 0x07, 0x01], []);
         } catch (e) {
@@ -488,6 +511,10 @@ export default {
         console.error(e);
         console.warn(cc, value, channel);
       }
+    },
+
+    sendState() {
+      this.$store.dispatch("sendState");
     },
 
     handleNoteOn(e) {
@@ -642,7 +669,7 @@ export default {
     },
 
     channel(value, oldValue) {
-      if (this.mmdiCompatibility && oldValue !== value) {
+      if (this.mdmiCompatibility && oldValue !== value) {
         // Show FM parameters for the channel when using SEGA Mega Drive MIDI Interface
         // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/UI-Features
         try {
