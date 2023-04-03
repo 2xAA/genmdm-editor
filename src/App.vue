@@ -114,6 +114,7 @@
                   <c><DMPFileUpload /></c>
                   <c><DMPFileDownload /></c>
                   <c><Y12FileUpload /></c>
+                  <c><Y12FileDownload /></c>
                 </grid>
               </c>
             </grid>
@@ -297,6 +298,7 @@ import DMPFileUpload from "./components/DMPFileUpload";
 import DMPFileDownload from "./components/DMPFileDownload";
 import Dialog from "./components/Dialog";
 import Y12FileUpload from "./components/Y12FileUpload.vue";
+import Y12FileDownload from "./components/Y12FileDownload.vue";
 
 export default {
   name: "App",
@@ -320,7 +322,8 @@ export default {
     DMPFileUpload,
     DMPFileDownload,
     Dialog,
-    Y12FileUpload
+    Y12FileUpload,
+    Y12FileDownload
   },
 
   data() {
