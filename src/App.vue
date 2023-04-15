@@ -676,6 +676,7 @@ export default {
 html,
 body {
   height: 100%;
+  user-select: none;
 }
 
 body {
