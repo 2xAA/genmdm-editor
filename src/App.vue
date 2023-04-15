@@ -113,6 +113,8 @@
                   <c><TFIFileDownload /></c>
                   <c><DMPFileUpload /></c>
                   <c><DMPFileDownload /></c>
+                  <c><Y12FileUpload /></c>
+                  <c><Y12FileDownload /></c>
                 </grid>
               </c>
             </grid>
@@ -197,7 +199,7 @@
                 <LabelledCheckbox
                   :labels="['Off', 'On']"
                   :emit-boolean="true"
-                  v-model="mmdiCompatibility"
+                  v-model="mdmiCompatibility"
                 />
               </c>
             </template>
@@ -295,6 +297,8 @@ import GENMFileDownload from "./components/GENMFileDownload";
 import DMPFileUpload from "./components/DMPFileUpload";
 import DMPFileDownload from "./components/DMPFileDownload";
 import Dialog from "./components/Dialog";
+import Y12FileUpload from "./components/Y12FileUpload.vue";
+import Y12FileDownload from "./components/Y12FileDownload.vue";
 
 export default {
   name: "App",
@@ -317,7 +321,9 @@ export default {
     GENMFileDownload,
     DMPFileUpload,
     DMPFileDownload,
-    Dialog
+    Dialog,
+    Y12FileUpload,
+    Y12FileDownload
   },
 
   data() {
@@ -333,7 +339,7 @@ export default {
 
       notesOn: {},
       polyphonyChannel: 1,
-      mmdiCompatibility: false,
+      mdmiCompatibility: false,
       storeUnsubscribe: null,
 
       ramSlot: 1,
@@ -470,16 +476,6 @@ export default {
     sendCC({ cc, value, channel }) {
       if (!this.outputPort) {
         return;
-      }
-
-      // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
-      // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
-      if (this.mmdiCompatibility && cc > 15 && cc < 20) {
-        try {
-          this.outputPort.sendSysex([0x00, 0x22, 0x77, 0x07, 0x01], []);
-        } catch (e) {
-          console.error(e);
-        }
       }
 
       try {
@@ -642,7 +638,7 @@ export default {
     },
 
     channel(value, oldValue) {
-      if (this.mmdiCompatibility && oldValue !== value) {
+      if (this.mdmiCompatibility && oldValue !== value) {
         // Show FM parameters for the channel when using SEGA Mega Drive MIDI Interface
         // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/UI-Features
         try {
@@ -650,6 +646,24 @@ export default {
         } catch (e) {
           console.error(e);
         }
+      }
+    },
+
+    mdmiCompatibility(value) {
+      if (!this.outputPort) {
+        return;
+      }
+
+      // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
+      // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
+
+      try {
+        this.outputPort.sendSysex(
+          [0x00, 0x22, 0x77, 0x07, !value ? 0x00 : 0x01],
+          []
+        );
+      } catch (e) {
+        console.error(e);
       }
     }
   }
@@ -676,6 +690,7 @@ export default {
 html,
 body {
   height: 100%;
+  user-select: none;
 }
 
 body {
