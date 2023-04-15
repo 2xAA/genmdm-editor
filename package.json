@@ -48,5 +48,8 @@
   },
   "browserslist": [
     "last 1 Chrome version"
-  ]
+  ],
+  "resolutions": {
+    "electron-builder": "23.6.0"
+  }
 }
