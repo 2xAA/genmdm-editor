@@ -1,7 +1,7 @@
 {
   "name": "genmdm-editor",
   "author": "2xAA",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "productName": "genMDM Editor",
   "private": true,
   "description": "genMDM editor is a web-based interface for genMDM, a MIDI controller for the Sega Mega Drive and Genesis",
