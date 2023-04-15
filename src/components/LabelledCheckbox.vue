@@ -71,4 +71,10 @@ label {
   justify-content: center;
   align-items: center;
 }
+
+label:active {
+  background: var(--foreground-color);
+  color: var(--background-color);
+  font-weight: bold;
+}
 </style>

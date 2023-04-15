@@ -72,6 +72,8 @@ export default {
 
   methods: {
     requestPointerLock(e) {
+      console.log(e);
+
       const {
         $refs: { draggableSelectBody }
       } = this;
@@ -182,5 +184,11 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.draggable-select:active {
+  background: var(--foreground-color);
+  color: var(--background-color);
+  font-weight: bold;
 }
 </style>
