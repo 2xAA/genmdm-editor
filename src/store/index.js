@@ -218,7 +218,7 @@ const store = new Vuex.Store({
 
   mutations: {
     SET_STATE(state, newState) {
-      state = newState;
+      Object.assign(state, newState);
     },
 
     SET_CC_VALUE(state, { cc, value, channel }) {
