@@ -80,17 +80,19 @@ export default {
         this.labels.length ? item : this.values[index]
       ]);
 
-      console.log(values);
       return values;
     },
 
     selectValue: {
       get() {
-        return this.currentIndex;
+        const value = this.emitArrayValue
+          ? this.value
+          : Math.round((this.value / 127) * (this.values.length - 1));
+        return value;
       },
 
-      set(index) {
-        this.setAndEmitValue(index);
+      set(key) {
+        this.setAndEmitValue(this.values.indexOf(key));
       }
     }
   },
