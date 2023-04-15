@@ -272,8 +272,8 @@ Note that the following parameters are affected by recalling one of the above pr
     label: "Stereo Configuration",
     range: 4,
     type: "enum",
-    default: 3,
-    enum: ["Mute", "Left", "Right", "Center"],
+    default: 127,
+    enum: ["Mute", "Right", "Left", "Center"],
     description: `4 values over a range of 0 to 127. This parameter sets the stereo output (panning) of the specified
  channel. Note that the stereo placement of a channel will have no effect if a mono cable is used
  (generally from the AV output socket from the Genesis / Mega Drive Console). For the best
