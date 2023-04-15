@@ -144,6 +144,7 @@ export default {
       }
 
       this.mouseButtonDown = true;
+      this.draw();
     },
 
     exitPointerLock() {
@@ -178,6 +179,7 @@ export default {
       document.body.style.cursor =
         this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
       this.mouseButtonDown = false;
+      this.draw();
       this.lastPointerPosition = { x: -1, y: -1 };
     },
 
@@ -245,9 +247,16 @@ export default {
         context.clearRect(0, 0, cw, ch);
         context.strokeStyle = this.$colors.foreground;
 
+        context.fillStyle = this.mouseButtonDown
+          ? this.$colors.foreground
+          : "transparent";
+
         context.beginPath();
         context.arc(cw / 2, ch / 2, ((size - 6) / 2 - 2) * dpr, 0, Math.PI * 2);
         context.stroke();
+        context.fill();
+
+        context.strokeStyle = this.$colors.foreground;
 
         if (quantise > 0) {
           for (let i = 0; i < quantise; ++i) {
@@ -275,6 +284,10 @@ export default {
         context.translate(cw / 2, ch / 2);
         context.rotate(internalValue * 270 * (Math.PI / 180));
         context.translate(-cw / 2, -ch / 2);
+
+        context.strokeStyle = this.mouseButtonDown
+          ? this.$colors.background
+          : this.$colors.foreground;
 
         context.beginPath();
         context.arc(
