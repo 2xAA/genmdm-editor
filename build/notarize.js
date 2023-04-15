@@ -17,7 +17,7 @@ exports.default = async function notarizing(context) {
 
   return await notarize({
     tool: "notarytool",
-    appBundleId: "gl.vcync.modv",
+    appBundleId: "pro.wray.genmdm-editor",
     appPath: `${appOutDir}/${appName}.app`,
     appleId: process.env.APPLEID,
     appleIdPassword: process.env.APPLEIDPASS,

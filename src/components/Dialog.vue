@@ -1,7 +1,18 @@
 <template>
-  <dialog ref="dialog">
+  <dialog
+    ref="dialog"
+    :style="{
+      width,
+      height
+    }"
+  >
     <header>
-      <button @click="close" class="close" aria-label="Close Dialog">
+      <button
+        @click="close"
+        class="close"
+        aria-label="Close Dialog"
+        :disabled="closeDisabled"
+      >
         <CloseIcon class="close-icon" width="14" height="15" />
       </button>
     </header>
@@ -25,6 +36,25 @@ export default {
     show: {
       type: Boolean,
       default: false
+    },
+
+    closeDisabled: {
+      type: Boolean,
+      default: false
+    },
+
+    size: {
+      type: Array,
+      default: () => [640, 480]
+    }
+  },
+
+  computed: {
+    width() {
+      return `${this.size[0]}px`;
+    },
+    height() {
+      return `${this.size[1]}px`;
     }
   },
 
@@ -66,9 +96,10 @@ dialog {
   border: 1px solid var(--foreground-color);
   box-sizing: border-box;
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.16);
+}
 
-  width: 640px;
-  height: 480px;
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 header {
@@ -85,6 +116,10 @@ button.close {
   background-color: transparent;
   border: none;
   font-size: 0;
+}
+
+button.close:disabled {
+  cursor: not-allowed;
 }
 
 div.body {
