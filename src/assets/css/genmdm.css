@@ -23,9 +23,13 @@
   align-items: center;
 }
 
-.button:active {
+.button:active:not(:disabled) {
   background: var(--foreground-color);
   color: var(--background-color)
+}
+
+.button:disabled {
+  cursor: not-allowed;
 }
 
 input[type=text] {

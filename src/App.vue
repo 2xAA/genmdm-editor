@@ -126,11 +126,11 @@
                   Send State
                 </button>
               </c>
-              <c
-                ><button class="button" @click="resetState">
+              <c>
+                <button class="button" @click="openResetStateDialog">
                   Reset State
-                </button></c
-              >
+                </button>
+              </c>
             </grid>
           </c>
           <c span="10">
@@ -285,6 +285,11 @@
         </c>
       </grid>
     </Dialog>
+
+    <ResetStateDialog
+      :show="showResetStateDialog"
+      @close="closeResetStateDialog"
+    />
   </div>
 </template>
 
@@ -313,6 +318,7 @@ import DMPFileDownload from "./components/DMPFileDownload";
 import Dialog from "./components/Dialog";
 import Y12FileUpload from "./components/Y12FileUpload.vue";
 import Y12FileDownload from "./components/Y12FileDownload.vue";
+import ResetStateDialog from "./components/ResetStateDialog.vue";
 
 export default {
   name: "App",
@@ -337,7 +343,8 @@ export default {
     DMPFileDownload,
     Dialog,
     Y12FileUpload,
-    Y12FileDownload
+    Y12FileDownload,
+    ResetStateDialog
   },
 
   data() {
@@ -358,6 +365,7 @@ export default {
       ramSlot: 1,
 
       showAboutDialog: false,
+      showResetStateDialog: false,
       friendsNames: [
         "Mum",
         "James",
@@ -645,6 +653,14 @@ export default {
 
     closeAboutDialog() {
       this.showAboutDialog = false;
+    },
+
+    openResetStateDialog() {
+      this.showResetStateDialog = true;
+    },
+
+    closeResetStateDialog() {
+      this.showResetStateDialog = false;
     }
   },
 
@@ -727,6 +743,9 @@ export default {
 html,
 body {
   height: 100%;
+}
+
+* {
   user-select: none;
 }
 

@@ -146,11 +146,15 @@ const store = new Vuex.Store({
       commit("SET_INSTRUMENT_INDEX", index);
     },
 
-    async sendState({ commit }) {
+    async sendState({ commit, state }) {
+      const originalChannel = state.channel;
+
       for (let i = 0; i < NUM_CHANNELS; ++i) {
         const channelKey = `channel${i + 1}`;
         const channel = state[channelKey];
         const channelEntries = Object.entries(channel);
+
+        commit("SET_CHANNEL", i + 1);
 
         for (let j = 0; j < channelEntries.length; ++j) {
           const [cc, value] = channelEntries[j];
@@ -159,21 +163,23 @@ const store = new Vuex.Store({
           commit("SET_CC_VALUE", { cc: Number(cc), value, channel: i + 1 });
         }
       }
+
+      commit("SET_CHANNEL", originalChannel);
     },
 
-    // resetChannel = undefined - don't reset channel data
-    // resetChannel = 0         - reset all channels
-    // resetChannel = 1-6       - reset defined channel
+    // channel = 0         - don't reset channel data
+    // channel = 1-6       - reset defined channel
+    // channel = 7         - reset all channels
     resetState(
       { commit, dispatch },
-      { resetChannel = undefined, resetEditor = false, resetPatches = false }
+      { channel = undefined, resetEditor = false, resetPatches = false } = {}
     ) {
       const defaultState = createDefaultState();
       const newState = Vue.observable({});
 
       let syncWithDevice = false;
 
-      if (resetChannel === 0) {
+      if (channel === 7) {
         syncWithDevice = true;
 
         newState.channel1 = defaultState.channel1;
@@ -184,11 +190,10 @@ const store = new Vuex.Store({
         newState.channel6 = defaultState.channel6;
       }
 
-      if (resetChannel > 0 && resetChannel < 7) {
+      if (channel > 0 && channel < 7) {
         syncWithDevice = true;
 
-        newState[`channel${resetChannel}`] =
-          defaultState[`channel${resetChannel}`];
+        newState[`channel${channel}`] = defaultState[`channel${channel}`];
       }
 
       if (resetEditor) {
@@ -206,7 +211,7 @@ const store = new Vuex.Store({
       commit("SET_STATE", newState);
 
       if (syncWithDevice) {
-        dispatch("sendState");
+        return dispatch("sendState");
       }
     }
   },
