@@ -23,6 +23,11 @@
   align-items: center;
 }
 
+.button:active {
+  background: var(--foreground-color);
+  color: var(--background-color)
+}
+
 input[type=text] {
   background-color: transparent;
   border: 1px solid var(--foreground-color);
