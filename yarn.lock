@@ -4636,10 +4636,10 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
-genmdm-parser@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/genmdm-parser/-/genmdm-parser-1.0.1.tgz#20352c75b4e5ad8c63f301017f0427dac129bad3"
-  integrity sha512-yQRNTTb+F9+yxdq6Fn13HkSufqwqbXAzvKN5BM/e26aRrZbweI6TqyYaoGQjlJG7KGT8HwiUHUdOWeKUwB/MYQ==
+genmdm-parser@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/genmdm-parser/-/genmdm-parser-1.0.2.tgz#95a8015fbe9370e86a88c75660e0c01cd762ed7a"
+  integrity sha512-cLWn2dnSUmOBQMDamLOWYjsnRj9hn7M5POD0SkOpFvlOAhXMNhBRNY9XPPvH3ptO8Foe+HsrozcLiAvW8gNC0w==
 
 gensync@^1.0.0-beta.1:
   version "1.0.0-beta.1"

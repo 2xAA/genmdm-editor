@@ -16,7 +16,7 @@
   },
   "main": "background.js",
   "dependencies": {
-    "genmdm-parser": "1.0.1",
+    "genmdm-parser": "1.0.2",
     "vue": "^2.6.11",
     "vue-flexible-link": "^1.0.2",
     "vue-svg-loader": "^0.12.0",

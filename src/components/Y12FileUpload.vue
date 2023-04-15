@@ -1,6 +1,6 @@
 <template>
   <label class="button">
-    <input type="file" id="input" accept=".dmp" @change="fileAdded" />
+    <input type="file" id="input" accept=".y12" @change="fileAdded" />
   </label>
 </template>
 
@@ -32,12 +32,19 @@ export default {
 
     parseDmpDataToMappedCC(data) {
       const parser = new GenMDMParser();
-      const parsed = parser.parseDMP(data);
+      const parsed = parser.parseY12(data);
 
       console.log(parsed);
 
       const ccValues = Object.fromEntries(parsed.toGenMDM());
-      ccValues[77] = 127; // deflemask doesn't provide a panning parameter
+      ccValues[70] = 0;
+      ccValues[71] = 0;
+      ccValues[72] = 0;
+      ccValues[73] = 0;
+      ccValues[74] = 0;
+      ccValues[75] = 0;
+      ccValues[76] = 0;
+      ccValues[77] = 127;
 
       this.$store.dispatch("setCCValues", {
         values: ccValues,
@@ -54,6 +61,6 @@ input {
 }
 
 label::before {
-  content: "Import DMP";
+  content: "Import Y12";
 }
 </style>
