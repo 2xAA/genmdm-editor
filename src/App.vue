@@ -118,6 +118,20 @@
                 </grid>
               </c>
             </grid>
+
+            <grid columns="2" class="patch-management-buttons">
+              <c span="2"><hr /></c>
+              <c>
+                <button class="button" @click="sendState">
+                  Send State
+                </button>
+              </c>
+              <c>
+                <button class="button" @click="openResetStateDialog">
+                  Reset State
+                </button>
+              </c>
+            </grid>
           </c>
           <c span="10">
             <grid columns="2">
@@ -271,6 +285,11 @@
         </c>
       </grid>
     </Dialog>
+
+    <ResetStateDialog
+      :show="showResetStateDialog"
+      @close="closeResetStateDialog"
+    />
   </div>
 </template>
 
@@ -299,6 +318,7 @@ import DMPFileDownload from "./components/DMPFileDownload";
 import Dialog from "./components/Dialog";
 import Y12FileUpload from "./components/Y12FileUpload.vue";
 import Y12FileDownload from "./components/Y12FileDownload.vue";
+import ResetStateDialog from "./components/ResetStateDialog.vue";
 
 export default {
   name: "App",
@@ -323,7 +343,8 @@ export default {
     DMPFileDownload,
     Dialog,
     Y12FileUpload,
-    Y12FileDownload
+    Y12FileDownload,
+    ResetStateDialog
   },
 
   data() {
@@ -339,12 +360,12 @@ export default {
 
       notesOn: {},
       polyphonyChannel: 1,
-      mdmiCompatibility: false,
       storeUnsubscribe: null,
 
       ramSlot: 1,
 
       showAboutDialog: false,
+      showResetStateDialog: false,
       friendsNames: [
         "Mum",
         "James",
@@ -397,6 +418,16 @@ export default {
 
       set(value) {
         this.$store.dispatch("setMaxPolyphonicChannels", value);
+      }
+    },
+
+    mdmiCompatibility: {
+      get() {
+        return this.$store.state.mdmiCompatibility;
+      },
+
+      set(value) {
+        this.$store.commit("SET_MDMICOMPATIBILITY", value);
       }
     },
 
@@ -478,12 +509,26 @@ export default {
         return;
       }
 
+      // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
+      // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
+      if (this.mdmiCompatibility && cc > 15 && cc < 20) {
+        try {
+          this.outputPort.sendSysex([0x00, 0x22, 0x77, 0x07, 0x01], []);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       try {
         this.outputPort.sendControlChange(cc, value, channel);
       } catch (e) {
         console.error(e);
         console.warn(cc, value, channel);
       }
+    },
+
+    sendState() {
+      this.$store.dispatch("sendState");
     },
 
     handleNoteOn(e) {
@@ -608,6 +653,14 @@ export default {
 
     closeAboutDialog() {
       this.showAboutDialog = false;
+    },
+
+    openResetStateDialog() {
+      this.showResetStateDialog = true;
+    },
+
+    closeResetStateDialog() {
+      this.showResetStateDialog = false;
     }
   },
 
@@ -690,6 +743,9 @@ export default {
 html,
 body {
   height: 100%;
+}
+
+* {
   user-select: none;
 }
 

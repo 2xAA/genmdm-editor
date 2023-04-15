@@ -23,9 +23,13 @@
   align-items: center;
 }
 
-.button:active {
+.button:active:not(:disabled) {
   background: var(--foreground-color);
   color: var(--background-color)
+}
+
+.button:disabled {
+  cursor: not-allowed;
 }
 
 input[type=text] {
@@ -79,4 +83,9 @@ label.select svg {
 
 label.select svg path {
   stroke: var(--foreground-color);
+}
+
+hr {
+  border:none;
+  border-top: 1px solid var(--foreground-color);
 }
