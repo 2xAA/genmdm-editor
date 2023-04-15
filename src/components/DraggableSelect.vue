@@ -5,6 +5,7 @@
     ref="draggableSelectBody"
     @pointerdown="requestPointerLock"
     @pointerup="exitPointerLock"
+    @contextmenu.prevent
   >
     <select
       ref="labelSelect"
