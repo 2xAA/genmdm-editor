@@ -827,6 +827,7 @@ h2 {
   font-size: 18px;
   font-weight: normal;
   text-transform: uppercase;
+  margin: 6px 0;
 }
 
 .operator-controls {
