@@ -4,6 +4,7 @@
 
 <script>
 import { GenMDMParser } from "genmdm-parser/dist/main.js";
+import { saveFile } from "../utils/save-file";
 
 export default {
   methods: {
@@ -22,34 +23,7 @@ export default {
       instrument.instrumentName = "genmdm-patch";
       const y12data = instrument.toY12();
 
-      var downloadBlob, downloadURL;
-
-      downloadBlob = function(data, fileName, mimeType) {
-        var blob, url;
-        blob = new Blob([data], {
-          type: mimeType
-        });
-        url = window.URL.createObjectURL(blob);
-        downloadURL(url, fileName);
-        setTimeout(function() {
-          return window.URL.revokeObjectURL(url);
-        }, 1000);
-      };
-
-      downloadURL = function(data, fileName) {
-        var a;
-        a = document.createElement("a");
-        a.href = data;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.style = "display: none";
-        a.click();
-        a.remove();
-      };
-
-      downloadBlob(y12data, "genmdm-patch.y12", "application/octet-stream");
-
-      console.log(y12data);
+      saveFile("genmdm-patch.y12", y12data);
     }
   }
 };
