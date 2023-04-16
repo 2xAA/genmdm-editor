@@ -16,6 +16,7 @@
   },
   "main": "background.js",
   "dependencies": {
+    "compress-json": "^2.1.2",
     "genmdm-parser": "1.0.2",
     "vue": "^2.6.11",
     "vue-flexible-link": "^1.0.2",

@@ -8,9 +8,9 @@
     <grid columns="3" class="reset-state-dialog-text">
       <c span="3"><h2>Reset State</h2></c>
       <c span="3">
-        <grid columns="2" class="control-group">
-          <c class="control-group__label">Channel</c>
-          <c class="control-group__control">
+        <grid columns="8" class="control-group">
+          <c span="6" class="control-group__label">Channel</c>
+          <c span="2" class="control-group__control">
             <DraggableSelect
               :values="[0, 1, 2, 3, 4, 5, 6, 7]"
               :emitArrayValue="true"
@@ -19,8 +19,8 @@
               v-model="channel"
             />
           </c>
-          <c class="control-group__label">Reset Editor Settings</c>
-          <c class="control-group__control">
+          <c span="6" class="control-group__label">Reset Editor Settings</c>
+          <c span="2" class="control-group__control">
             <DraggableSelect
               :values="[0, 1]"
               :emitArrayValue="true"
@@ -29,8 +29,8 @@
               v-model="resetEditor"
             />
           </c>
-          <c class="control-group__label">Reset Patches</c>
-          <c class="control-group__control">
+          <c span="6" class="control-group__label">Reset Patches</c>
+          <c span="2" class="control-group__control">
             <DraggableSelect
               :values="[0, 1]"
               :emitArrayValue="true"
