@@ -29,7 +29,7 @@ export default {
     this.updateFromStore();
 
     this.storeUnsubscribe = this.$store.subscribe(mutation => {
-      let shouldDraw = false;
+      let redraw = false;
 
       if (mutation.type === "SET_CC_VALUE") {
         const { cc, value } = mutation.payload;
@@ -41,14 +41,14 @@ export default {
         ) {
           this.ccValues[cc] = value;
           this.values[100 - cc] = value / 127;
-          shouldDraw = true;
+          redraw = true;
         }
       } else if (mutation.type === "SET_STATE") {
-        shouldDraw = true;
+        redraw = true;
         this.updateFromStore();
       }
 
-      if (shouldDraw) {
+      if (redraw) {
         this.draw();
       }
     });
