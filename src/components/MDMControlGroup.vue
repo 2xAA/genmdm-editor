@@ -65,4 +65,8 @@ export default {
 .control-group__control {
   border-bottom: 1px solid var(--foreground-color);
 }
+
+.control-group__control {
+  overflow: hidden;
+}
 </style>
