@@ -8,6 +8,7 @@
     @contextmenu.prevent
   >
     <select
+      class="select"
       ref="labelSelect"
       @touchstart.prevent
       @touchmove.prevent
@@ -225,20 +226,5 @@ export default {
   background: var(--foreground-color);
   color: var(--background-color);
   font-weight: bold;
-}
-
-select {
-  height: 100%;
-  width: calc(100% + 16px);
-  padding: 0px;
-  margin: 0;
-  margin: 0 0 0 -2px;
-  background: none;
-  color: inherit;
-  font-family: inherit;
-  font-size: inherit;
-  border: none;
-  text-align: center;
-  letter-spacing: -2px;
 }
 </style>
