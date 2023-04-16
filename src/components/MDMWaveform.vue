@@ -24,6 +24,13 @@ export default {
     };
   },
 
+  created() {
+    for (let i = 0; i < this.segments; i += 1) {
+      this.ccValues[100 + i] = this.$store.state.channel1[100 + i];
+      this.values[i] = this.ccValues[100 + i] / 127;
+    }
+  },
+
   mounted() {
     const { canvas } = this.$refs;
 
@@ -127,12 +134,16 @@ export default {
       const q = 1 / 128;
 
       const value = Math.round(yValue / q) * q;
+      const cc = Math.round(value * 127);
 
-      this.values[segment] = value;
+      // Value isn't directly here.
+      // Converting it to the rounded CC value quantises it,
+      // so the segments don't jump when restoring state
+      this.values[segment] = cc / 127;
 
       requestAnimationFrame(this.draw);
 
-      this.ccValues[100 + segment] = value * 127;
+      this.ccValues[100 + segment] = cc;
     }
   }
 };
