@@ -20,15 +20,38 @@ export default {
       context: null,
       segments: 14,
       values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      ccValues: {}
+      ccValues: {},
+      storeUnsubscribe: null
     };
   },
 
   created() {
-    for (let i = 0; i < this.segments; i += 1) {
-      this.ccValues[100 + i] = this.$store.state.channel1[100 + i];
-      this.values[i] = this.ccValues[100 + i] / 127;
-    }
+    this.updateFromStore();
+
+    this.storeUnsubscribe = this.$store.subscribe(mutation => {
+      let shouldDraw = false;
+
+      if (mutation.type === "SET_CC_VALUE") {
+        const { cc, value } = mutation.payload;
+
+        if (
+          cc > 99 &&
+          cc < 100 + this.segments &&
+          this.ccValues[cc] !== value
+        ) {
+          this.ccValues[cc] = value;
+          this.values[100 - cc] = value / 127;
+          shouldDraw = true;
+        }
+      } else if (mutation.type === "SET_STATE") {
+        shouldDraw = true;
+        this.updateFromStore();
+      }
+
+      if (shouldDraw) {
+        this.draw();
+      }
+    });
   },
 
   mounted() {
@@ -46,6 +69,8 @@ export default {
     canvas.removeEventListener("pointerdown", this.down);
     document.removeEventListener("pointerup", this.up);
     document.removeEventListener("pointermove", this.move);
+
+    this.storeUnsubscribe();
   },
 
   computed: {
@@ -55,6 +80,13 @@ export default {
   },
 
   methods: {
+    updateFromStore() {
+      for (let i = 0; i < this.segments; i += 1) {
+        this.ccValues[100 + i] = this.$store.state.channel1[100 + i];
+        this.values[i] = this.ccValues[100 + i] / 127;
+      }
+    },
+
     down() {
       document.addEventListener("pointerup", this.up);
       document.addEventListener("pointermove", this.move);
