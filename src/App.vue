@@ -171,8 +171,10 @@
             <template v-slot:header>
               <c span="6" class="control-group__label">MIDI Input</c>
               <c span="2" class="control-group__control">
-                <select name="inputs" v-model="inputId">
-                  <option disabled selected>Select an input</option>
+                <select class="select" name="inputs" v-model="inputId">
+                  <option disabled selected value="none">
+                    ---
+                  </option>
                   <option
                     v-for="(input, index) in inputs"
                     :key="index"
@@ -184,8 +186,10 @@
 
               <c span="6" class="control-group__label">MIDI Output</c>
               <c span="2" class="control-group__control">
-                <select name="outputs" v-model="outputId">
-                  <option disabled selected>Select an output</option>
+                <select class="select" name="outputs" v-model="outputId">
+                  <option disabled selected value="none">
+                    ---
+                  </option>
                   <option
                     v-for="(output, index) in outputs"
                     :key="index"
@@ -365,8 +369,8 @@ export default {
       inputs: [],
       outputs: [],
 
-      inputId: null,
-      outputId: null,
+      inputId: "none",
+      outputId: "none",
 
       notesOn: {},
       polyphonyChannel: 1,
