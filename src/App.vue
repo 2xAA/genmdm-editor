@@ -131,6 +131,12 @@
                   Reset State
                 </button>
               </c>
+              <c>
+                <StateUpload />
+              </c>
+              <c>
+                <StateDownload />
+              </c>
             </grid>
           </c>
           <c span="10">
@@ -319,6 +325,8 @@ import Dialog from "./components/Dialog";
 import Y12FileUpload from "./components/Y12FileUpload.vue";
 import Y12FileDownload from "./components/Y12FileDownload.vue";
 import ResetStateDialog from "./components/ResetStateDialog.vue";
+import StateUpload from "./components/StateUpload.vue";
+import StateDownload from "./components/StateDownload.vue";
 
 export default {
   name: "App",
@@ -344,7 +352,9 @@ export default {
     Dialog,
     Y12FileUpload,
     Y12FileDownload,
-    ResetStateDialog
+    ResetStateDialog,
+    StateUpload,
+    StateDownload
   },
 
   data() {
