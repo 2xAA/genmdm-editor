@@ -94,7 +94,6 @@ select.select {
   height: 100%;
   width: calc(100% + 16px);
   padding: 0px;
-  margin: 0;
   margin: 0 0 0 -2px;
   background: none;
   color: inherit;
