@@ -19,8 +19,12 @@ Also fully compatible with <a href="https://github.com/rhargreaves/mega-drive-mi
 </div>
 
 ## Using genMDM Editor
-genMDM Editor is a desktop executable, and also works in Chromuim based browsers.
+genMDM Editor is a desktop executable and a webpage.
+
+The webpage works in Chromuim based browsers.
 Those browsers include Google Chrome, Opera, Brave and Microsoft Edge.
+
+Using genMDM on iOS/iPadOS is possible using Web MIDI Browser, found here: [apps.apple.com/app/web-midi-browser](https://apps.apple.com/app/web-midi-browser/id953846217)
 
 genMDM Editor is compatible with both the genMDM, by little-scale, and the MDMI (Mega Drive MIDI Interface), by Robert Hargreaves.
 This Readme will refer to both interfaces as **"your Sega"**, for convinience.
