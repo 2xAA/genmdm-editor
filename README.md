@@ -75,6 +75,11 @@ The **"EXPORT"** buttons will open a file browser to save the current channel's 
 |`.tfi`|`.tfi` is TFM Music Maker's instrument format.|Doesn't hold AM or FM LFO parameters or stereo configuation.|
 |`.y12`|`.y12` is a format for storing YM2612 FM preset data, similar to `.tfi`|Doesn't hold AM or FM LFO parameters or stereo configuation.|
 
+#### `.ged` format
+
+This is a format for the genMDM Editor's internal state. It uses [`compress-json`](https://github.com/beenotung/compress-json) to serialise the internal state to a file.
+It saves the entire application state, including patches and editor settings. Use the **"LOAD STATE"** and **"SAVE STATE"** buttons to manage this state. Loading a .ged file will overwrite the editor's autosaved state immediately.
+
 ### State
 
 Neither genMDM or MDMI save their session state when powered off, but genMDM Editor does.
