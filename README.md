@@ -78,7 +78,7 @@ The **"EXPORT"** buttons will open a file browser to save the current channel's 
 #### `.ged` format
 
 This is a format for the genMDM Editor's internal state. It uses [`compress-json`](https://github.com/beenotung/compress-json) to serialise the internal state to a file.
-It saves the entire application state, including patches and editor settings. Use the **"LOAD STATE"** and **"SAVE STATE"** buttons to manage this state. Loading a .ged file will overwrite the editor's autosaved state immediately.
+It contains the entire application state, including patches and editor settings.
 
 ### State
 
@@ -90,9 +90,10 @@ genMDM Editor saves your editor state automatically, so if your Sega loses power
 
 #### Load/Save
 
-genMDM Editor's state can be saved to a file at any time by pressing the **"Save State"** button. The editor's file format is `.ged` and saves in a compressed JSON format.  
+genMDM Editor's state can be saved to a file at any time by pressing the **"Save State"** button.  
 
-The `.ged` files can be loaded back into the editor with the **"Load State"** button. If you want to sync this state to your Sega, press the **"Send State"** button.
+The `.ged` files can be loaded back into the editor with the **"Load State"** button. Loading a `.ged` file will overwrite the editor's autosaved state immediately.  
+If you want to sync this state to your Sega, press the **"Send State"** button.
 
 ### Polyphony
 
