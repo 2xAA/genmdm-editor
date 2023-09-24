@@ -471,11 +471,15 @@ export default {
       }
     }, true);
 
-    const onMutateThrottled = _.throttle((mutation) =>  {
-      if (mutation.type === "SET_CC_VALUE") {
-        this.sendCC(mutation.payload);
-      }
-    }, 100, {leading: true});
+    const onMutateThrottled = _.throttle(
+      mutation => {
+        if (mutation.type === "SET_CC_VALUE") {
+          this.sendCC(mutation.payload);
+        }
+      },
+      30,
+      { leading: true }
+    );
     this.storeUnsubscribe = this.$store.subscribe(onMutateThrottled);
   },
 
