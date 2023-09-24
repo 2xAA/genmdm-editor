@@ -18,6 +18,7 @@
   "dependencies": {
     "compress-json": "^2.1.2",
     "genmdm-parser": "1.0.2",
+    "lodash": "^4.17.21",
     "vue": "^2.6.11",
     "vue-flexible-link": "^1.0.2",
     "vue-svg-loader": "^0.12.0",

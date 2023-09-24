@@ -331,6 +331,7 @@ import Y12FileDownload from "./components/Y12FileDownload.vue";
 import ResetStateDialog from "./components/ResetStateDialog.vue";
 import StateUpload from "./components/StateUpload.vue";
 import StateDownload from "./components/StateDownload.vue";
+import _ from "lodash";
 
 export default {
   name: "App",
@@ -470,11 +471,12 @@ export default {
       }
     }, true);
 
-    this.storeUnsubscribe = this.$store.subscribe(mutation => {
+    const onMutateThrottled = _.throttle((mutation) =>  {
       if (mutation.type === "SET_CC_VALUE") {
         this.sendCC(mutation.payload);
       }
-    });
+    }, 100, {leading: true});
+    this.storeUnsubscribe = this.$store.subscribe(onMutateThrottled);
   },
 
   beforeDestroy() {
