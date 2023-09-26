@@ -122,10 +122,7 @@ export default {
 
     mouseMoveThrottled() {
       return _.throttle(this.mouseMove, this.$store.state.knobThrottle)
-    },
-    knobThrottle() {
-      return this.$store.state.knobThrottle;
-    },
+    }
   },
 
   methods: {
