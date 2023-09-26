@@ -18,6 +18,7 @@
 <script>
 import genmdmMapping from "../genmdm-mapping";
 import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
+import _ from "lodash";
 
 export default {
   mixins: [redrawOnColorschemeChange],
@@ -61,7 +62,6 @@ export default {
 
   created() {
     this.updateFromStore();
-
     this.storeUnsubscribe = this.$store.subscribe(mutation => {
       if (mutation.type === "SET_CC_VALUE") {
         const { cc, value, channel } = mutation.payload;
@@ -77,7 +77,6 @@ export default {
       }
     });
   },
-
   mounted() {
     const { canvas } = this.$refs;
 
@@ -119,7 +118,14 @@ export default {
 
     title() {
       return genmdmMapping[this.cc].label;
-    }
+    },
+
+    mouseMoveThrottled() {
+      return _.throttle(this.mouseMove, this.$store.state.knobThrottle)
+    },
+    knobThrottle() {
+      return this.$store.state.knobThrottle;
+    },
   },
 
   methods: {
@@ -165,16 +171,16 @@ export default {
       } = this;
 
       if (document.pointerLockElement === canvas) {
-        document.addEventListener("pointermove", this.mouseMove, false);
+        document.addEventListener("pointermove", this.mouseMoveThrottled, false);
         document.addEventListener("pointerup", this.mouseUp);
       } else {
-        document.removeEventListener("pointermove", this.mouseMove, false);
+        document.removeEventListener("pointermove", this.mouseMoveThrottled, false);
         this.mouseUp();
       }
     },
 
     mouseUp() {
-      document.removeEventListener("pointermove", this.mouseMove, false);
+      document.removeEventListener("pointermove", this.mouseMoveThrottled, false);
       document.removeEventListener("pointerup", this.mouseUp);
       document.body.style.cursor =
         this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
@@ -182,7 +188,6 @@ export default {
       this.draw();
       this.lastPointerPosition = { x: -1, y: -1 };
     },
-
     mouseMove(e) {
       // first touch
       // I feel I've overengineered this somewhat
