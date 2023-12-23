@@ -104,12 +104,12 @@ If you want to sync this state to your Sega, press the **"Send State"** button.
 The genMDM Editor UI reacts to incoming MIDI CC messages. It is recommended to route all MIDI messages to the Sega through genMDM Editor to keep the UI in sync.
 
 Find genMDM's MIDI CC parameters here:
-https://catskullelectronics.com/products/genmdm?variant=29399089381454
+[catskullelectronics.com/products/genmdm](https://catskullelectronics.com/products/genmdm?variant=29399089381454)
 
 Find MDMI's MIDI CC parameters here:
 
-- https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Common-MIDI-CCs-&-Events
-- https://github.com/rhargreaves/mega-drive-midi-interface/wiki/FM-Parameter-CCs
+- [mega-drive-midi-interface/wiki/Common-MIDI-CCs-&-Events](https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Common-MIDI-CCs-&-Events)
+- [mega-drive-midi-interface/wiki/FM-Parameter-CCs](https://github.com/rhargreaves/mega-drive-midi-interface/wiki/FM-Parameter-CCs)
 
 #### MIDI Note Polyphony
 
