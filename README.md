@@ -19,6 +19,7 @@ Also fully compatible with <a href="https://github.com/rhargreaves/mega-drive-mi
 </div>
 
 ## Using genMDM Editor
+
 genMDM Editor is a desktop executable and a webpage.
 
 The webpage works in Chromuim based browsers.
@@ -36,18 +37,19 @@ Check out the overview video on how to use the editor: [youtu.be/btzQHaF8cU4](ht
 1. Download the latest release at [genmdm-editor/releases/latest](https://github.com/2xAA/genmdm-editor/releases/latest) or navigate to [2xaa.github.io/genmdm-editor](https://2xaa.github.io/genmdm-editor).
 2. Select the MIDI device connected to your Sega in the MIDI Output dropdown.
 
-### MDMI Compatibility
-If using MDMI, ensure the **"MDMI Compatibility"** option is turned on *after* connecting the MDMI.  
+### Mega Drive MIDI Interface Compatibility
+
+If using MDMI (Mega Drive MIDI Interface), ensure the **"MDMI Compatibility"** option is turned on _after_ connecting the MDMI.
 The option sends a SysEx message to MDMI to invert the operator's Total Levels, as GenMDM does.
 
-With the **"MDMI Compatibility"** option turned on, changing channels in the editor informs MDMI to show the channel's settings on the video output.  
+With the **"MDMI Compatibility"** option turned on, changing channels in the editor informs MDMI to show the channel's settings on the video output.
 More information: [mega-drive-midi-interface/wiki/UI-Features](https://github.com/rhargreaves/mega-drive-midi-interface/wiki/UI-Features#displaying-current-fm-channel-parameters)
 
 ### File Formats
 
 #### `.genm` Format
 
-The genMDM Editor was build around the `.genm` file format, which can hold 128 genMDM instruments.  
+The genMDM Editor was build around the `.genm` file format, which can hold 128 genMDM instruments.
 Each instrument in the `.genm` file can store every parameter of the genMDM instrument.
 
 The `.genm` format does not include any of the editor settings, the global settings or the DAC Control settings.
@@ -56,7 +58,7 @@ More information: [little-scale.blogspot.com/genm-file-format](http://little-sca
 
 ##### `.genm` load/save
 
-Pressing the **"LOAD GENM"** button will open a file browser to choose a `.genm` file to load.  
+Pressing the **"LOAD GENM"** button will open a file browser to choose a `.genm` file to load.
 Loading a `.genm` file will overwrite the current patches in the editor. It will not load anything to the current channel.
 
 Pressing the **"SAVE GENM"** button will open a file browser to choose where to save a `.genm` file containing all the patches in the editor's patch list.
@@ -67,13 +69,13 @@ genMDM Editor can import and export `.tfi`, `.dmp` and `.y12` formats using thei
 
 The **"IMPORT"** buttons will open a file browser to load an instrument to the current channel - it does not write to the patch slot.
 
-The **"EXPORT"** buttons will open a file browser to save the current channel's parameters to the selected instrument file format - it does not read from the patch slot. 
+The **"EXPORT"** buttons will open a file browser to save the current channel's parameters to the selected instrument file format - it does not read from the patch slot.
 
-|Format|Information|Pitfalls|
-|---|---|---|
-|`.dmp`|`.dmp` is Deflemask's instrument format. It's a multi-system format, so not all patches can be imported into genMDM Editor - only those which were saved from the Sega Genesis system in Deflemask.|Doesn't hold the stereo configuration option.|
-|`.tfi`|`.tfi` is TFM Music Maker's instrument format.|Doesn't hold AM or FM LFO parameters or stereo configuation.|
-|`.y12`|`.y12` is a format for storing YM2612 FM preset data, similar to `.tfi`|Doesn't hold AM or FM LFO parameters or stereo configuation.|
+| Format | Information                                                                                                                                                                                         | Pitfalls                                                     |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `.dmp` | `.dmp` is Deflemask's instrument format. It's a multi-system format, so not all patches can be imported into genMDM Editor - only those which were saved from the Sega Genesis system in Deflemask. | Doesn't hold the stereo configuration option.                |
+| `.tfi` | `.tfi` is TFM Music Maker's instrument format.                                                                                                                                                      | Doesn't hold AM or FM LFO parameters or stereo configuation. |
+| `.y12` | `.y12` is a format for storing YM2612 FM preset data, similar to `.tfi`                                                                                                                             | Doesn't hold AM or FM LFO parameters or stereo configuation. |
 
 #### `.ged` format
 
@@ -90,12 +92,26 @@ genMDM Editor saves your editor state automatically, so if your Sega loses power
 
 #### Load/Save
 
-genMDM Editor's state can be saved to a file at any time by pressing the **"Save State"** button.  
+genMDM Editor's state can be saved to a file at any time by pressing the **"Save State"** button.
 
-The `.ged` files can be loaded back into the editor with the **"Load State"** button. Loading a `.ged` file will overwrite the editor's autosaved state immediately.  
+The `.ged` files can be loaded back into the editor with the **"Load State"** button. Loading a `.ged` file will overwrite the editor's autosaved state immediately.
 If you want to sync this state to your Sega, press the **"Send State"** button.
 
-### Polyphony
+### MIDI
+
+#### MIDI CC
+
+The genMDM Editor UI reacts to incoming MIDI CC messages. It is recommended to route all MIDI messages to the Sega through genMDM Editor to keep the UI in sync.
+
+Find genMDM's MIDI CC parameters here:
+https://catskullelectronics.com/products/genmdm?variant=29399089381454
+
+Find MDMI's MIDI CC parameters here:
+
+- https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Common-MIDI-CCs-&-Events
+- https://github.com/rhargreaves/mega-drive-midi-interface/wiki/FM-Parameter-CCs
+
+#### MIDI Note Polyphony
 
 genMDM does not support polyphony, though MDMI does the editor currently does not use this.
 
@@ -104,6 +120,7 @@ If **"Polyphony Enable"** is turned on, the **"MIDI Input"** device selected in 
 When **"Polyphony Enable"** is turned on, changes to the instrument are copied automatically over the polyphony channels.
 
 ## Support
+
 If you have any questions that aren't covered in the linked video, please start a discussion at [genmdm-editor/discussions](https://github.com/2xAA/genmdm-editor/discussions).
 
 ## Project development setup
@@ -136,25 +153,20 @@ yarn electron:serve
 yarn electron:build
 ```
 
-
 ## Contributing
 
 Contributions, issues and feature requests are welcome!
 
 Feel free to check [issues page](https://github.com/2xAA/genmdm-editor/issues).
 
-
-
 ## Show your support
 
-Give a ⭐️  if this project helped you!
+Give a ⭐️ if this project helped you!
 
 Consider sponsoring me on GitHub: [https://github.com/sponsors/2xAA](https://github.com/sponsors/2xAA).
 
-
-
 ## License
 
-Copyright © 2021 [2xAA](https://github.com/2xAA).
+Copyright © 2023 [2xAA](https://github.com/2xAA).
 
 This project is [MIT](https://github.com/2xAA/genmdm-editor/blob/main/LICENSE) licensed.
