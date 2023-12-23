@@ -18,24 +18,30 @@ Also fully compatible with <a href="https://github.com/rhargreaves/mega-drive-mi
   <video src="https://user-images.githubusercontent.com/554219/232328348-34175e38-a6a9-43a4-8781-14f210814465.mp4"></video>
 </div>
 
-## Using genMDM Editor
+## About genMDM Editor
 
 genMDM Editor is a desktop executable and a webpage.
 
-The webpage works in Chromuim based browsers.
-Those browsers include Google Chrome, Opera, Brave and Microsoft Edge.
+The webpage works in Firefox (starting at Firefox version 99) and Chromuim based browsers.  
+Chromium based browsers include Google Chrome, Opera, Brave and Microsoft Edge.
 
 Using genMDM on iOS/iPadOS is possible using Web MIDI Browser, found here: [apps.apple.com/app/web-midi-browser](https://apps.apple.com/app/web-midi-browser/id953846217)
 
 genMDM Editor is compatible with both the genMDM, by little-scale, and the MDMI (Mega Drive MIDI Interface), by Robert Hargreaves.
 This Readme will refer to both interfaces as **"your Sega"**, for convinience.
 
+## Using genMDM Editor
+
+### Quickstart
 Check out the overview video on how to use the editor: [youtu.be/btzQHaF8cU4](https://youtu.be/btzQHaF8cU4)
 
 ### Getting genMDM Editor
 
-1. Download the latest release at [genmdm-editor/releases/latest](https://github.com/2xAA/genmdm-editor/releases/latest) or navigate to [2xaa.github.io/genmdm-editor](https://2xaa.github.io/genmdm-editor).
-2. Select the MIDI device connected to your Sega in the MIDI Output dropdown.
+#### Desktop
+Download the latest desktop release at [genmdm-editor/releases/latest](https://github.com/2xAA/genmdm-editor/releases/latest).
+
+#### Web
+Navigate to [2xaa.github.io/genmdm-editor](https://2xaa.github.io/genmdm-editor).
 
 ### Mega Drive MIDI Interface Compatibility
 
