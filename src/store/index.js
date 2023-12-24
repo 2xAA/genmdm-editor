@@ -22,7 +22,8 @@ function createDefaultState() {
     maxPolyphonicChannels: 6,
     channel: 1,
     instrumentIndex: 0,
-    mdmiCompatibility: false
+    mdmiCompatibility: false,
+    knobThrottle: 0
   };
 
   const mappedCCNumbers = Object.keys(genmdmMapping);
@@ -256,6 +257,10 @@ const store = new Vuex.Store({
 
     SET_MDMICOMPATIBILITY(state, value) {
       state.mdmiCompatibility = value;
+    },
+
+    SET_KNOBTHROTTLE(state, value) {
+      state.knobThrottle = value;
     }
   }
 });

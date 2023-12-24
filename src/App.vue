@@ -226,6 +226,16 @@
                   v-model="mdmiCompatibility"
                 />
               </c>
+
+              <c span="6" class="control-group__label">Knob Throttle (in ms)</c>
+              <c span="2" class="control-group__control">
+                <DraggableSelect
+                  :values="[0, 25, 50, 75, 100, 125, 150, 175, 200]"
+                  :default="0"
+                  :emitArrayValue="true"
+                  v-model.number="knobThrottle"
+                />
+              </c>
             </template>
           </MDMControlGroup>
         </div>
@@ -442,6 +452,16 @@ export default {
 
       set(value) {
         this.$store.commit("SET_MDMICOMPATIBILITY", value);
+      }
+    },
+
+    knobThrottle: {
+      get() {
+        return this.$store.state.knobThrottle;
+      },
+
+      set(value) {
+        this.$store.commit("SET_KNOBTHROTTLE", value);
       }
     },
 
