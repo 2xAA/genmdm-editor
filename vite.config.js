@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import { sharedConfig } from "./shared.vite.config";
 
 export default defineConfig({
+  base: "./",
   root: "./src/renderer",
   build: {
     outDir: "../../out/renderer",
