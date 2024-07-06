@@ -31,7 +31,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build Windows
-        run: yarn run electron:build -w
+        run: yarn run electron:win
 
   build-macOS:
     name: Build macOS
@@ -56,7 +56,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build macOS
-        run: yarn run electron:build -m
+        run: yarn run electron:mac
 
   build-ubuntu:
     name: Build Ubuntu
@@ -74,4 +74,4 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build ubuntu
-        run: yarn run electron:build -l
+        run: yarn run electron:linux
