@@ -34,6 +34,7 @@ linux:
     - snap
     - deb
   category: Midi
+  maintainer: wray.pro
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
