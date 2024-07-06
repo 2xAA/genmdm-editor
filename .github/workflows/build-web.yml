@@ -22,7 +22,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build
-        run: yarn run build
+        run: yarn run build:browser
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.5
