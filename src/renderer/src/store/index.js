@@ -1,5 +1,6 @@
 import { reactive } from "vue";
 import { createStore } from "vuex";
+
 import vuejsStorage from "vuejs-storage";
 import genmdmMapping from "../genmdm-mapping";
 
@@ -59,8 +60,11 @@ const store = createStore({
         const value = values[cc];
         const isGlobal = GLOBAL_CC.indexOf(cc) > -1;
 
-        if (state.polyphonic || isGlobal) {
-          for (let i = 1; i < 7; ++i) {
+        if (
+          (state.polyphonic && state.channel <= state.maxPolyphonicChannels) ||
+          isGlobal
+        ) {
+          for (let i = 1; i <= state.maxPolyphonicChannels; ++i) {
             if (state[`channel${i}`][cc] === value) {
               continue;
             }

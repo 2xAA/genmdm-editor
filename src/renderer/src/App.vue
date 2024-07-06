@@ -5,8 +5,14 @@
         <grid columns="10">
           <c span="8">
             <grid columns="8">
-              <c span="2"><h2>Channel settings</h2></c>
-              <c span="6"></c>
+              <c span="3"><h2>Channel settings</h2></c>
+              <c span="5">
+                <h2>
+                  (<span v-if="polyphonic && channel <= maxPolyphonicChannels"
+                    >Poly</span
+                  ><span v-else>Mono</span>phonic Channel)
+                </h2>
+              </c>
 
               <c span="2">
                 <MDMControlGroup :cc-values="[14, 15, 77, 76, 75]">
@@ -217,7 +223,7 @@
       </c>
     </grid>
 
-    <Dialog :show="showAboutDialog" @close="closeAboutDialog">
+    <VDialog :show="showAboutDialog" @close="closeAboutDialog">
       <grid columns="3" class="about-dialog-text">
         <c span="3">
           <h1>genMDM Editor</h1>
@@ -275,7 +281,7 @@
           >.
         </c>
       </grid>
-    </Dialog>
+    </VDialog>
 
     <ResetStateDialog
       :show="showResetStateDialog"
@@ -306,7 +312,7 @@ import PatchList from "./components/PatchList.vue";
 import GENMFileDownload from "./components/GENMFileDownload.vue";
 import DMPFileUpload from "./components/DMPFileUpload.vue";
 import DMPFileDownload from "./components/DMPFileDownload.vue";
-import Dialog from "./components/Dialog.vue";
+import VDialog from "./components/Dialog.vue";
 import Y12FileUpload from "./components/Y12FileUpload.vue";
 import Y12FileDownload from "./components/Y12FileDownload.vue";
 import ResetStateDialog from "./components/ResetStateDialog.vue";
@@ -334,7 +340,7 @@ export default {
     GENMFileDownload,
     DMPFileUpload,
     DMPFileDownload,
-    Dialog,
+    VDialog,
     Y12FileUpload,
     Y12FileDownload,
     ResetStateDialog,
@@ -345,7 +351,7 @@ export default {
   data() {
     return {
       version: pkg.version,
-      isElectronBuild: !!process.env.ELECTRON_BUILD,
+      isElectronBuild: process.env.ELECTRON_BUILD,
 
       inputs: [],
       outputs: [],
@@ -506,7 +512,6 @@ export default {
         WebMidi.addListener("connected", this.populateInputAndOutputPorts);
         WebMidi.addListener("disconnected", this.populateInputAndOutputPorts);
       }
-      this.populateInputAndOutputPorts();
     }, true);
 
     this.storeUnsubscribe = this.$store.subscribe((mutation) => {
@@ -523,8 +528,6 @@ export default {
     if (input) {
       input.removeListener();
     }
-
-    WebMidi.disable();
   },
 
   methods: {
@@ -599,7 +602,7 @@ export default {
 
       let channel = e.channel;
 
-      if (this.polyphonic && channel < this.maxPolyphonicChannels) {
+      if (this.polyphonic && channel <= this.maxPolyphonicChannels) {
         channel = this.nextPolyphonyChannel(number);
       }
 
@@ -639,7 +642,7 @@ export default {
           this.outputPort.sendPitchBend(e.value, i);
         }
       } else {
-        this.outputPort.sendPitchBend(e.value, this.channel);
+        this.outputPort.sendPitchBend(e.value, e.channel);
       }
     },
 
@@ -756,7 +759,7 @@ body {
 }
 
 /* big screens */
-@media only screen and (min-width: 1160px) {
+@media only screen and (min-width: 1280px) {
   body {
     display: flex;
     justify-content: flex-end;
