@@ -128,7 +128,9 @@ div.body {
   min-height: 72px;
   padding: 8px;
 }
+</style>
 
+<style>
 .close-icon path {
   fill: var(--foreground-color);
 }
