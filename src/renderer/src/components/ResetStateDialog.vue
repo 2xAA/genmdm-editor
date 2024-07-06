@@ -1,9 +1,9 @@
 <template>
-  <Dialog
+  <VDialog
     :size="[380, 320]"
     :show="show"
+    :close-disabled="resetDisabled"
     @close="$emit('close')"
-    :closeDisabled="resetDisabled"
   >
     <grid columns="3" class="reset-state-dialog-text">
       <c span="3"><h2>Reset State</h2></c>
@@ -12,62 +12,63 @@
           <c span="6" class="control-group__label">Channel</c>
           <c span="2" class="control-group__control">
             <DraggableSelect
+              v-model="channel"
               :values="[0, 1, 2, 3, 4, 5, 6, 7]"
-              :emitArrayValue="true"
+              :emit-array-value="true"
               :default="0"
               :labels="['None', '1', '2', '3', '4', '5', '6', 'All']"
-              v-model="channel"
             />
           </c>
           <c span="6" class="control-group__label">Reset Editor Settings</c>
           <c span="2" class="control-group__control">
             <DraggableSelect
+              v-model="resetEditor"
               :values="[0, 1]"
-              :emitArrayValue="true"
+              :emit-array-value="true"
               :default="0"
               :labels="['No', 'Yes']"
-              v-model="resetEditor"
             />
           </c>
           <c span="6" class="control-group__label">Reset Patches</c>
           <c span="2" class="control-group__control">
             <DraggableSelect
+              v-model="resetPatches"
               :values="[0, 1]"
-              :emitArrayValue="true"
+              :emit-array-value="true"
               :default="0"
               :labels="['No', 'Yes']"
-              v-model="resetPatches"
             />
           </c>
         </grid>
       </c>
       <c span="2+1">
-        <button class="button" @click="resetState" :disabled="resetDisabled">
+        <button class="button" :disabled="resetDisabled" @click="resetState">
           RESET
         </button>
       </c>
     </grid>
-  </Dialog>
+  </VDialog>
 </template>
 
 <script>
-import Dialog from "./Dialog";
-import DraggableSelect from "./DraggableSelect";
+import VDialog from "./Dialog.vue";
+import DraggableSelect from "./DraggableSelect.vue";
 
 export default {
+  components: {
+    VDialog,
+    DraggableSelect,
+  },
   props: ["show"],
 
-  components: {
-    Dialog,
-    DraggableSelect
-  },
+  emits: ["close"],
 
   data() {
     return {
       resetDisabled: false,
       channel: 0,
       resetEditor: 0,
-      resetPatches: 0
+      resetPatches: 0,
     };
   },
 
@@ -79,12 +80,12 @@ export default {
       await this.$store.dispatch("resetState", {
         channel,
         resetEditor,
-        resetPatches
+        resetPatches,
       });
 
       this.resetDisabled = false;
-    }
-  }
+    },
+  },
 };
 </script>
 

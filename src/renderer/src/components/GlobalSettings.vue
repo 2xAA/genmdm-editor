@@ -6,11 +6,11 @@
 </template>
 
 <script>
-import MDMControlGroup from "./MDMControlGroup";
+import MDMControlGroup from "./MDMControlGroup.vue";
 
 export default {
   components: {
-    MDMControlGroup
-  }
+    MDMControlGroup,
+  },
 };
 </script>

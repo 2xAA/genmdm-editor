@@ -7,13 +7,13 @@
 </template>
 
 <script>
-import MDMControlGroup from "./MDMControlGroup";
-import MDMWaveform from "./MDMWaveform";
+import MDMControlGroup from "./MDMControlGroup.vue";
+import MDMWaveform from "./MDMWaveform.vue";
 
 export default {
   components: {
     MDMControlGroup,
-    MDMWaveform
-  }
+    MDMWaveform,
+  },
 };
 </script>

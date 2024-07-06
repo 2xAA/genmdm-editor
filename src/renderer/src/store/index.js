@@ -1,10 +1,10 @@
-import Vue from "vue";
-import Vuex from "vuex";
+import { reactive } from "vue";
+import { createStore } from "vuex";
 import vuejsStorage from "vuejs-storage";
 import genmdmMapping from "../genmdm-mapping";
 
 function sleep(milliseconds = 0) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 const GLOBAL_CC = [1, 74, 78, 79, 80, 81, 83, 84, 85, 86, 88, 89];
@@ -22,7 +22,7 @@ function createDefaultState() {
     maxPolyphonicChannels: 6,
     channel: 1,
     instrumentIndex: 0,
-    mdmiCompatibility: false
+    mdmiCompatibility: false,
   };
 
   const mappedCCNumbers = Object.keys(genmdmMapping);
@@ -30,7 +30,7 @@ function createDefaultState() {
   for (let i = 0; i < NUM_CHANNELS; ++i) {
     defaultState[`channel${i + 1}`] = {};
 
-    mappedCCNumbers.forEach(key => {
+    mappedCCNumbers.forEach((key) => {
       defaultState[`channel${i + 1}`][key] = genmdmMapping[key].default || 0;
     });
   }
@@ -40,22 +40,20 @@ function createDefaultState() {
 
 const state = createDefaultState();
 
-Vue.use(Vuex);
-
-const store = new Vuex.Store({
+const store = createStore({
   state,
 
   plugins: [
     vuejsStorage({
       keys: Object.keys(state),
       //keep state.count in localStorage
-      namespace: "genmdm_autosave"
-    })
+      namespace: "genmdm_autosave",
+    }),
   ],
 
   actions: {
     setCCValues({ commit, state }, { values, ignoreSameValues = true }) {
-      Object.keys(values).forEach(key => {
+      Object.keys(values).forEach((key) => {
         const cc = parseInt(key, 10);
 
         const value = values[cc];
@@ -83,7 +81,7 @@ const store = new Vuex.Store({
     },
 
     setCCValuesOnChannel({ commit, state }, values = {}) {
-      Object.keys(values).forEach(key => {
+      Object.keys(values).forEach((key) => {
         if (isNaN(parseInt(key, 10))) {
           return;
         }
@@ -172,10 +170,10 @@ const store = new Vuex.Store({
     // channel = 7         - reset all channels
     resetState(
       { commit, dispatch },
-      { channel = undefined, resetEditor = false, resetPatches = false } = {}
+      { channel = undefined, resetEditor = false, resetPatches = false } = {},
     ) {
       const defaultState = createDefaultState();
-      const newState = Vue.observable({});
+      const newState = reactive({});
 
       let syncWithDevice = false;
 
@@ -213,7 +211,7 @@ const store = new Vuex.Store({
       if (syncWithDevice) {
         return dispatch("sendState");
       }
-    }
+    },
   },
 
   mutations: {
@@ -256,8 +254,8 @@ const store = new Vuex.Store({
 
     SET_MDMICOMPATIBILITY(state, value) {
       state.mdmiCompatibility = value;
-    }
-  }
+    },
+  },
 });
 
 export default store;

@@ -1,16 +1,15 @@
 <template>
   <grid columns="8" class="control-group">
     <slot name="header"></slot>
-    <template v-for="cc in ccValues">
+    <template v-for="cc in ccValues" :key="`label-${cc}`">
       <c
+        v-tippy="{ followCursor: true }"
         span="6"
         class="control-group__label"
-        :key="`label-${cc}`"
         :content="controls[cc].description"
-        v-tippy="{ followCursor: true }"
         >{{ controls[cc].label }}</c
       >
-      <c span="2" class="control-group__control" :key="`control-${cc}`">
+      <c span="2" class="control-group__control">
         <MDMControl :cc="cc" />
       </c>
     </template>
@@ -20,31 +19,30 @@
 
 <script>
 import genmdmMapping from "../genmdm-mapping.js";
-import MDMControl from "./MDMControl";
+import MDMControl from "./MDMControl.vue";
 
 export default {
+  components: {
+    MDMControl,
+  },
   props: {
     ccValues: {
       type: Array,
-      default: () => []
-    }
-  },
-
-  components: {
-    MDMControl
+      default: () => [],
+    },
   },
 
   computed: {
     controls() {
       const controls = {};
 
-      this.ccValues.forEach(cc => {
+      this.ccValues.forEach((cc) => {
         controls[cc] = genmdmMapping[cc];
       });
 
       return controls;
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -10,43 +10,28 @@
 
               <c span="2">
                 <MDMControlGroup :cc-values="[14, 15, 77, 76, 75]">
-                  <template v-slot:header>
+                  <template #header>
                     <c span="6" class="control-group__label">Channel</c>
                     <c span="2" class="control-group__control">
                       <DraggableSelect
+                        v-model.number="channel"
                         :values="[1, 2, 3, 4, 5, 6]"
                         :default="0"
-                        :emitArrayValue="true"
-                        v-model.number="channel"
+                        :emit-array-value="true"
                       />
                     </c>
                   </template>
 
-                  <template v-slot:footer>
+                  <template #footer>
                     <c span="6" class="control-group__label">RAM Slot</c>
                     <c span="2" class="control-group__control">
                       <DraggableSelect
+                        v-model.number="ramSlot"
                         :values="[
-                          1,
-                          2,
-                          3,
-                          4,
-                          5,
-                          6,
-                          7,
-                          8,
-                          9,
-                          10,
-                          11,
-                          12,
-                          13,
-                          14,
-                          15,
-                          16
+                          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
                         ]"
                         :default="0"
-                        :emitArrayValue="true"
-                        v-model.number="ramSlot"
+                        :emit-array-value="true"
                       />
                     </c>
                   </template>
@@ -59,7 +44,7 @@
                         sendCC({
                           cc: 9,
                           value: Math.round((ramSlot / 16) * 127),
-                          channel
+                          channel,
                         })
                       "
                     >
@@ -73,7 +58,7 @@
                         sendCC({
                           cc: 6,
                           value: Math.round((ramSlot / 16) * 127),
-                          channel
+                          channel,
                         })
                       "
                     >
@@ -122,9 +107,7 @@
             <grid columns="2" class="patch-management-buttons">
               <c span="2"><hr /></c>
               <c>
-                <button class="button" @click="sendState">
-                  Send State
-                </button>
+                <button class="button" @click="sendState">Send State</button>
               </c>
               <c>
                 <button class="button" @click="openResetStateDialog">
@@ -168,62 +151,60 @@
           <h2>Editor Settings</h2>
 
           <MDMControlGroup>
-            <template v-slot:header>
+            <template #header>
               <c span="6" class="control-group__label">MIDI Input</c>
               <c span="2" class="control-group__control">
-                <select class="select" name="inputs" v-model="inputId">
-                  <option disabled selected value="none">
-                    ---
-                  </option>
+                <select v-model="inputId" class="select" name="inputs">
+                  <option disabled selected value="none">---</option>
                   <option
                     v-for="(input, index) in inputs"
                     :key="index"
                     :value="input.id"
-                    >{{ input.name }} ({{ input.manufacturer }})</option
                   >
+                    {{ input.name }} ({{ input.manufacturer }})
+                  </option>
                 </select>
               </c>
 
               <c span="6" class="control-group__label">MIDI Output</c>
               <c span="2" class="control-group__control">
-                <select class="select" name="outputs" v-model="outputId">
-                  <option disabled selected value="none">
-                    ---
-                  </option>
+                <select v-model="outputId" class="select" name="outputs">
+                  <option disabled selected value="none">---</option>
                   <option
                     v-for="(output, index) in outputs"
                     :key="index"
                     :value="output.id"
-                    >{{ output.name }} ({{ output.manufacturer }})</option
                   >
+                    {{ output.name }} ({{ output.manufacturer }})
+                  </option>
                 </select>
               </c>
 
               <c span="6" class="control-group__label">Polyphony Enable</c>
               <c span="2" class="control-group__control">
                 <LabelledCheckbox
+                  v-model="polyphonic"
                   :labels="['Off', 'On']"
                   :emit-boolean="true"
-                  v-model="polyphonic"
                 />
               </c>
 
               <c span="6" class="control-group__label">Max Poly. Channels</c>
               <c span="2" class="control-group__control">
                 <DraggableSelect
+                  v-model.number="maxPolyphonicChannels"
                   :values="[2, 3, 4, 5, 6]"
                   :default="6"
-                  :emitArrayValue="true"
-                  v-model.number="maxPolyphonicChannels"
+                  :emit-array-value="true"
                 />
               </c>
 
               <c span="6" class="control-group__label">MDMI Compatibility</c>
               <c span="2" class="control-group__control">
                 <LabelledCheckbox
+                  v-model="mdmiCompatibility"
                   :labels="['Off', 'On']"
                   :emit-boolean="true"
-                  v-model="mdmiCompatibility"
                 />
               </c>
             </template>
@@ -307,25 +288,25 @@
 import WebMidi from "webmidi";
 import FlexibleLink from "vue-flexible-link/src/FlexibleLink.vue";
 
-import pkg from "../package.json";
+import pkg from "../../../package.json";
 import shuffle from "./utils/shuffle";
-import MDMControlGroup from "./components/MDMControlGroup";
-import DraggableSelect from "./components/DraggableSelect";
-import LabelledCheckbox from "./components/LabelledCheckbox";
-import MDMADSR from "./components/MDMADSR";
-import TFIFileDownload from "./components/TFIFileDownload";
-import TFIFileUpload from "./components/TFIFileUpload";
-import GENMFileUpload from "./components/GENMFileUpload";
-import DACSettings from "./components/DACSettings";
-import GlobalSettings from "./components/GlobalSettings";
-import MDMAlgorithmDisplay from "./components/MDMAlgorithmDisplay";
-import MDMSSGEGDisplay from "./components/MDMSSGEGDisplay";
-import Arrow from "./components/Arrow";
-import PatchList from "./components/PatchList";
-import GENMFileDownload from "./components/GENMFileDownload";
-import DMPFileUpload from "./components/DMPFileUpload";
-import DMPFileDownload from "./components/DMPFileDownload";
-import Dialog from "./components/Dialog";
+import MDMControlGroup from "./components/MDMControlGroup.vue";
+import DraggableSelect from "./components/DraggableSelect.vue";
+import LabelledCheckbox from "./components/LabelledCheckbox.vue";
+import MDMADSR from "./components/MDMADSR.vue";
+import TFIFileDownload from "./components/TFIFileDownload.vue";
+import TFIFileUpload from "./components/TFIFileUpload.vue";
+import GENMFileUpload from "./components/GENMFileUpload.vue";
+import DACSettings from "./components/DACSettings.vue";
+import GlobalSettings from "./components/GlobalSettings.vue";
+import MDMAlgorithmDisplay from "./components/MDMAlgorithmDisplay.vue";
+import MDMSSGEGDisplay from "./components/MDMSSGEGDisplay.vue";
+import Arrow from "./components/Arrow.vue";
+import PatchList from "./components/PatchList.vue";
+import GENMFileDownload from "./components/GENMFileDownload.vue";
+import DMPFileUpload from "./components/DMPFileUpload.vue";
+import DMPFileDownload from "./components/DMPFileDownload.vue";
+import Dialog from "./components/Dialog.vue";
 import Y12FileUpload from "./components/Y12FileUpload.vue";
 import Y12FileDownload from "./components/Y12FileDownload.vue";
 import ResetStateDialog from "./components/ResetStateDialog.vue";
@@ -358,7 +339,7 @@ export default {
     Y12FileDownload,
     ResetStateDialog,
     StateUpload,
-    StateDownload
+    StateDownload,
   },
 
   data() {
@@ -395,14 +376,14 @@ export default {
         "Cyanide Dansen",
         "Polyop",
         "jonic",
-        "Robert Hargreaves"
-      ]
+        "Robert Hargreaves",
+      ],
     };
   },
 
   computed: {
     outputPort() {
-      return this.outputs.find(output => output.id === this.outputId);
+      return this.outputs.find((output) => output.id === this.outputId);
     },
 
     channel: {
@@ -412,7 +393,7 @@ export default {
 
       set(value) {
         this.$store.dispatch("setChannel", value);
-      }
+      },
     },
 
     polyphonic: {
@@ -422,7 +403,7 @@ export default {
 
       set(value) {
         this.$store.dispatch("setPolyphony", value);
-      }
+      },
     },
 
     maxPolyphonicChannels: {
@@ -432,7 +413,7 @@ export default {
 
       set(value) {
         this.$store.dispatch("setMaxPolyphonicChannels", value);
-      }
+      },
     },
 
     mdmiCompatibility: {
@@ -442,7 +423,7 @@ export default {
 
       set(value) {
         this.$store.commit("SET_MDMICOMPATIBILITY", value);
-      }
+      },
     },
 
     friends() {
@@ -457,33 +438,93 @@ export default {
 
     instrumentIndex() {
       return this.$store.state.instrumentIndex;
-    }
+    },
+  },
+
+  watch: {
+    inputId(newId, oldId) {
+      if (oldId) {
+        const oldInput = this.inputs.find((input) => input.id === oldId);
+        if (oldInput) {
+          oldInput.removeListener();
+        }
+      }
+
+      const input = this.inputs.find((input) => input.id === newId);
+
+      // Listen for a 'note on' message on all channels
+      input.addListener("noteon", "all", this.handleNoteOn);
+
+      // Listen for a 'note off' message on all channels
+      input.addListener("noteoff", "all", this.handleNoteOff);
+
+      // Listen for a pitch bend message on all channels
+      input.addListener("pitchbend", "all", this.handlePitchBend);
+
+      input.addListener("controlchange", "all", this.handleCC);
+
+      // Listen for a program change message on all channels
+      input.addListener("programchange", "all", this.handleProgramChange);
+    },
+
+    channel(value, oldValue) {
+      if (this.mdmiCompatibility && oldValue !== value) {
+        // Show FM parameters for the channel when using SEGA Mega Drive MIDI Interface
+        // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/UI-Features
+        try {
+          this.outputPort.sendControlChange(83, 127, value);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    },
+
+    mdmiCompatibility(value) {
+      if (!this.outputPort) {
+        return;
+      }
+
+      // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
+      // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
+
+      try {
+        this.outputPort.sendSysex(
+          [0x00, 0x22, 0x77, 0x07, !value ? 0x00 : 0x01],
+          [],
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    },
   },
 
   mounted() {
-    WebMidi.enable(err => {
+    WebMidi.enable((err) => {
       if (err) {
         console.log("WebMidi could not be enabled.", err);
       } else {
         WebMidi.addListener("connected", this.populateInputAndOutputPorts);
         WebMidi.addListener("disconnected", this.populateInputAndOutputPorts);
       }
+      this.populateInputAndOutputPorts();
     }, true);
 
-    this.storeUnsubscribe = this.$store.subscribe(mutation => {
+    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
       if (mutation.type === "SET_CC_VALUE") {
         this.sendCC(mutation.payload);
       }
     });
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.storeUnsubscribe();
 
-    const input = this.inputs.find(input => input.id === this.inputId);
+    const input = this.inputs.find((input) => input.id === this.inputId);
     if (input) {
       input.removeListener();
     }
+
+    WebMidi.disable();
   },
 
   methods: {
@@ -495,7 +536,7 @@ export default {
 
       this.$store.dispatch("setCCValues", {
         values: data,
-        ignoreSameValues: false
+        ignoreSameValues: false,
       });
     },
 
@@ -513,8 +554,8 @@ export default {
         index: this.instrumentIndex,
         patch: {
           data: { ...this.$store.state[`channel${this.channel}`] },
-          name
-        }
+          name,
+        },
       });
     },
 
@@ -552,7 +593,7 @@ export default {
 
       const {
         note: { number, name, octave },
-        velocity
+        velocity,
       } = e;
       const note = `${name}${octave}`;
 
@@ -565,7 +606,7 @@ export default {
       this.notesOn[number] = channel;
 
       this.outputPort.playNote(note, channel, {
-        velocity
+        velocity,
       });
     },
 
@@ -605,7 +646,7 @@ export default {
     handleCC(e) {
       this.$store.dispatch("setCCValuesOnChannel", {
         [e.controller.number]: this.inverse ? 127 - e.value : e.value,
-        channel: e.channel
+        channel: e.channel,
       });
 
       if (!this.outputPort) {
@@ -626,11 +667,11 @@ export default {
     freeChannels() {
       const channels = [false, true, true, true, true, true];
 
-      Object.values(this.notesOn).forEach(channel => {
+      Object.values(this.notesOn).forEach((channel) => {
         channels[channel] = false;
       });
 
-      return channels.findIndex(channel => channel);
+      return channels.findIndex((channel) => channel);
     },
 
     nextPolyphonyChannel(newNoteNumber) {
@@ -675,65 +716,8 @@ export default {
 
     closeResetStateDialog() {
       this.showResetStateDialog = false;
-    }
+    },
   },
-
-  watch: {
-    inputId(newId, oldId) {
-      if (oldId) {
-        const oldInput = this.inputs.find(input => input.id === oldId);
-        if (oldInput) {
-          oldInput.removeListener();
-        }
-      }
-
-      const input = this.inputs.find(input => input.id === newId);
-
-      // Listen for a 'note on' message on all channels
-      input.addListener("noteon", "all", this.handleNoteOn);
-
-      // Listen for a 'note off' message on all channels
-      input.addListener("noteoff", "all", this.handleNoteOff);
-
-      // Listen for a pitch bend message on all channels
-      input.addListener("pitchbend", "all", this.handlePitchBend);
-
-      input.addListener("controlchange", "all", this.handleCC);
-
-      // Listen for a program change message on all channels
-      input.addListener("programchange", "all", this.handleProgramChange);
-    },
-
-    channel(value, oldValue) {
-      if (this.mdmiCompatibility && oldValue !== value) {
-        // Show FM parameters for the channel when using SEGA Mega Drive MIDI Interface
-        // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/UI-Features
-        try {
-          this.outputPort.sendControlChange(83, 127, value);
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    },
-
-    mdmiCompatibility(value) {
-      if (!this.outputPort) {
-        return;
-      }
-
-      // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
-      // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
-
-      try {
-        this.outputPort.sendSysex(
-          [0x00, 0x22, 0x77, 0x07, !value ? 0x00 : 0x01],
-          []
-        );
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }
 };
 </script>
 
@@ -772,7 +756,7 @@ body {
 }
 
 /* big screens */
-@media only screen and (min-width: 1280px) {
+@media only screen and (min-width: 1160px) {
   body {
     display: flex;
     justify-content: flex-end;

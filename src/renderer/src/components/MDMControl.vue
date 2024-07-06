@@ -3,55 +3,46 @@
     <template v-if="type !== 'bool'">
       <DraggableSelect
         v-if="enumValues && dataValues"
+        v-model.number="value"
         :values="dataValues"
-        :emitArrayValue="true"
+        :emit-array-value="true"
         :default="defaultValue"
         :labels="enumValues"
-        v-model.number="value"
       />
       <DraggableSelect
         v-else-if="enumValues"
+        v-model.number="value"
         :values="rangeValues"
         :default="defaultValue"
         :labels="enumValues"
-        v-model.number="value"
       />
       <DraggableSelect
         v-else-if="range > 0"
+        v-model.number="value"
         :values="rangeValues"
         :default="defaultValue"
-        v-model.number="value"
       />
     </template>
 
-    <LabelledCheckbox v-else :labels="enumValues" v-model.number="value" />
+    <LabelledCheckbox v-else v-model.number="value" :labels="enumValues" />
   </div>
 </template>
 
 <script>
 import genmdmMapping from "../genmdm-mapping.js";
-import DraggableSelect from "./DraggableSelect";
-import LabelledCheckbox from "./LabelledCheckbox";
+import DraggableSelect from "./DraggableSelect.vue";
+import LabelledCheckbox from "./LabelledCheckbox.vue";
 
 export default {
+  components: {
+    DraggableSelect,
+    LabelledCheckbox,
+  },
   props: {
     cc: {
       type: Number,
-      required: true
-    }
-  },
-
-  components: {
-    DraggableSelect,
-    LabelledCheckbox
-  },
-
-  created() {
-    if (!genmdmMapping[this.cc]) {
-      throw new Error(`CC mapping doesn't exist for ${this.cc}`);
-    }
-
-    this.value = this.defaultValue;
+      required: true,
+    },
   },
 
   computed: {
@@ -74,9 +65,9 @@ export default {
         }
 
         this.$store.dispatch("setCCValues", {
-          values
+          values,
         });
-      }
+      },
     },
 
     mapping() {
@@ -120,8 +111,16 @@ export default {
       }
 
       return values;
+    },
+  },
+
+  created() {
+    if (!genmdmMapping[this.cc]) {
+      throw new Error(`CC mapping doesn't exist for ${this.cc}`);
     }
-  }
+
+    this.value = this.defaultValue;
+  },
 };
 </script>
 

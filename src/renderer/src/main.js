@@ -1,26 +1,23 @@
-import Vue from "vue";
-import VueTippy, { TippyComponent } from "vue-tippy";
+import { createApp } from "vue";
+import VueTippy from "vue-tippy";
 import App from "./App.vue";
 import store from "./store";
 
 import "./assets/css/raster.css";
 import "tippy.js/themes/light.css";
 import "./assets/css/genmdm.css";
+import "tippy.js/dist/tippy.css";
+
 import { getColors } from "./utils/get-colors";
 
-Vue.config.productionTip = false;
-Vue.config.ignoredElements = ["grid", "c"];
+const app = createApp(App);
 
-Vue.use(VueTippy);
-Vue.component("tippy", TippyComponent);
-
-Object.defineProperty(Vue.prototype, "$colors", {
+Object.defineProperty(app.config.globalProperties, "$colors", {
   get() {
     return getColors();
   }
 });
 
-new Vue({
-  render: h => h(App),
-  store
-}).$mount("#app");
+app.use(VueTippy);
+app.use(store);
+app.mount("#app");

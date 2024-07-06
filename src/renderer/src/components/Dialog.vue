@@ -3,15 +3,15 @@
     ref="dialog"
     :style="{
       width,
-      height
+      height,
     }"
   >
     <header>
       <button
-        @click="close"
         class="close"
         aria-label="Close Dialog"
         :disabled="closeDisabled"
+        @click="close"
       >
         <CloseIcon class="close-icon" width="14" height="15" />
       </button>
@@ -24,30 +24,36 @@
 </template>
 
 <script>
-import CloseIcon from "@/assets/graphics/close.svg";
+import CloseIcon from "../assets/graphics/close.svg";
 
 export default {
+  components: {
+    CloseIcon,
+  },
+
   props: {
     title: {
       type: String,
-      default: "modV"
+      default: "modV",
     },
 
     show: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     closeDisabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     size: {
       type: Array,
-      default: () => [640, 480]
-    }
+      default: () => [640, 480],
+    },
   },
+
+  emits: ["close"],
 
   computed: {
     width() {
@@ -55,11 +61,15 @@ export default {
     },
     height() {
       return `${this.size[1]}px`;
-    }
+    },
   },
 
-  components: {
-    CloseIcon
+  watch: {
+    show(value) {
+      if (value) {
+        this.open();
+      }
+    },
   },
 
   mounted() {
@@ -76,16 +86,8 @@ export default {
     close() {
       this.$emit("close");
       this.$refs.dialog.close();
-    }
+    },
   },
-
-  watch: {
-    show(value) {
-      if (value) {
-        this.open();
-      }
-    }
-  }
 };
 </script>
 

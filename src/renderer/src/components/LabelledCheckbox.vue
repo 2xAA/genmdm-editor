@@ -7,6 +7,8 @@
 
 <script>
 export default {
+  emits: ["update:modelValue"],
+
   props: {
     default: {},
 
@@ -50,7 +52,7 @@ export default {
   watch: {
     value(newValue, oldValue) {
       if (newValue !== oldValue) {
-        this.$emit("input", this.emitBoolean ? !!this.value : this.value);
+        this.$emit("update:modelValue", this.emitBoolean ? !!this.value : this.value);
       }
     }
   }

@@ -1,8 +1,8 @@
 <template>
   <div class="dial">
     <canvas
-      :title="title"
       ref="canvas"
+      :title="title"
       class="ns-resize-cursor"
       @pointerdown="requestPointerLock"
       @pointerup="exitPointerLock"
@@ -25,28 +25,28 @@ export default {
   props: {
     cc: {
       type: Number,
-      required: true
+      required: true,
     },
 
     ccOffset: {
       type: Number,
-      default: 0
+      default: 0,
     },
 
     size: {
       type: Number,
-      default: 60
+      default: 60,
     },
 
     quantise: {
       type: Number,
-      default: -1
+      default: -1,
     },
 
     inverse: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
 
   data() {
@@ -55,14 +55,48 @@ export default {
       movementValue: 0,
       storeUnsubscribe: null,
       mouseButtonDown: false,
-      lastPointerPosition: { x: -1, y: -1 }
+      lastPointerPosition: { x: -1, y: -1 },
     };
+  },
+
+  computed: {
+    q() {
+      return 1 / (this.quantise - 1);
+    },
+
+    internalValue() {
+      const { q, quantise, movementValue } = this;
+
+      let value = movementValue / 127;
+
+      if (quantise > -1) {
+        value = Math.floor(value / q) * q;
+      }
+
+      return value;
+    },
+
+    scaledValue() {
+      return Math.floor(
+        this.internalValue * (genmdmMapping[this.cc].range - 1),
+      );
+    },
+
+    title() {
+      return genmdmMapping[this.cc].label;
+    },
+  },
+
+  watch: {
+    "$store.state.channel"() {
+      this.updateFromStore();
+    },
   },
 
   created() {
     this.updateFromStore();
 
-    this.storeUnsubscribe = this.$store.subscribe(mutation => {
+    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
       if (mutation.type === "SET_CC_VALUE") {
         const { cc, value, channel } = mutation.payload;
 
@@ -87,51 +121,23 @@ export default {
     this.draw();
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     document.removeEventListener("pointerup", this.mouseUp);
     document.removeEventListener("pointermove", this.mouseMove);
     document.body.classList.remove("ns-resize-cursor");
     this.storeUnsubscribe();
   },
 
-  computed: {
-    q() {
-      return 1 / (this.quantise - 1);
-    },
-
-    internalValue() {
-      const { q, quantise, movementValue } = this;
-
-      let value = movementValue / 127;
-
-      if (quantise > -1) {
-        value = Math.floor(value / q) * q;
-      }
-
-      return value;
-    },
-
-    scaledValue() {
-      return Math.floor(
-        this.internalValue * (genmdmMapping[this.cc].range - 1)
-      );
-    },
-
-    title() {
-      return genmdmMapping[this.cc].label;
-    }
-  },
-
   methods: {
     requestPointerLock(e) {
       const {
-        $refs: { canvas }
+        $refs: { canvas },
       } = this;
 
       document.addEventListener(
         "pointerlockchange",
         this.lockChangeAlert,
-        false
+        false,
       );
 
       if (canvas.requestPointerLock) {
@@ -155,13 +161,13 @@ export default {
       document.removeEventListener(
         "pointerlockchange",
         this.lockChangeAlert,
-        false
+        false,
       );
     },
 
     lockChangeAlert() {
       const {
-        $refs: { canvas }
+        $refs: { canvas },
       } = this;
 
       if (document.pointerLockElement === canvas) {
@@ -203,13 +209,15 @@ export default {
       const clampedNewValue = Math.max(0, Math.min(127, newValue));
 
       this.movementValue = clampedNewValue;
+      this.draw();
+
       this.downY = e.pageY;
       this.$store.dispatch("setCCValues", {
         values: {
           [this.cc + this.ccOffset]: this.inverse
             ? 127 - clampedNewValue
-            : clampedNewValue
-        }
+            : clampedNewValue,
+        },
       });
     },
 
@@ -217,7 +225,7 @@ export default {
       const {
         $refs: { canvas },
         context,
-        size
+        size,
       } = this;
       const dpr = window.devicePixelRatio;
 
@@ -231,14 +239,18 @@ export default {
     },
 
     draw() {
+      if (!this.$refs.canvas) {
+        return;
+      }
+
       const {
         $refs: {
-          canvas: { width: cw, height: ch }
+          canvas: { width: cw, height: ch },
         },
         context,
         size,
         internalValue,
-        quantise
+        quantise,
       } = this;
 
       const dpr = window.devicePixelRatio;
@@ -268,11 +280,11 @@ export default {
             context.beginPath();
             context.moveTo(
               size * 0.150555556 * dpr,
-              cw - size * 0.150555556 * dpr
+              cw - size * 0.150555556 * dpr,
             );
             context.lineTo(
               size * 0.173888889 * dpr,
-              cw - size * 0.173888889 * dpr
+              cw - size * 0.173888889 * dpr,
             );
             context.stroke();
 
@@ -295,7 +307,7 @@ export default {
           ch / 2 + (size / 5) * dpr,
           (size / 25) * dpr,
           0,
-          Math.PI * 2
+          Math.PI * 2,
         );
         context.stroke();
         context.restore();
@@ -304,23 +316,13 @@ export default {
 
     updateFromStore() {
       const { channel } = this.$store.state;
-      const value = this.$store.state[`channel${channel}`][
-        this.cc + this.ccOffset
-      ];
+      const value =
+        this.$store.state[`channel${channel}`][this.cc + this.ccOffset];
 
       this.movementValue = this.inverse ? -value + 127 : value;
-    }
-  },
-
-  watch: {
-    "$store.state.channel"() {
-      this.updateFromStore();
-    },
-
-    movementValue() {
       this.draw();
-    }
-  }
+    },
+  },
 };
 </script>
 

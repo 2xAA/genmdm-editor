@@ -1,86 +1,71 @@
-"use strict";
+import { app, shell, BrowserWindow, ipcMain } from "electron";
+import { join } from "path";
+import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 
-import { app, protocol, BrowserWindow } from "electron";
-import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
-import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
-const isDevelopment = process.env.NODE_ENV !== "production";
-
-// Scheme must be registered before the app is ready
-protocol.registerSchemesAsPrivileged([
-  { scheme: "app", privileges: { secure: true, standard: true } }
-]);
-
-async function createWindow() {
+function createWindow() {
   // Create the browser window.
-  const win = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 1352,
     height: 960,
     minWidth: 1139,
     minHeight: 946,
     webPreferences: {
-      // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
-    }
+      sandbox: false,
+    },
   });
 
-  if (process.env.WEBPACK_DEV_SERVER_URL) {
-    // Load the url of the dev server if in development mode
-    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL);
-    if (!process.env.IS_TEST) {
-      win.webContents.openDevTools();
-    }
+  mainWindow.on("ready-to-show", () => {
+    mainWindow.show();
+  });
+
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
+    return { action: "deny" };
+  });
+
+  // HMR for renderer base on electron-vite cli.
+  // Load the remote URL for development or the local html file for production.
+  if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
+    mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
   } else {
-    createProtocol("app");
-    // Load the index.html when not in development
-    win.loadURL("app://./index.html");
+    mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
   }
 }
 
-// Quit when all windows are closed.
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.whenReady().then(() => {
+  // Set app user model id for windows
+  electronApp.setAppUserModelId("fm.2xaa");
+
+  // Default open or close DevTools by F12 in development
+  // and ignore CommandOrControl + R in production.
+  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+  app.on("browser-window-created", (_, window) => {
+    optimizer.watchWindowShortcuts(window);
+  });
+
+  // IPC test
+  ipcMain.on("ping", () => console.log("pong"));
+
+  createWindow();
+
+  app.on("activate", function () {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+
+// Quit when all windows are closed, except on macOS. There, it's common
+// for applications and their menu bar to stay active until the user quits
+// explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-app.on("activate", () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on("ready", async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    try {
-      await installExtension(VUEJS_DEVTOOLS);
-    } catch (e) {
-      console.error("Vue Devtools failed to install:", e.toString());
-    }
-  }
-  createWindow();
-});
-
-// Exit cleanly on request from parent process in development mode.
-if (isDevelopment) {
-  if (process.platform === "win32") {
-    process.on("message", data => {
-      if (data === "graceful-exit") {
-        app.quit();
-      }
-    });
-  } else {
-    process.on("SIGTERM", () => {
-      app.quit();
-    });
-  }
-}
+// In this file you can include the rest of your app"s specific main process
+// code. You can also put them in separate files and require them here.

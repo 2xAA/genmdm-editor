@@ -7,7 +7,7 @@
           24 + operator - 1,
           39 + operator - 1,
           70 + operator - 1,
-          90 + operator - 1
+          90 + operator - 1,
         ]"
       />
     </c>
@@ -20,67 +20,66 @@
         :inverse="true"
         :quantise="32"
         :cc="ADSR_CC_NUMBERS[0]"
-        :ccOffset="operator - 1"
+        :cc-offset="operator - 1"
       />
       <MDMDial
         :value="displayPositions[0][1]"
         :quantise="128"
         :cc="ADSR_CC_NUMBERS[1]"
-        :ccOffset="operator - 1"
+        :cc-offset="operator - 1"
       />
       <MDMDial
         :value="displayPositions[1][0]"
         :quantise="32"
         :inverse="true"
         :cc="ADSR_CC_NUMBERS[2]"
-        :ccOffset="operator - 1"
+        :cc-offset="operator - 1"
       />
       <MDMDial
         :value="displayPositions[1][1]"
         :quantise="16"
         :inverse="true"
         :cc="ADSR_CC_NUMBERS[3]"
-        :ccOffset="operator - 1"
+        :cc-offset="operator - 1"
       />
       <MDMDial
         :value="displayPositions[2][0]"
         :quantise="32"
         :inverse="true"
         :cc="ADSR_CC_NUMBERS[4]"
-        :ccOffset="operator - 1"
+        :cc-offset="operator - 1"
       />
       <MDMDial
         :value="displayPositions[3][0]"
         :quantise="16"
         :inverse="true"
         :cc="ADSR_CC_NUMBERS[5]"
-        :ccOffset="operator - 1"
+        :cc-offset="operator - 1"
       />
     </c>
   </grid>
 </template>
 
 <script>
-import MDMDial from "./MDMDial";
-import MDMControlGroup from "./MDMControlGroup";
+import MDMDial from "./MDMDial.vue";
+import MDMControlGroup from "./MDMControlGroup.vue";
 import genmdmMapping from "../genmdm-mapping";
 import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
 
 const ADSR_CC_NUMBERS = [43, 16, 47, 55, 51, 59];
 
 export default {
+  components: {
+    MDMDial,
+    MDMControlGroup,
+  },
   mixins: [redrawOnColorschemeChange],
 
   props: {
     color: { type: String, default: "#000000" },
     operator: { type: Number, required: true },
     width: { type: Number, default: 298 },
-    height: { type: Number, default: 156 }
-  },
-
-  components: {
-    MDMDial,
-    MDMControlGroup
+    height: { type: Number, default: 156 },
   },
 
   data() {
@@ -89,7 +88,7 @@ export default {
       mouseDown: true,
       nodeSelected: -1,
       storeUnsubscribe: null,
-      ADSR_CC_NUMBERS
+      ADSR_CC_NUMBERS,
     };
   },
 
@@ -105,7 +104,7 @@ export default {
         [0.5, 0.5],
         [0.5, 0.5],
         [0.5, 0.5],
-        [0.5, 1]
+        [0.5, 1],
       ];
 
       positions[0][0] = channel[ADSR_CC_NUMBERS[0] + operator] / 127;
@@ -116,7 +115,13 @@ export default {
       positions[3][0] = 1 - channel[ADSR_CC_NUMBERS[5] + operator] / 127;
 
       return positions;
-    }
+    },
+  },
+
+  watch: {
+    displayPositions() {
+      this.draw();
+    },
   },
 
   mounted() {
@@ -126,7 +131,7 @@ export default {
     this.resize();
     this.draw();
 
-    this.storeUnsubscribe = this.$store.subscribe(mutation => {
+    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
       if (mutation.type === "SET_CC_VALUE") {
         const cc = parseInt(mutation.payload.cc, 10) - (this.operator - 1);
 
@@ -137,7 +142,7 @@ export default {
     });
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.storeUnsubscribe();
   },
 
@@ -147,7 +152,7 @@ export default {
         $refs: { canvas },
         context,
         width,
-        height
+        height,
       } = this;
       const dpr = window.devicePixelRatio;
 
@@ -164,7 +169,7 @@ export default {
       const dpr = window.devicePixelRatio;
       const { context, $refs, getXYFromPosition } = this;
       const {
-        canvas: { width: cw, height: ch }
+        canvas: { width: cw, height: ch },
       } = $refs;
 
       context.restore();
@@ -254,13 +259,13 @@ export default {
       if (index === 0) {
         return {
           x: lowerX + (1 - position[0]) * qw, //Math.pow(cw, position[0]),
-          y: Math.floor((1 - position[1]) * canvas.height)
+          y: Math.floor((1 - position[1]) * canvas.height),
         };
       }
 
       return {
         x: lowerX + Math.floor(position[0] * qw),
-        y: Math.floor(position[1] * canvas.height)
+        y: Math.floor(position[1] * canvas.height),
       };
     },
 
@@ -271,22 +276,22 @@ export default {
       const values = {};
 
       const ar = Math.floor(
-        positions[0][0] * (genmdmMapping[ADSR_CC_NUMBERS[0]].range - 1)
+        positions[0][0] * (genmdmMapping[ADSR_CC_NUMBERS[0]].range - 1),
       );
       const tl = Math.floor(
-        positions[0][1] * (genmdmMapping[ADSR_CC_NUMBERS[1]].range - 1)
+        positions[0][1] * (genmdmMapping[ADSR_CC_NUMBERS[1]].range - 1),
       );
       const dr1 = Math.floor(
-        positions[1][0] * (genmdmMapping[ADSR_CC_NUMBERS[2]].range - 1)
+        positions[1][0] * (genmdmMapping[ADSR_CC_NUMBERS[2]].range - 1),
       );
       const sa = Math.floor(
-        positions[1][1] * (genmdmMapping[ADSR_CC_NUMBERS[3]].range - 1)
+        positions[1][1] * (genmdmMapping[ADSR_CC_NUMBERS[3]].range - 1),
       );
       const dr2 = Math.floor(
-        positions[2][0] * (genmdmMapping[ADSR_CC_NUMBERS[4]].range - 1)
+        positions[2][0] * (genmdmMapping[ADSR_CC_NUMBERS[4]].range - 1),
       );
       const rr = Math.floor(
-        positions[3][0] * (genmdmMapping[ADSR_CC_NUMBERS[5]].range - 1)
+        positions[3][0] * (genmdmMapping[ADSR_CC_NUMBERS[5]].range - 1),
       );
 
       values[ADSR_CC_NUMBERS[0] + (operator - 1)] = ar;
@@ -304,14 +309,8 @@ export default {
       positions[x][y] = value;
 
       this.displayPositions = this.generateValues(positions);
-    }
+    },
   },
-
-  watch: {
-    displayPositions() {
-      this.draw();
-    }
-  }
 };
 </script>
 

@@ -1,24 +1,28 @@
 <template>
   <div
+    ref="draggableSelectBody"
     class="draggable-select ns-resize-cursor"
     :class="{ active: mouseButtonDown }"
-    ref="draggableSelectBody"
     @pointerdown="requestPointerLock"
     @pointerup="exitPointerLock"
     @contextmenu.prevent
   >
     <select
-      class="select"
       ref="labelSelect"
+      v-model="selectValue"
+      class="select"
       @touchstart.prevent
       @touchmove.prevent
       @touchend.prevent
       @touchcancel.prevent
-      v-model="selectValue"
     >
-      <option v-for="[key, value] in selectValues" :key="key" :value="key">{{
-        value
-      }}</option>
+      <option
+        v-for="[key, selectValue_value] in selectValues"
+        :key="key"
+        :value="key"
+      >
+        {{ selectValue_value }}
+      </option>
     </select>
   </div>
 </template>
@@ -28,24 +32,26 @@ export default {
   props: {
     values: {
       type: Array,
-      required: true
+      required: true,
     },
 
     default: {},
 
     labels: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
 
-    value: {
-      required: true
+    modelValue: {
+      type: undefined,
+      required: true,
     },
 
     emitArrayValue: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
+  emits: ["update:modelValue"],
 
   data() {
     return {
@@ -53,15 +59,8 @@ export default {
       lastCursor: "",
       mouseButtonDown: false,
       lastPointerPosition: { x: 0, y: 0 },
-      editable: false
+      editable: false,
     };
-  },
-
-  created() {
-    this.internalValue = Math.max(
-      0,
-      Math.min(this.values.length - 1, this.default)
-    );
   },
 
   computed: {
@@ -74,13 +73,12 @@ export default {
     },
 
     selectValues() {
-      const values = (this.labels.length
-        ? this.labels
-        : this.values
-      ).map((item, index) => [
-        this.values[index],
-        this.labels.length ? item : this.values[index]
-      ]);
+      const values = (this.labels.length ? this.labels : this.values).map(
+        (item, index) => [
+          this.values[index],
+          this.labels.length ? item : this.values[index],
+        ],
+      );
 
       return values;
     },
@@ -88,15 +86,32 @@ export default {
     selectValue: {
       get() {
         const value = this.emitArrayValue
-          ? this.value
-          : Math.round((this.value / 127) * (this.values.length - 1));
+          ? this.modelValue
+          : Math.round((this.modelValue / 127) * (this.values.length - 1));
         return value;
       },
 
       set(key) {
         this.setAndEmitValue(this.values.indexOf(key));
+      },
+    },
+  },
+
+  watch: {
+    value(value) {
+      if (!this.mouseButtonDown) {
+        this.internalValue = Math.round(
+          (value / 127) * (this.values.length - 1),
+        );
       }
-    }
+    },
+  },
+
+  created() {
+    this.internalValue = Math.max(
+      0,
+      Math.min(this.values.length - 1, this.default),
+    );
   },
 
   methods: {
@@ -106,13 +121,13 @@ export default {
         e.pointerType !== "mouse"
       ) {
         const {
-          $refs: { draggableSelectBody }
+          $refs: { draggableSelectBody },
         } = this;
 
         document.addEventListener(
           "pointerlockchange",
           this.lockChangeAlert,
-          false
+          false,
         );
 
         if (draggableSelectBody.requestPointerLock) {
@@ -138,14 +153,14 @@ export default {
       document.removeEventListener(
         "pointerlockchange",
         this.lockChangeAlert,
-        false
+        false,
       );
       this.mouseButtonDown = false;
     },
 
     lockChangeAlert() {
       const {
-        $refs: { draggableSelectBody }
+        $refs: { draggableSelectBody },
       } = this;
 
       if (document.pointerLockElement === draggableSelectBody) {
@@ -170,7 +185,7 @@ export default {
       const { internalValue, values } = this;
       const newValue = -yDelta + internalValue;
       const clampedNewIndex = Math.floor(
-        Math.max(0, Math.min(values.length - 1, newValue))
+        Math.max(0, Math.min(values.length - 1, newValue)),
       );
 
       this.setAndEmitValue(clampedNewIndex);
@@ -181,14 +196,14 @@ export default {
 
     setAndEmitValue(index) {
       const clampedNewMIDIValue = Math.floor(
-        (index / (this.values.length - 1)) * 127
+        (index / (this.values.length - 1)) * 127,
       );
 
       this.internalValue = index;
 
       this.$emit(
-        "input",
-        this.emitArrayValue ? this.values[index] : clampedNewMIDIValue
+        "update:modelValue",
+        this.emitArrayValue ? this.values[index] : clampedNewMIDIValue,
       );
     },
 
@@ -201,18 +216,8 @@ export default {
           this.$refs.labelSelect.open();
         });
       }
-    }
+    },
   },
-
-  watch: {
-    value(value) {
-      if (!this.mouseButtonDown) {
-        this.internalValue = Math.round(
-          (value / 127) * (this.values.length - 1)
-        );
-      }
-    }
-  }
 };
 </script>
 
