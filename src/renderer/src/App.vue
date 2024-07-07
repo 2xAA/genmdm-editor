@@ -647,14 +647,14 @@ export default {
     },
 
     handleCC(e) {
+      if (!this.outputPort) {
+        return;
+      }
+
       this.$store.dispatch("setCCValuesOnChannel", {
         [e.controller.number]: this.inverse ? 127 - e.value : e.value,
         channel: e.channel,
       });
-
-      if (!this.outputPort) {
-        return;
-      }
     },
 
     async handleProgramChange(e) {
@@ -662,9 +662,15 @@ export default {
         return;
       }
 
-      const { value } = e;
-      await this.$store.dispatch("setInstrumentIndex", value);
-      this.loadInstrument();
+      const { value, channel } = e;
+      const { data } = this.patches[value];
+
+      if (!data) return;
+
+      this.$store.dispatch("setCCValuesOnChannel", {
+        ...data,
+        channel,
+      });
     },
 
     freeChannels() {

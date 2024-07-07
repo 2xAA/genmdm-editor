@@ -12,7 +12,7 @@ const GLOBAL_CC = [1, 74, 78, 79, 80, 81, 83, 84, 85, 86, 88, 89];
 const NUM_CHANNELS = 6;
 
 function createBlankPatchesArray() {
-  return [...new Array(128).keys()].map(() => ({ name: "", data: undefined }));
+  return [...new Array(128).keys()].map(() => ({ name: "" })); // we don't define the data key here until we have data
 }
 
 function createDefaultState() {
@@ -54,7 +54,10 @@ const store = createStore({
 
   actions: {
     setCCValues({ commit, state }, { values, ignoreSameValues = true }) {
-      Object.keys(values).forEach((key) => {
+      const keys = Object.keys(values);
+
+      for (let i = 0; i < keys.length; i += 1) {
+        const key = keys[i];
         const cc = parseInt(key, 10);
 
         const value = values[cc];
@@ -64,30 +67,34 @@ const store = createStore({
           (state.polyphonic && state.channel <= state.maxPolyphonicChannels) ||
           isGlobal
         ) {
-          for (let i = 1; i <= state.maxPolyphonicChannels; ++i) {
-            if (state[`channel${i}`][cc] === value) {
+          for (let j = 1; j <= state.maxPolyphonicChannels; ++j) {
+            if (state[`channel${j}`][cc] === value) {
               continue;
             }
 
-            commit("SET_CC_VALUE", { cc, value, channel: i });
+            commit("SET_CC_VALUE", { cc, value, channel: j });
           }
         } else {
           if (
             ignoreSameValues &&
             state[`channel${state.channel}`][cc] === value
           ) {
-            return;
+            continue;
           }
 
           commit("SET_CC_VALUE", { cc, value, channel: state.channel });
         }
-      });
+      }
     },
 
     setCCValuesOnChannel({ commit, state }, values = {}) {
-      Object.keys(values).forEach((key) => {
+      const keys = Object.keys(values);
+
+      for (let i = 0; i < keys.length; i += 1) {
+        const key = keys[i];
+
         if (isNaN(parseInt(key, 10))) {
-          return;
+          continue;
         }
         const cc = parseInt(key, 10);
 
@@ -95,21 +102,26 @@ const store = createStore({
         const isGlobal = GLOBAL_CC.indexOf(cc) > -1;
 
         if (state.polyphonic || isGlobal) {
-          for (let i = 1; i < 7; ++i) {
-            if (state[`channel${i}`][cc] === value) {
+          for (let j = 1; j < 7; ++j) {
+            if (state[`channel${j}`][cc] === value) {
               continue;
             }
 
-            commit("SET_CC_VALUE", { cc, value, channel: i });
+            commit("SET_CC_VALUE", { cc, value, channel: j });
           }
         } else {
           if (state[`channel${values.channel}`][cc] === value) {
-            return;
+            continue;
           }
 
-          commit("SET_CC_VALUE", { cc, value, channel: values.channel });
+          commit("SET_CC_VALUE", {
+            cc,
+            value,
+            channel: values.channel,
+            ignoreSameValues: values.ignoreSameValues,
+          });
         }
-      });
+      }
     },
 
     setChannel({ commit }, channel) {
