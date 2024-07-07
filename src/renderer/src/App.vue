@@ -539,6 +539,7 @@ export default {
 
       this.$store.dispatch("setCCValues", {
         values: data,
+        channel: this.channel,
         ignoreSameValues: false,
       });
     },
@@ -637,8 +638,8 @@ export default {
         return;
       }
 
-      if (this.polyphonic) {
-        for (let i = 1; i < this.maxPolyphonicChannels + 1; ++i) {
+      if (this.polyphonic && e.channel <= this.maxPolyphonicChannels) {
+        for (let i = 1; i <= this.maxPolyphonicChannels; ++i) {
           this.outputPort.sendPitchBend(e.value, i);
         }
       } else {
@@ -652,7 +653,7 @@ export default {
       }
 
       this.$store.dispatch("setCCValuesOnChannel", {
-        [e.controller.number]: this.inverse ? 127 - e.value : e.value,
+        [e.controller.number]: e.value,
         channel: e.channel,
       });
     },

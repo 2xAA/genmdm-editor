@@ -67,7 +67,9 @@ const store = createStore({
           (state.polyphonic && state.channel <= state.maxPolyphonicChannels) ||
           isGlobal
         ) {
-          for (let j = 1; j <= state.maxPolyphonicChannels; ++j) {
+          const affectedChannels = isGlobal ? 6 : state.maxPolyphonicChannels;
+
+          for (let j = 1; j <= affectedChannels; ++j) {
             if (state[`channel${j}`][cc] === value) {
               continue;
             }
@@ -101,8 +103,13 @@ const store = createStore({
         const value = values[cc];
         const isGlobal = GLOBAL_CC.indexOf(cc) > -1;
 
-        if (state.polyphonic || isGlobal) {
-          for (let j = 1; j < 7; ++j) {
+        if (
+          (state.polyphonic && values.channel <= state.maxPolyphonicChannels) ||
+          isGlobal
+        ) {
+          const affectedChannels = isGlobal ? 6 : state.maxPolyphonicChannels;
+
+          for (let j = 1; j <= affectedChannels; ++j) {
             if (state[`channel${j}`][cc] === value) {
               continue;
             }

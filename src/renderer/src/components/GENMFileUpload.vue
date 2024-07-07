@@ -1,6 +1,6 @@
 <template>
   <label class="button">
-    <input type="file" id="input" accept=".genm" @change="fileAdded" />
+    <input id="input" type="file" accept=".genm" @change="fileAdded" />
   </label>
 </template>
 
@@ -11,7 +11,7 @@ export default {
   methods: {
     fileAdded(e) {
       const {
-        files: { 0: file }
+        files: { 0: file },
       } = e.target;
 
       const reader = new FileReader();
@@ -29,17 +29,17 @@ export default {
       const instrumentData = [];
 
       parsed
-        .map(instrument => Object.fromEntries(instrument.toGenMDM()))
+        .map((instrument) => Object.fromEntries(instrument.toGenMDM()))
         .forEach((ccData, index) => {
           instrumentData.push({
             name: parsed[index].instrumentName,
-            data: ccData
+            data: ccData || {},
           });
         });
 
       this.$store.dispatch("setPatches", instrumentData);
-    }
-  }
+    },
+  },
 };
 </script>
 
