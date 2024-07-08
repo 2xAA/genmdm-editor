@@ -1,42 +1,49 @@
 <template>
   <label>
     {{ currentLabel }}
-    <input type="checkbox" @change="onChange" :value="checked" />
+    <input type="checkbox" :value="checked" @change="onChange" />
   </label>
 </template>
 
 <script>
 export default {
-  emits: ["update:modelValue"],
-
   props: {
     default: {},
 
     labels: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
 
     emitBoolean: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
+
+    modelValue: {},
   },
 
-  data() {
-    return {
-      value: 0
-    };
-  },
+  emits: ["update:modelValue"],
 
   computed: {
     checked() {
-      return this.value > 63;
+      return this.modelValue > 63;
     },
 
     currentLabel() {
-      return this.labels[this.checked ? 1 : 0];
-    }
+      return this.labels[this.modelValue ? 1 : 0];
+    },
+  },
+
+  watch: {
+    value(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.$emit(
+          "update:modelValue",
+          this.emitBoolean ? !!this.modelValue : this.modelValue,
+        );
+      }
+    },
   },
 
   methods: {
@@ -46,16 +53,8 @@ export default {
       } else {
         this.value = 127;
       }
-    }
+    },
   },
-
-  watch: {
-    value(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.$emit("update:modelValue", this.emitBoolean ? !!this.value : this.value);
-      }
-    }
-  }
 };
 </script>
 

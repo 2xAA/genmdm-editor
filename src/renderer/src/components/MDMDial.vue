@@ -96,7 +96,7 @@ export default {
   created() {
     this.updateFromStore();
 
-    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
+    this.storeUnsubscribe = this.$store.subscribe((mutation, state) => {
       if (mutation.type === "SET_CC_VALUE") {
         const { cc, value, channel } = mutation.payload;
 
@@ -105,9 +105,15 @@ export default {
           !this.mouseButtonDown &&
           channel === this.$store.state.channel
         ) {
-          this.movementValue = this.inverse ? -value + 127 : value;
-          this.draw();
+          this.setMovementValue(value);
         }
+      }
+
+      if (mutation.type === "SET_STATE") {
+        const value =
+          state[`channel${this.$store.state.channel}`][this.cc + this.ccOffset];
+
+        this.setMovementValue(value);
       }
     });
   },
@@ -319,6 +325,10 @@ export default {
       const value =
         this.$store.state[`channel${channel}`][this.cc + this.ccOffset];
 
+      this.setMovementValue(value);
+    },
+
+    setMovementValue(value) {
       this.movementValue = this.inverse ? -value + 127 : value;
       this.draw();
     },
@@ -337,3 +347,4 @@ canvas {
   text-align: center;
 }
 </style>
+import { nextTick } from "vue";

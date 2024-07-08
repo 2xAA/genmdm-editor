@@ -118,8 +118,6 @@ export default {
     if (!genmdmMapping[this.cc]) {
       throw new Error(`CC mapping doesn't exist for ${this.cc}`);
     }
-
-    this.value = this.defaultValue;
   },
 };
 </script>
