@@ -1,7 +1,7 @@
 <template>
   <label>
     {{ currentLabel }}
-    <input type="checkbox" :value="checked" @change="onChange" />
+    <input type="checkbox" :checked="checked" @change="onChange" />
   </label>
 </template>
 
@@ -25,25 +25,39 @@ export default {
 
   emits: ["update:modelValue"],
 
+  data() {
+    return {
+      value: 0,
+    };
+  },
+
   computed: {
     checked() {
-      return this.modelValue > 63;
+      return this.value > 63;
     },
 
     currentLabel() {
-      return this.labels[this.modelValue ? 1 : 0];
+      return this.labels[this.checked ? 1 : 0];
     },
   },
 
   watch: {
+    modelValue() {
+      this.value = this.modelValue ? 127 : 0;
+    },
+
     value(newValue, oldValue) {
       if (newValue !== oldValue) {
         this.$emit(
           "update:modelValue",
-          this.emitBoolean ? !!this.modelValue : this.modelValue,
+          this.emitBoolean ? !!this.value : this.value,
         );
       }
     },
+  },
+
+  created() {
+    this.value = this.modelValue ? 127 : 0;
   },
 
   methods: {
