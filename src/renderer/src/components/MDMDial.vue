@@ -347,4 +347,3 @@ canvas {
   text-align: center;
 }
 </style>
-import { nextTick } from "vue";
