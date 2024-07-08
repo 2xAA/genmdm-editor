@@ -24,6 +24,9 @@ function createDefaultState() {
     channel: 1,
     instrumentIndex: 0,
     mdmiCompatibility: false,
+
+    midiInputId: "none",
+    midiOutputId: "none",
   };
 
   const mappedCCNumbers = Object.keys(genmdmMapping);
@@ -277,6 +280,14 @@ const store = createStore({
 
     SET_MDMICOMPATIBILITY(state, value) {
       state.mdmiCompatibility = value;
+    },
+
+    SET_MIDI_INPUT_ID(state, value) {
+      state.midiInputId = value;
+    },
+
+    SET_MIDI_OUTPUT_ID(state, value) {
+      state.midiOutputId = value;
     },
   },
 });

@@ -161,7 +161,7 @@
               <c span="6" class="control-group__label">MIDI Input</c>
               <c span="2" class="control-group__control">
                 <select v-model="inputId" class="select" name="inputs">
-                  <option disabled selected value="none">---</option>
+                  <option selected value="none">---</option>
                   <option
                     v-for="(input, index) in inputs"
                     :key="index"
@@ -318,6 +318,7 @@ import Y12FileDownload from "./components/Y12FileDownload.vue";
 import ResetStateDialog from "./components/ResetStateDialog.vue";
 import StateUpload from "./components/StateUpload.vue";
 import StateDownload from "./components/StateDownload.vue";
+import { reactive } from "vue";
 
 export default {
   name: "App",
@@ -356,8 +357,8 @@ export default {
       inputs: [],
       outputs: [],
 
-      inputId: "none",
-      outputId: "none",
+      input: null,
+      output: null,
 
       notesOn: {},
       polyphonyChannel: 1,
@@ -445,25 +446,31 @@ export default {
     instrumentIndex() {
       return this.$store.state.instrumentIndex;
     },
+
+    inputId: {
+      get() {
+        return this.$store.state.midiInputId;
+      },
+
+      set(value) {
+        this.$store.commit("SET_MIDI_INPUT_ID", value);
+      },
+    },
+
+    outputId: {
+      get() {
+        return this.$store.state.midiOutputId;
+      },
+
+      set(value) {
+        this.$store.commit("SET_MIDI_OUTPUT_ID", value);
+      },
+    },
   },
 
   watch: {
     inputId(newId, oldId) {
-      if (oldId) {
-        const oldInput = this.inputs.find((input) => input.id === oldId);
-        if (oldInput) {
-          oldInput.removeListener();
-        }
-      }
-
-      const input = this.inputs.find((input) => input.id === newId);
-
-      // Add listeners on all channels
-      input.addListener("noteon", "all", this.handleNoteOn);
-      input.addListener("noteoff", "all", this.handleNoteOff);
-      input.addListener("pitchbend", "all", this.handlePitchBend);
-      input.addListener("controlchange", "all", this.handleCC);
-      input.addListener("programchange", "all", this.handleProgramChange);
+      this.createInput(newId, oldId);
     },
 
     channel(value, oldValue) {
@@ -537,9 +544,37 @@ export default {
       });
     },
 
+    createInput(newId, oldId) {
+      if (oldId) {
+        const oldInput = this.inputs.find((input) => input.id === oldId);
+        if (oldInput) {
+          oldInput.removeListener();
+        }
+      }
+
+      const input = this.inputs.find((input) => input.id === newId);
+
+      if (!input) {
+        return;
+      }
+
+      this.input = input;
+
+      // Add listeners on all channels
+      input.addListener("noteon", "all", this.handleNoteOn);
+      input.addListener("noteoff", "all", this.handleNoteOff);
+      input.addListener("pitchbend", "all", this.handlePitchBend);
+      input.addListener("controlchange", "all", this.handleCC);
+      input.addListener("programchange", "all", this.handleProgramChange);
+    },
+
     populateInputAndOutputPorts() {
-      this.outputs = WebMidi.outputs;
-      this.inputs = WebMidi.inputs;
+      this.outputs = reactive([...WebMidi.outputs]);
+      this.inputs = reactive([...WebMidi.inputs]);
+
+      if (!this.input && this.inputId !== "none") {
+        this.createInput(this.inputId);
+      }
     },
 
     writeToSlot() {
