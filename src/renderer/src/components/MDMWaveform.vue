@@ -11,8 +11,8 @@ export default {
   props: {
     size: {
       type: Number,
-      default: 188
-    }
+      default: 188,
+    },
   },
 
   data() {
@@ -21,14 +21,20 @@ export default {
       segments: 14,
       values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       ccValues: {},
-      storeUnsubscribe: null
+      storeUnsubscribe: null,
     };
+  },
+
+  computed: {
+    segmentWidth() {
+      return this.size / this.segments;
+    },
   },
 
   created() {
     this.updateFromStore();
 
-    this.storeUnsubscribe = this.$store.subscribe(mutation => {
+    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
       let redraw = false;
 
       if (mutation.type === "SET_CC_VALUE") {
@@ -64,19 +70,13 @@ export default {
     canvas.addEventListener("pointerdown", this.down);
   },
 
-  beforeDestroy() {
+  onBeforeUnmount() {
     const { canvas } = this.$refs;
     canvas.removeEventListener("pointerdown", this.down);
     document.removeEventListener("pointerup", this.up);
     document.removeEventListener("pointermove", this.move);
 
     this.storeUnsubscribe();
-  },
-
-  computed: {
-    segmentWidth() {
-      return this.size / this.segments;
-    }
   },
 
   methods: {
@@ -98,7 +98,7 @@ export default {
       document.removeEventListener("pointerup", this.up);
       document.removeEventListener("pointermove", this.move);
       this.$store.dispatch("setCCValues", {
-        values: this.ccValues
+        values: this.ccValues,
       });
     },
 
@@ -110,7 +110,7 @@ export default {
       const {
         $refs: { canvas },
         context,
-        size
+        size,
       } = this;
       const dpr = window.devicePixelRatio;
 
@@ -126,11 +126,15 @@ export default {
     },
 
     draw() {
+      if (!this.$refs.canvas) {
+        return;
+      }
+
       const {
         context,
         $refs: {
-          canvas: { width: cw, height: ch }
-        }
+          canvas: { width: cw, height: ch },
+        },
       } = this;
 
       const dpr = window.devicePixelRatio;
@@ -144,7 +148,7 @@ export default {
           Math.floor(this.segmentWidth * dpr * i) + 0.5,
           ch,
           Math.floor(this.segmentWidth * dpr),
-          Math.floor(-this.values[i] * ch) + 0.5
+          Math.floor(-this.values[i] * ch) + 0.5,
         );
       }
     },
@@ -176,8 +180,8 @@ export default {
       requestAnimationFrame(this.draw);
 
       this.ccValues[100 + segment] = cc;
-    }
-  }
+    },
+  },
 };
 </script>
 
