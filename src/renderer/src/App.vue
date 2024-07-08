@@ -474,7 +474,7 @@ export default {
     },
 
     channel(value, oldValue) {
-      if (this.mdmiCompatibility && oldValue !== value) {
+      if (this.outputPort && this.mdmiCompatibility && oldValue !== value) {
         // Show FM parameters for the channel when using SEGA Mega Drive MIDI Interface
         // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/UI-Features
         try {
