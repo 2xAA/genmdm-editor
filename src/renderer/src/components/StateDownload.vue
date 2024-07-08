@@ -9,9 +9,13 @@ import { saveFile } from "../utils/save-file";
 export default {
   methods: {
     saveState() {
-      const compressed = compress(this.$store.state);
+      const stateCopy = { ...this.$store.state };
+      delete stateCopy.midiInputId;
+      delete stateCopy.midiOutputId;
+
+      const compressed = compress(stateCopy);
       saveFile("state.ged", JSON.stringify(compressed));
-    }
-  }
+    },
+  },
 };
 </script>

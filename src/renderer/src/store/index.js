@@ -199,7 +199,10 @@ const store = createStore({
       { channel = undefined, resetEditor = false, resetPatches = false } = {},
     ) {
       const defaultState = createDefaultState();
-      const newState = reactive({});
+      const newState = reactive({
+        midiInputId: state.midiInputId,
+        midiOutputId: state.midiOutputId,
+      });
 
       let syncWithDevice = false;
 
@@ -242,7 +245,13 @@ const store = createStore({
 
   mutations: {
     SET_STATE(state, newState) {
-      Object.assign(state, newState);
+      const newStateCopy = {
+        ...newState,
+        midiInputId: state.midiInputId,
+        midiOutputId: state.midiOutputId,
+      };
+
+      Object.assign(state, newStateCopy);
     },
 
     SET_CC_VALUE(state, { cc, value, channel }) {
