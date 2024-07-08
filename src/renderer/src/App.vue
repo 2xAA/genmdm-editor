@@ -458,18 +458,11 @@ export default {
 
       const input = this.inputs.find((input) => input.id === newId);
 
-      // Listen for a 'note on' message on all channels
+      // Add listeners on all channels
       input.addListener("noteon", "all", this.handleNoteOn);
-
-      // Listen for a 'note off' message on all channels
       input.addListener("noteoff", "all", this.handleNoteOff);
-
-      // Listen for a pitch bend message on all channels
       input.addListener("pitchbend", "all", this.handlePitchBend);
-
       input.addListener("controlchange", "all", this.handleCC);
-
-      // Listen for a program change message on all channels
       input.addListener("programchange", "all", this.handleProgramChange);
     },
 
