@@ -1,7 +1,11 @@
 <template>
   <div>
     <h2>DAC Control</h2>
-    <MDMControlGroup :cc-values="[78, 86, 88, 79, 89]" :channel="channel" />
+    <MDMControlGroup
+      v-if="!mdmiCompatibility"
+      :cc-values="[78, 86, 88, 79, 89]"
+      :channel="channel"
+    />
     <MDMWaveform />
   </div>
 </template>
@@ -19,6 +23,10 @@ export default {
   computed: {
     channel() {
       return this.$store.state.channel;
+    },
+
+    mdmiCompatibility() {
+      return this.$store.state.mdmiCompatibility;
     },
   },
 };
