@@ -120,3 +120,7 @@ select.select {
 .svg-icon path {
   fill: var(--foreground-color);
 }
+
+a {
+  color: var(--foreground-color);
+}
