@@ -1,9 +1,10 @@
 <template>
-  <div class="dial">
+  <div class="dial" :class="{ disabled }">
     <canvas
       ref="canvas"
       :title="title"
       class="ns-resize-cursor"
+      :class="{ disabled }"
       @pointerdown="requestPointerLock"
       @pointerup="exitPointerLock"
       @touchstart.prevent
@@ -16,7 +17,7 @@
 </template>
 
 <script>
-import genmdmMapping from "../genmdm-mapping";
+import { HighResCanvasRenderingContext2D } from "@vcync/hires-canvas2d";
 import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
 
 export default {
@@ -33,6 +34,11 @@ export default {
       default: 0,
     },
 
+    channel: {
+      type: Number,
+      required: true,
+    },
+
     size: {
       type: Number,
       default: 60,
@@ -47,6 +53,21 @@ export default {
       type: Boolean,
       default: false,
     },
+
+    range: {
+      type: Number,
+      required: true,
+    },
+
+    title: {
+      type: String,
+      default: "",
+    },
+
+    disabled: {
+      type: Boolean,
+      default: () => false,
+    },
   },
 
   data() {
@@ -56,40 +77,37 @@ export default {
       storeUnsubscribe: null,
       mouseButtonDown: false,
       lastPointerPosition: { x: -1, y: -1 },
+      lastTimeVibrate: 100,
+      mouseMoveRaf: null,
     };
   },
 
   computed: {
-    q() {
-      return 1 / (this.quantise - 1);
-    },
-
     internalValue() {
-      const { q, quantise, movementValue } = this;
+      const { quantise, movementValue } = this;
 
       let value = movementValue / 127;
 
       if (quantise > -1) {
-        value = Math.floor(value / q) * q;
+        const q = Math.floor((1 / (quantise - 1)) * 1000) / 1000;
+        value = Math.round(value / q) * q;
       }
 
       return value;
     },
 
     scaledValue() {
-      return Math.floor(
-        this.internalValue * (genmdmMapping[this.cc].range - 1),
-      );
-    },
-
-    title() {
-      return genmdmMapping[this.cc].label;
+      return Math.floor((this.internalValue * 127) / (128 / this.range));
     },
   },
 
   watch: {
     "$store.state.channel"() {
       this.updateFromStore();
+    },
+
+    disabled() {
+      this.draw();
     },
   },
 
@@ -103,7 +121,7 @@ export default {
         if (
           cc === this.cc + this.ccOffset &&
           !this.mouseButtonDown &&
-          channel === this.$store.state.channel
+          channel === this.channel
         ) {
           this.setMovementValue(value);
         }
@@ -121,7 +139,12 @@ export default {
   mounted() {
     const { canvas } = this.$refs;
 
-    this.context = canvas.getContext("2d");
+    // this.context = canvas.getContext("2d");
+    this.context = new HighResCanvasRenderingContext2D(
+      canvas.getContext("2d"),
+      window.devicePixelRatio,
+    );
+
     this.resize();
 
     this.draw();
@@ -138,7 +161,13 @@ export default {
     requestPointerLock(e) {
       const {
         $refs: { canvas },
+        disabled,
       } = this;
+
+      if (disabled) {
+        e.preventDefault();
+        return;
+      }
 
       document.addEventListener(
         "pointerlockchange",
@@ -196,6 +225,8 @@ export default {
     },
 
     mouseMove(e) {
+      const { channel } = this;
+
       // first touch
       // I feel I've overengineered this somewhat
       let firstTouch = false;
@@ -210,20 +241,39 @@ export default {
       this.lastPointerPosition.x = e.clientX;
       this.lastPointerPosition.y = e.clientY;
 
+      const lastValue = this.internalValue;
+
       const newValue =
         (firstTouch && yDelta !== 0 ? 0 : -yDelta) + this.movementValue;
       const clampedNewValue = Math.max(0, Math.min(127, newValue));
 
-      this.movementValue = clampedNewValue;
-      this.draw();
+      if (this.mouseMoveRaf) {
+        cancelAnimationFrame(this.mouseMoveRaf);
+      }
 
-      this.downY = e.pageY;
-      this.$store.dispatch("setCCValues", {
-        values: {
-          [this.cc + this.ccOffset]: this.inverse
-            ? 127 - clampedNewValue
-            : clampedNewValue,
-        },
+      this.mouseMoveRaf = requestAnimationFrame(() => {
+        this.movementValue = clampedNewValue;
+        if (this.internalValue !== lastValue) {
+          this.draw();
+        }
+
+        if (this.internalValue !== lastValue && this.lastTimeVibrate > 10) {
+          this.lastTimeVibrate = Date.now();
+          window.api.vibrate();
+        }
+
+        this.downY = e.pageY;
+        if (this.internalValue !== lastValue) {
+          this.$store.dispatch("setCCValues", {
+            channel,
+            values: {
+              [this.cc + this.ccOffset]: this.inverse
+                ? 127 - this.internalValue * 127
+                : this.internalValue * 127,
+            },
+          });
+        }
+        this.mouseMoveRaf = null;
       });
     },
 
@@ -234,6 +284,7 @@ export default {
         size,
       } = this;
       const dpr = window.devicePixelRatio;
+      context.dpr = dpr;
 
       canvas.width = size * dpr;
       canvas.height = size * dpr;
@@ -249,49 +300,37 @@ export default {
         return;
       }
 
-      const {
-        $refs: {
-          canvas: { width: cw, height: ch },
-        },
-        context,
-        size,
-        internalValue,
-        quantise,
-      } = this;
-
-      const dpr = window.devicePixelRatio;
+      const { context, size, internalValue, range, $colors, disabled } = this;
 
       requestAnimationFrame(() => {
-        context.clearRect(0, 0, cw, ch);
-        context.strokeStyle = this.$colors.foreground;
+        context.clearRect(0, 0, size, size);
+        context.strokeStyle = disabled ? "gray" : $colors.foreground;
 
         context.fillStyle = this.mouseButtonDown
-          ? this.$colors.foreground
+          ? $colors.foreground
           : "transparent";
 
         context.beginPath();
-        context.arc(cw / 2, ch / 2, ((size - 6) / 2 - 2) * dpr, 0, Math.PI * 2);
+        context.arc(size / 2, size / 2, (size - 6) / 2 - 2, 0, Math.PI * 2);
         context.stroke();
         context.fill();
 
-        context.strokeStyle = this.$colors.foreground;
+        context.strokeStyle = disabled ? "gray" : $colors.foreground;
 
-        if (quantise > 0) {
-          for (let i = 0; i < quantise; ++i) {
+        if (range > 0) {
+          for (let i = 0; i < range; ++i) {
             context.save();
-            context.translate(cw / 2, ch / 2);
-            context.rotate((i / (quantise - 1)) * 270 * (Math.PI / 180));
-            context.translate(-cw / 2, -ch / 2);
+            context.lineWidth =
+              window.devicePixelRatio > 1
+                ? 1 / (window.devicePixelRatio - 1.4)
+                : 1;
+            context.translate(size / 2, size / 2);
+            context.rotate((i / (range - 1)) * 270 * (Math.PI / 180));
+            context.translate(-size / 2, -size / 2);
 
             context.beginPath();
-            context.moveTo(
-              size * 0.150555556 * dpr,
-              cw - size * 0.150555556 * dpr,
-            );
-            context.lineTo(
-              size * 0.173888889 * dpr,
-              cw - size * 0.173888889 * dpr,
-            );
+            context.moveTo(size * 0.150555556, size - size * 0.150555556);
+            context.lineTo(size * 0.173888889, size - size * 0.173888889);
             context.stroke();
 
             context.restore();
@@ -299,19 +338,21 @@ export default {
         }
 
         context.save();
-        context.translate(cw / 2, ch / 2);
+        context.translate(size / 2, size / 2);
         context.rotate(internalValue * 270 * (Math.PI / 180));
-        context.translate(-cw / 2, -ch / 2);
+        context.translate(-size / 2, -size / 2);
 
-        context.strokeStyle = this.mouseButtonDown
-          ? this.$colors.background
-          : this.$colors.foreground;
+        context.strokeStyle = disabled
+          ? "gray"
+          : this.mouseButtonDown
+            ? $colors.background
+            : $colors.foreground;
 
         context.beginPath();
         context.arc(
-          cw / 2 - (size / 5) * dpr,
-          ch / 2 + (size / 5) * dpr,
-          (size / 25) * dpr,
+          size / 2 - size / 5,
+          size / 2 + size / 5,
+          size / 25,
           0,
           Math.PI * 2,
         );
@@ -321,7 +362,7 @@ export default {
     },
 
     updateFromStore() {
-      const { channel } = this.$store.state;
+      const { channel } = this;
       const value =
         this.$store.state[`channel${channel}`][this.cc + this.ccOffset];
 
@@ -337,6 +378,12 @@ export default {
 </script>
 
 <style scoped>
+.dial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 canvas {
   user-select: none;
   touch-action: none;

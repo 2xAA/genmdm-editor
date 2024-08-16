@@ -9,5 +9,5 @@ export default {
     window
       .matchMedia("(prefers-color-scheme: dark)")
       .removeEventListener("change", this.draw);
-  }
+  },
 };

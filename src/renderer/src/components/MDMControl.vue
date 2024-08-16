@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import genmdmMapping from "../genmdm-mapping.js";
 import DraggableSelect from "./DraggableSelect.vue";
 import LabelledCheckbox from "./LabelledCheckbox.vue";
 
@@ -38,7 +37,13 @@ export default {
     DraggableSelect,
     LabelledCheckbox,
   },
+
   props: {
+    channel: {
+      type: Number,
+      required: true,
+    },
+
     cc: {
       type: Number,
       required: true,
@@ -46,10 +51,6 @@ export default {
   },
 
   computed: {
-    channel() {
-      return this.$store.state.channel;
-    },
-
     value: {
       get() {
         return this.$store.state[`channel${this.channel}`][this.cc];
@@ -66,12 +67,13 @@ export default {
 
         this.$store.dispatch("setCCValues", {
           values,
+          channel: this.channel,
         });
       },
     },
 
     mapping() {
-      return genmdmMapping[this.cc];
+      return this.$store.getters.mapping[this.cc];
     },
 
     type() {
@@ -115,7 +117,7 @@ export default {
   },
 
   created() {
-    if (!genmdmMapping[this.cc]) {
+    if (!this.mapping) {
       throw new Error(`CC mapping doesn't exist for ${this.cc}`);
     }
   },

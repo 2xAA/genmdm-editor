@@ -2,7 +2,7 @@
   <div
     ref="draggableSelectBody"
     class="draggable-select ns-resize-cursor"
-    :class="{ active: mouseButtonDown }"
+    :class="{ active: mouseButtonDown, disabled }"
     @pointerdown="requestPointerLock"
     @pointerup="exitPointerLock"
     @contextmenu.prevent
@@ -11,6 +11,7 @@
       ref="labelSelect"
       v-model="selectValue"
       class="select"
+      :disabled="disabled"
       @touchstart.prevent
       @touchmove.prevent
       @touchend.prevent
@@ -20,6 +21,7 @@
         v-for="[key, selectValue_value] in selectValues"
         :key="key"
         :value="key"
+        :disabled="disabledItems.length && disabledItems[key + 1]"
       >
         {{ selectValue_value }}
       </option>
@@ -30,6 +32,17 @@
 <script>
 export default {
   props: {
+    disabled: {
+      type: Boolean,
+      default: () => false,
+    },
+
+    disabledItems: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+
     values: {
       type: Array,
       required: true,
@@ -50,16 +63,22 @@ export default {
     emitArrayValue: {
       type: Boolean,
     },
+
+    whatIs: {
+      type: String,
+      default: "",
+    },
   },
   emits: ["update:modelValue"],
 
   data() {
     return {
-      internalValue: 0,
+      internalValue: -1,
       lastCursor: "",
       mouseButtonDown: false,
       lastPointerPosition: { x: 0, y: 0 },
       editable: false,
+      lastTimeVibrate: 50,
     };
   },
 
@@ -87,7 +106,7 @@ export default {
       get() {
         const value = this.emitArrayValue
           ? this.modelValue
-          : Math.round((this.modelValue / 127) * (this.values.length - 1));
+          : Math.floor(this.modelValue / (128 / this.values.length));
         return value;
       },
 
@@ -98,20 +117,19 @@ export default {
   },
 
   watch: {
-    value(value) {
+    modelValue(value) {
       if (!this.mouseButtonDown) {
-        this.internalValue = Math.round(
-          (value / 127) * (this.values.length - 1),
-        );
+        this.internalValue = this.emitArrayValue
+          ? this.values[value]
+          : Math.floor(value / (128 / this.values.length));
       }
     },
   },
 
   created() {
-    this.internalValue = Math.max(
-      0,
-      Math.min(this.values.length - 1, this.default),
-    );
+    this.internalValue = this.emitArrayValue
+      ? this.modelValue
+      : Math.floor(this.modelValue / (128 / this.values.length));
   },
 
   methods: {
@@ -194,17 +212,21 @@ export default {
       this.lastPointerPosition.y = e.clientY;
     },
 
-    setAndEmitValue(index) {
+    setAndEmitValue(value) {
       const clampedNewMIDIValue = Math.floor(
-        (index / (this.values.length - 1)) * 127,
+        (value / (this.values.length - 1)) * 127,
       );
 
-      this.internalValue = index;
+      if (this.internalValue !== value && !this.disabledItems[value]) {
+        this.internalValue = value;
+        this.lastTimeVibrate = Date.now();
+        window.api.vibrate();
 
-      this.$emit(
-        "update:modelValue",
-        this.emitArrayValue ? this.values[index] : clampedNewMIDIValue,
-      );
+        const emitValue = this.emitArrayValue
+          ? this.values[value]
+          : clampedNewMIDIValue;
+        this.$emit("update:modelValue", emitValue);
+      }
     },
 
     toggleEditable() {
@@ -212,7 +234,6 @@ export default {
 
       if (this.editable && this.labels.length) {
         this.$nextTick(() => {
-          console.log(this.$refs.labelSelect);
           this.$refs.labelSelect.open();
         });
       }
@@ -227,9 +248,15 @@ export default {
   overflow: hidden;
 }
 
-.draggable-select.active {
+.draggable-select.active:not(.disabled) {
   background: var(--foreground-color);
   color: var(--background-color);
   font-weight: bold;
+}
+
+.draggable-select.disabled select {
+  cursor: not-allowed;
+  text-decoration: line-through;
+  color: light-dark(rgb(128, 128, 128), rgb(170, 170, 170));
 }
 </style>

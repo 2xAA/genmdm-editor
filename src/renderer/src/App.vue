@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div>
     <grid columns="12">
       <c span="10" class="main-column">
         <grid columns="10">
@@ -8,14 +8,18 @@
               <c span="3"><h2>Channel settings</h2></c>
               <c span="5">
                 <h2>
-                  (<span v-if="polyphonic && channel <= maxPolyphonicChannels"
-                    >Poly</span
-                  ><span v-else>Mono</span>phonic Channel)
+                  <span v-if="mode === 0">Monophonic</span>
+                  <span v-else-if="mode === 1">Polyphonic</span>
+                  <span v-else>Unison</span>
+                  <span v-if="mode > 0"> (Group {{ group + 1 }})</span>
                 </h2>
               </c>
 
               <c span="2">
-                <MDMControlGroup :cc-values="[14, 15, 77, 76, 75]">
+                <MDMControlGroup
+                  :cc-values="[14, 15, 77, 76, 75]"
+                  :channel="channel"
+                >
                   <template #header>
                     <c span="6" class="control-group__label">Channel</c>
                     <c span="2" class="control-group__control">
@@ -28,7 +32,7 @@
                     </c>
                   </template>
 
-                  <template #footer>
+                  <template v-if="!mdmiCompatibility" #footer>
                     <c span="6" class="control-group__label">RAM Slot</c>
                     <c span="2" class="control-group__control">
                       <DraggableSelect
@@ -42,10 +46,10 @@
                     </c>
                   </template>
                 </MDMControlGroup>
-                <grid columns="2">
+                <grid v-if="!mdmiCompatibility" columns="2">
                   <c>
                     <button
-                      class="button"
+                      class="button rr rt"
                       @click="
                         sendCC({
                           cc: 9,
@@ -59,7 +63,7 @@
                   </c>
                   <c>
                     <button
-                      class="button"
+                      class="button rt"
                       @click="
                         sendCC({
                           cc: 6,
@@ -88,24 +92,24 @@
                 <PatchList />
                 <grid columns="2" class="patch-management-buttons">
                   <c>
-                    <button class="button" @click="loadInstrument">
+                    <button class="button rt rr" @click="loadInstrument">
                       Load slot
                     </button>
                   </c>
                   <c
-                    ><button class="button" @click="writeToSlot">
+                    ><button class="button rt" @click="writeToSlot">
                       Write slot
                     </button></c
                   >
-                  <c><GENMFileUpload /></c>
-                  <c><GENMFileDownload /></c>
+                  <c><GENMFileUpload class="rr rt" /></c>
+                  <c><GENMFileDownload class="rt" /></c>
 
-                  <c><TFIFileUpload /></c>
-                  <c><TFIFileDownload /></c>
-                  <c><DMPFileUpload /></c>
-                  <c><DMPFileDownload /></c>
-                  <c><Y12FileUpload /></c>
-                  <c><Y12FileDownload /></c>
+                  <c><TFIFileUpload class="rr rt" /></c>
+                  <c><TFIFileDownload class="rt" /></c>
+                  <c><DMPFileUpload class="rr rt" /></c>
+                  <c><DMPFileDownload class="rt" /></c>
+                  <c><Y12FileUpload class="rr rt" /></c>
+                  <c><Y12FileDownload class="rt" /></c>
                 </grid>
               </c>
             </grid>
@@ -113,7 +117,7 @@
             <grid columns="2" class="patch-management-buttons">
               <c span="2"><hr /></c>
               <c>
-                <button class="button" @click="sendState">Send State</button>
+                <button class="button rr" @click="sendState">Send State</button>
               </c>
               <c>
                 <button class="button" @click="openResetStateDialog">
@@ -121,10 +125,10 @@
                 </button>
               </c>
               <c>
-                <StateUpload />
+                <StateUpload class="rr rt" />
               </c>
               <c>
-                <StateDownload />
+                <StateDownload class="rt" />
               </c>
             </grid>
           </c>
@@ -140,7 +144,7 @@
                       <MDMSSGEGDisplay :operator="x" />
                     </c>
                   </grid>
-                  <MDMADSR :operator="x" />
+                  <MDMADSR :operator="x" :channel="channel" />
                 </div>
               </c>
             </grid>
@@ -156,11 +160,16 @@
         <div class="editor-settings">
           <h2>Editor Settings</h2>
 
-          <MDMControlGroup>
+          <MDMControlGroup :channel="channel">
             <template #header>
               <c span="6" class="control-group__label">MIDI Input</c>
               <c span="2" class="control-group__control">
-                <select v-model="inputId" class="select" name="inputs">
+                <select
+                  :value="localInputId"
+                  class="select"
+                  name="inputs"
+                  @change="midiInputSelected"
+                >
                   <option selected value="none">---</option>
                   <option
                     v-for="(input, index) in inputs"
@@ -175,7 +184,7 @@
               <c span="6" class="control-group__label">MIDI Output</c>
               <c span="2" class="control-group__control">
                 <select v-model="outputId" class="select" name="outputs">
-                  <option disabled selected value="none">---</option>
+                  <option selected value="none">---</option>
                   <option
                     v-for="(output, index) in outputs"
                     :key="index"
@@ -186,26 +195,13 @@
                 </select>
               </c>
 
-              <c span="6" class="control-group__label">Polyphony Enable</c>
-              <c span="2" class="control-group__control">
-                <LabelledCheckbox
-                  v-model="polyphonic"
-                  :labels="['Off', 'On']"
-                  :emit-boolean="true"
-                />
-              </c>
-
-              <c span="6" class="control-group__label">Max Poly. Channels</c>
-              <c span="2" class="control-group__control">
-                <DraggableSelect
-                  v-model.number="maxPolyphonicChannels"
-                  :values="[2, 3, 4, 5, 6]"
-                  :default="6"
-                  :emit-array-value="true"
-                />
-              </c>
-
-              <c span="6" class="control-group__label">MDMI Compatibility</c>
+              <c
+                v-tippy="{ followCursor: true }"
+                span="6"
+                class="control-group__label"
+                content="Turn on to use genMDM Editor with Mega Drive MIDI Interface."
+                >MDMI Mode</c
+              >
               <c span="2" class="control-group__control">
                 <LabelledCheckbox
                   v-model="mdmiCompatibility"
@@ -215,6 +211,10 @@
               </c>
             </template>
           </MDMControlGroup>
+
+          <button class="button rt" @click="openVoiceConfigDialog">
+            Voice Configuration
+          </button>
         </div>
 
         <GlobalSettings />
@@ -223,79 +223,92 @@
       </c>
     </grid>
 
-    <VDialog :show="showAboutDialog" @close="closeAboutDialog">
+    <VDialog
+      v-if="showAboutDialog"
+      :show="showAboutDialog"
+      @close="closeAboutDialog"
+    >
       <grid columns="3" class="about-dialog-text">
         <c span="3">
           <h1>genMDM Editor</h1>
           <span class="subtitle">version {{ version }} by 2xAA</span>
         </c>
         <c>
-          This editor's design was inspired by the scan of the Japanese
-          technical documentation of the YM2608, which is said to be the closest
-          documentation to the Sega Mega Drive's YM2612 as they share the same
-          FM package.<br /><br />I created this editor to further the genMDM's
-          usability and to understand the Sega MD's capabilities. I hope you
-          find this useful.
-        </c>
-        <c>
-          Special thanks to catskull and littlescale for the genMDM itself.<br /><br />
-          Greetz to: {{ friends }} and all chippers and genMDM users around the
-          world.<br /><br />ALWAYS BACK UP YOUR SAVES.
-        </c>
-        <c>
-          Found a bug or would like to suggest an improvement?
-          <FlexibleLink
-            :native="isElectronBuild"
-            href="https://github.com/2xAA/genmdm-editor/issues/new/choose"
-            nofollow
-            noreferrer
-            target="_blank"
-            >Create an issue on GitHub</FlexibleLink
-          >.<br /><br />Need some help?<br /><br />Check out
-          <FlexibleLink
-            :native="isElectronBuild"
+          <b
+            >Like this software?<br /><br />Consider supporting the development
+            of this and other projects by
+            <a
+              href="https://github.com/sponsors/2xAA"
+              nofollow
+              noreferrer
+              target="_blank"
+              >donating</a
+            >
+            or
+            <a href="https://2xaa.net/" nofollow noreferrer target="_blank"
+              >buying/streaming my music</a
+            >.</b
+          ><br /><br />
+
+          Need some help?<br /><br />Check out
+          <a
             href="https://github.com/2xAA/genmdm-editor/discussions"
             nofollow
             noreferrer
             target="_blank"
-            >Discussions</FlexibleLink
+            >Discussions</a
           >
-          for an answer to your question.<br /><br />Like this software?<br /><br />Consider
-          supporting the development of this and other projects by
-          <FlexibleLink
-            :native="isElectronBuild"
-            href="https://github.com/sponsors/2xAA"
+          for an answer to your question.<br /><br />
+          Found a bug or would like to suggest an improvement?<br />
+          <a
+            href="https://github.com/2xAA/genmdm-editor/issues/new/choose"
             nofollow
             noreferrer
             target="_blank"
-            >donating</FlexibleLink
-          >
-          or
-          <FlexibleLink
-            :native="isElectronBuild"
-            href="https://2xaa.fm/"
-            nofollow
-            noreferrer
-            target="_blank"
-            >buying/streaming my music</FlexibleLink
-          >.
+            >Create an issue on GitHub</a
+          >.</c
+        >
+        <c>
+          I created this editor to further the genMDM and MDMI's usability and
+          to understand the Sega MD's capabilities. I hope you find this
+          useful.<br /><br />
+
+          This editor's design was inspired by the scan of the Japanese
+          technical documentation of the YM2608, which is said to be the closest
+          documentation to the Sega Mega Drive's YM2612 as they share the same
+          FM package.
+        </c>
+        <c>
+          Special thanks to catskull, Robert Hargreaves, and littlescale for the
+          genMDM itself.<br /><br />
+          Greetz to: {{ friends }} and all chippers and genMDM users around the
+          world.<br /><br />ALWAYS BACK UP YOUR SAVES.
         </c>
       </grid>
     </VDialog>
 
     <ResetStateDialog
+      v-if="showResetStateDialog"
       :show="showResetStateDialog"
       @close="closeResetStateDialog"
+    />
+
+    <VoiceConfigDialog
+      v-if="showVoiceConfigDialog"
+      :show="showVoiceConfigDialog"
+      @close="closeVoiceConfigDialog"
     />
   </div>
 </template>
 
 <script>
 import WebMidi from "webmidi";
-import FlexibleLink from "vue-flexible-link/src/FlexibleLink.vue";
 
 import pkg from "../../../package.json";
 import shuffle from "./utils/shuffle";
+
+import { MIDIChannelVoiceMode } from "./store/index.js";
+
 import MDMControlGroup from "./components/MDMControlGroup.vue";
 import DraggableSelect from "./components/DraggableSelect.vue";
 import LabelledCheckbox from "./components/LabelledCheckbox.vue";
@@ -318,13 +331,14 @@ import Y12FileDownload from "./components/Y12FileDownload.vue";
 import ResetStateDialog from "./components/ResetStateDialog.vue";
 import StateUpload from "./components/StateUpload.vue";
 import StateDownload from "./components/StateDownload.vue";
+import VoiceConfigDialog from "./components/VoiceConfigDialog.vue";
+import { MDMKeyboard } from "./MDMKeyboard";
 import { reactive } from "vue";
 
 export default {
   name: "App",
 
   components: {
-    FlexibleLink,
     MDMControlGroup,
     MDMADSR,
     TFIFileDownload,
@@ -347,6 +361,7 @@ export default {
     ResetStateDialog,
     StateUpload,
     StateDownload,
+    VoiceConfigDialog,
   },
 
   data() {
@@ -354,24 +369,33 @@ export default {
       version: pkg.version,
       isElectronBuild: process.env.ELECTRON_BUILD,
 
+      input: null,
+      localInputId: "none",
+
       inputs: [],
       outputs: [],
 
-      input: null,
-      output: null,
-
-      notesOn: {},
-      polyphonyChannel: 1,
+      notesOn: {}, // should key channels and have note as value...
+      noteOnChannels: {
+        1: [],
+        2: [],
+        3: [],
+        4: [],
+        5: [],
+        6: [],
+      },
       storeUnsubscribe: null,
 
       ramSlot: 1,
 
-      showAboutDialog: false,
       showResetStateDialog: false,
+      showVoiceConfigDialog: false,
+
       friendsNames: [
         "Mum",
         "James",
-        "Emmoi",
+        "Nic",
+        "Li",
         "NERDDISCO",
         "Lazer Sausage",
         "cTrix",
@@ -383,14 +407,35 @@ export default {
         "Cyanide Dansen",
         "Polyop",
         "jonic",
-        "Robert Hargreaves",
       ],
+
+      keyboardInstance: null,
     };
   },
 
   computed: {
     outputPort() {
       return this.outputs.find((output) => output.id === this.outputId);
+    },
+
+    inputId: {
+      get() {
+        return this.$store.state.midiInputId;
+      },
+
+      set(value) {
+        this.$store.commit("SET_MIDI_INPUT_ID", value);
+      },
+    },
+
+    outputId: {
+      get() {
+        return this.$store.state.midiOutputId;
+      },
+
+      set(value) {
+        this.$store.commit("SET_MIDI_OUTPUT_ID", value);
+      },
     },
 
     channel: {
@@ -403,24 +448,12 @@ export default {
       },
     },
 
-    polyphonic: {
-      get() {
-        return this.$store.state.polyphonic;
-      },
-
-      set(value) {
-        this.$store.dispatch("setPolyphony", value);
-      },
+    mode() {
+      return this.$store.state.channelConfiguration[this.channel - 1].mode;
     },
 
-    maxPolyphonicChannels: {
-      get() {
-        return this.$store.state.maxPolyphonicChannels;
-      },
-
-      set(value) {
-        this.$store.dispatch("setMaxPolyphonicChannels", value);
-      },
+    group() {
+      return this.$store.state.channelConfiguration[this.channel - 1].group;
     },
 
     mdmiCompatibility: {
@@ -447,30 +480,25 @@ export default {
       return this.$store.state.instrumentIndex;
     },
 
-    inputId: {
+    showAboutDialog: {
       get() {
-        return this.$store.state.midiInputId;
+        return this.$store.state.showAboutDialog;
       },
 
       set(value) {
-        this.$store.commit("SET_MIDI_INPUT_ID", value);
-      },
-    },
-
-    outputId: {
-      get() {
-        return this.$store.state.midiOutputId;
-      },
-
-      set(value) {
-        this.$store.commit("SET_MIDI_OUTPUT_ID", value);
+        this.$store.commit("SET_SHOWABOUTDIALOG", value);
       },
     },
   },
 
   watch: {
     inputId(newId, oldId) {
+      console.log("wowowow");
       this.createInput(newId, oldId);
+    },
+
+    outputId() {
+      this.sendTLInversionSysEx(this.mdmiCompatibility);
     },
 
     channel(value, oldValue) {
@@ -490,17 +518,7 @@ export default {
         return;
       }
 
-      // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
-      // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
-
-      try {
-        this.outputPort.sendSysex(
-          [0x00, 0x22, 0x77, 0x07, !value ? 0x00 : 0x01],
-          [],
-        );
-      } catch (e) {
-        console.error(e);
-      }
+      this.sendTLInversionSysEx(value);
     },
   },
 
@@ -510,15 +528,33 @@ export default {
         console.log("WebMidi could not be enabled.", err);
       } else {
         WebMidi.addListener("connected", this.populateInputAndOutputPorts);
-        WebMidi.addListener("disconnected", this.populateInputAndOutputPorts);
+        WebMidi.addListener("disconnected", this.handleMidiDisconnected);
       }
     }, true);
+
+    this.populateInputAndOutputPorts();
 
     this.storeUnsubscribe = this.$store.subscribe((mutation) => {
       if (mutation.type === "SET_CC_VALUE") {
         this.sendCC(mutation.payload);
       }
     });
+
+    this.keyboardInstance = new MDMKeyboard(
+      (number, velocity) => {
+        this.handleNoteOn({
+          note: { number },
+          velocity: velocity / 127,
+          channel: this.channel,
+        });
+      },
+      (number) => {
+        this.handleNoteOff({
+          note: { number },
+          channel: this.channel,
+        });
+      },
+    );
   },
 
   beforeUnmount() {
@@ -531,6 +567,26 @@ export default {
   },
 
   methods: {
+    createInput(newId, oldId) {
+      this.cleanUpMidiInput(oldId);
+
+      const input = this.inputs.find((input) => input.id === newId);
+
+      if (!input) {
+        return;
+      }
+
+      this.input = input;
+      this.localInputId = newId;
+
+      // Add listeners on all channels
+      input.addListener("noteon", "all", this.handleNoteOn);
+      input.addListener("noteoff", "all", this.handleNoteOff);
+      input.addListener("pitchbend", "all", this.handlePitchBend);
+      input.addListener("controlchange", "all", this.handleCC);
+      input.addListener("programchange", "all", this.handleProgramChange);
+    },
+
     loadInstrument() {
       const { data } = this.patches[this.instrumentIndex];
       if (!data) {
@@ -577,6 +633,40 @@ export default {
       }
     },
 
+    handleMidiDisconnected(e) {
+      this.cleanUpMidiInput(e.port.id);
+      this.populateInputAndOutputPorts();
+    },
+
+    cleanUpMidiInput(id) {
+      if (id) {
+        const oldInput = this.inputs.find((input) => input.id === id);
+        if (oldInput) {
+          oldInput.removeListener();
+          this.input = null;
+          this.localInputId = "none";
+        }
+      }
+    },
+
+    sendTLInversionSysEx(value) {
+      // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
+      // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
+      try {
+        this.outputPort.sendSysex(
+          [0x00, 0x22, 0x77, 0x07, !value ? 0x00 : 0x01],
+          [],
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    },
+
+    midiInputSelected({ target: { value } }) {
+      this.midiInputSelected = value;
+      this.inputId = value;
+    },
+
     writeToSlot() {
       const { name: existingName } = this.patches[this.instrumentIndex];
 
@@ -596,16 +686,6 @@ export default {
         return;
       }
 
-      // Send TL inversion SysEx for SEGA Mega Drive MIDI Interface
-      // https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Configuration-&-Advanced-Operations#:~:text=custom%20PSG%20envelope-,Invert%20Total%20Level,-00%2022%2077
-      if (this.mdmiCompatibility && cc > 15 && cc < 20) {
-        try {
-          this.outputPort.sendSysex([0x00, 0x22, 0x77, 0x07, 0x01], []);
-        } catch (e) {
-          console.error(e);
-        }
-      }
-
       try {
         this.outputPort.sendControlChange(cc, value, channel);
       } catch (e) {
@@ -615,6 +695,7 @@ export default {
     },
 
     sendState() {
+      this.sendTLInversionSysEx(this.mdmiCompatibility);
       this.$store.dispatch("sendState");
     },
 
@@ -624,22 +705,45 @@ export default {
       }
 
       const {
-        note: { number, name, octave },
+        note: { number },
         velocity,
+        channel: channelIn,
       } = e;
-      const note = `${name}${octave}`;
 
-      let channel = e.channel;
+      let outChannels = [];
 
-      if (this.polyphonic && channel <= this.maxPolyphonicChannels) {
-        channel = this.nextPolyphonyChannel(number);
+      // Pass through other channels
+      if (channelIn > 6) {
+        this.outputPort.playNote(number, channelIn, {
+          velocity,
+        });
+        return;
       }
 
-      this.notesOn[number] = channel;
+      /** @type {MIDIChannelConfiguration} */
+      const { group, mode } =
+        this.$store.state.channelConfiguration[channelIn - 1];
 
-      this.outputPort.playNote(note, channel, {
-        velocity,
-      });
+      if (mode === MIDIChannelVoiceMode.MONOPHONIC) {
+        outChannels.push(channelIn);
+      } else if (mode === MIDIChannelVoiceMode.UNISON) {
+        outChannels.push(
+          ...this.$store.getters.channelsByGroup[group].slice(1),
+        );
+      } else if (mode === MIDIChannelVoiceMode.POLYPHONIC) {
+        const groupChannels =
+          this.$store.getters.channelsByGroup[group].slice(1);
+        outChannels.push(this.nextPolyphonyChannel(number, groupChannels));
+      }
+
+      for (let i = 0; i < outChannels.length; i++) {
+        const channel = outChannels[i];
+        this.noteOnChannels[channel].push(number);
+
+        this.outputPort.playNote(number, channel, {
+          velocity,
+        });
+      }
     },
 
     handleNoteOff(e) {
@@ -647,18 +751,47 @@ export default {
         return;
       }
 
-      const { name, octave, number } = e.note;
-      const note = `${name}${octave}`;
-      let channel;
-      if (this.polyphonic) {
-        channel = this.notesOn[number];
-      } else {
-        channel = e.channel;
+      const {
+        channel: channelIn,
+        note: { number },
+      } = e;
+      let outChannels = [];
+
+      // Pass through other channels
+      if (channelIn > 6) {
+        this.outputPort.stopNote(number, channelIn);
+        return;
       }
 
-      this.outputPort.stopNote(note, channel);
+      const { group, mode } =
+        this.$store.state.channelConfiguration[channelIn - 1];
 
-      delete this.notesOn[number];
+      if (mode === MIDIChannelVoiceMode.MONOPHONIC) {
+        outChannels.push(channelIn);
+      } else if (mode === MIDIChannelVoiceMode.UNISON) {
+        outChannels.push(
+          ...this.$store.getters.channelsByGroup[group].slice(1),
+        );
+      } else if (mode === MIDIChannelVoiceMode.POLYPHONIC) {
+        const noteOnChannels = Object.entries(this.noteOnChannels);
+        for (let i = 0; i < noteOnChannels.length; i += 1) {
+          const [channel, notes] = noteOnChannels[i];
+          if (notes.indexOf(number) > -1) {
+            outChannels.push(channel);
+            break;
+          }
+        }
+      }
+
+      for (let i = 0; i < outChannels.length; i++) {
+        const channel = outChannels[i];
+        this.outputPort.stopNote(number, channel);
+        const index = this.noteOnChannels[channel].indexOf(number);
+
+        if (index > -1) {
+          this.noteOnChannels[channel].splice(index, 1);
+        }
+      }
     },
 
     handlePitchBend(e) {
@@ -666,12 +799,13 @@ export default {
         return;
       }
 
-      if (this.polyphonic && e.channel <= this.maxPolyphonicChannels) {
-        for (let i = 1; i <= this.maxPolyphonicChannels; ++i) {
-          this.outputPort.sendPitchBend(e.value, i);
-        }
-      } else {
-        this.outputPort.sendPitchBend(e.value, e.channel);
+      const affectedChannels = this.$store.getters.groupedChannelsFromChannel(
+        e.channel - 1,
+      );
+      for (let i = 0; i < affectedChannels.length; ++i) {
+        const channel = affectedChannels[i];
+
+        this.outputPort.sendPitchBend(e.value, channel);
       }
     },
 
@@ -680,8 +814,13 @@ export default {
         return;
       }
 
-      this.$store.dispatch("setCCValuesOnChannel", {
-        [e.controller.number]: e.value,
+      if (e.controller.number === 85) {
+        this.sendCC({ cc: e.controller.number, ...e });
+        return;
+      }
+
+      this.$store.dispatch("setCCValues", {
+        values: { [e.controller.number]: e.value },
         channel: e.channel,
       });
     },
@@ -696,47 +835,74 @@ export default {
 
       if (!data) return;
 
-      this.$store.dispatch("setCCValuesOnChannel", {
-        ...data,
+      this.$store.dispatch("setCCValues", {
+        values: { ...data },
         channel,
       });
     },
 
-    freeChannels() {
-      const channels = [false, true, true, true, true, true];
+    freeChannel(channels) {
+      const entries = Object.entries(this.noteOnChannels);
 
-      Object.values(this.notesOn).forEach((channel) => {
-        channels[channel] = false;
-      });
+      const index = entries.findIndex(
+        ([channel, notes]) =>
+          channel && !notes.length && channels.indexOf(Number(channel)) > -1,
+      );
 
-      return channels.findIndex((channel) => channel);
-    },
-
-    nextPolyphonyChannel(newNoteNumber) {
-      const notesOn = Object.keys(this.notesOn);
-      const lowestNote = Math.min(...notesOn);
-      let lowestNoteChannel = this.polyphonyChannel;
-
-      if (newNoteNumber > lowestNote) {
-        lowestNoteChannel = this.notesOn[lowestNote];
+      if (index > -1) {
+        return index + 1;
       }
 
-      let nextChannel = this.polyphonyChannel + 1;
+      return index;
+    },
 
-      const freeChannel = this.freeChannels();
+    nextPolyphonyChannel(newNoteNumber, channels) {
+      const noteOnChannels = Object.entries(this.noteOnChannels);
+
+      const notesOn = noteOnChannels
+        .filter(([channel]) => channels.indexOf(channel) > -1)
+        .map(([, notes]) => notes)
+        .flat();
+
+      const lowestNote = Math.min(...notesOn);
+
+      let lowestNoteChannel = Math.min(...channels);
+      for (let i = 0; i < noteOnChannels.length; i += 1) {
+        const [channel, notes] = noteOnChannels[i];
+        if (notes.indexOf(lowestNote) > -1) {
+          lowestNoteChannel = Number(channel);
+          break;
+        }
+      }
+
+      if (newNoteNumber > lowestNote) {
+        const lowestNoteChannelArr = noteOnChannels.find(
+          ([, note]) => note === lowestNote,
+        );
+
+        lowestNoteChannel =
+          (lowestNoteChannelArr && lowestNoteChannelArr[0]) ??
+          lowestNoteChannel;
+      }
+
+      let nextChannel = lowestNoteChannel;
+
+      const freeChannel = this.freeChannel(channels);
       if (freeChannel > 0) {
         nextChannel = freeChannel;
       }
 
-      if (nextChannel === lowestNoteChannel) {
-        nextChannel = lowestNoteChannel + 1;
+      if (freeChannel < 1) {
+        const channelsOrderedByNotesAsc = noteOnChannels
+          .filter(([channel]) => channels.indexOf(Number(channel)) > -1)
+          .sort(
+            ([, notesA], [, notesB]) => Math.min(...notesA) - Math.min(notesB),
+          )
+          .map(([channel]) => Number(channel));
+
+        nextChannel = channelsOrderedByNotesAsc.pop();
       }
 
-      if (nextChannel > this.maxPolyphonicChannels) {
-        nextChannel = 1;
-      }
-
-      this.polyphonyChannel = nextChannel;
       return nextChannel;
     },
 
@@ -754,6 +920,14 @@ export default {
 
     closeResetStateDialog() {
       this.showResetStateDialog = false;
+    },
+
+    openVoiceConfigDialog() {
+      this.showVoiceConfigDialog = true;
+    },
+
+    closeVoiceConfigDialog() {
+      this.showVoiceConfigDialog = false;
     },
   },
 };
@@ -829,6 +1003,10 @@ label.select select {
   cursor: ns-resize;
 }
 
+.ns-resize-cursor.disabled {
+  cursor: not-allowed;
+}
+
 label span {
   background-color: transparent;
   color: var(--foreground-color);
@@ -891,12 +1069,10 @@ h2 {
 }
 
 .about-dialog-text {
-  color: var(--foreground-color);
   grid-gap: 25px;
 }
 
 .about-dialog-text a {
-  color: var(--foreground-color);
   cursor: pointer;
   text-decoration: underline;
 }

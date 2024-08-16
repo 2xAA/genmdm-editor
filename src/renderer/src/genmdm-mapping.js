@@ -1,3 +1,21 @@
+/**
+ * @typedef {Object} Control
+ * @property {string} label - The label of the control.
+ * @property {number} range - The range of values for the control.
+ * @property {boolean} [type] - The type of the control, if specified.
+ * @property {number} default - The default value of the control.
+ * @property {string[]} [enum] - The enum values for the control, if specified.
+ * @property {string} [description] - The description of the control, if specified.
+ * @property {number[]} [values] - The specific values corresponding to the enum, if specified.
+ */
+
+/**
+ * @typedef {Object.<number, Control>} GenMDMMapping
+ */
+
+/**
+ * @type {GenMDMMapping}
+ */
 export default {
   // YM2612 Global Control
 

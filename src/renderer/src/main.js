@@ -15,7 +15,7 @@ const app = createApp(App);
 Object.defineProperty(app.config.globalProperties, "$colors", {
   get() {
     return getColors();
-  }
+  },
 });
 
 app.use(VueTippy);

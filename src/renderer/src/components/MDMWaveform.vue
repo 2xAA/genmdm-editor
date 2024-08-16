@@ -70,7 +70,7 @@ export default {
     canvas.addEventListener("pointerdown", this.down);
   },
 
-  onBeforeUnmount() {
+  beforeUnmount() {
     const { canvas } = this.$refs;
     canvas.removeEventListener("pointerdown", this.down);
     document.removeEventListener("pointerup", this.up);
@@ -99,6 +99,7 @@ export default {
       document.removeEventListener("pointermove", this.move);
       this.$store.dispatch("setCCValues", {
         values: this.ccValues,
+        channel: this.$store.state.channel,
       });
     },
 
@@ -167,7 +168,7 @@ export default {
 
       const yValue = 1 - e.offsetY / this.size;
 
-      const q = 1 / 128;
+      const q = 1 / 127;
 
       const value = Math.round(yValue / q) * q;
       const cc = Math.round(value * 127);

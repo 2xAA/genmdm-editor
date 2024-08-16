@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>DAC Control</h2>
-    <MDMControlGroup :cc-values="[78, 86, 88, 79, 89]" />
+    <MDMControlGroup :cc-values="[78, 86, 88, 79, 89]" :channel="channel" />
     <MDMWaveform />
   </div>
 </template>
@@ -14,6 +14,12 @@ export default {
   components: {
     MDMControlGroup,
     MDMWaveform,
+  },
+
+  computed: {
+    channel() {
+      return this.$store.state.channel;
+    },
   },
 };
 </script>

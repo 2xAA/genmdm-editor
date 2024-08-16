@@ -1,5 +1,5 @@
 <template>
-  <grid columns="8" class="control-group">
+  <grid columns="8" class="control-group" :class="{ disabled }">
     <slot name="header"></slot>
     <template v-for="cc in ccValues" :key="`label-${cc}`">
       <c
@@ -10,7 +10,7 @@
         >{{ controls[cc].label }}</c
       >
       <c span="2" class="control-group__control">
-        <MDMControl :cc="cc" />
+        <MDMControl :cc="cc" :channel="channel" />
       </c>
     </template>
     <slot name="footer"></slot>
@@ -18,14 +18,24 @@
 </template>
 
 <script>
-import genmdmMapping from "../genmdm-mapping.js";
 import MDMControl from "./MDMControl.vue";
 
 export default {
   components: {
     MDMControl,
   },
+
   props: {
+    channel: {
+      type: Number,
+      required: true,
+    },
+
+    disabled: {
+      type: Boolean,
+      default: () => false,
+    },
+
     ccValues: {
       type: Array,
       default: () => [],
@@ -37,7 +47,7 @@ export default {
       const controls = {};
 
       this.ccValues.forEach((cc) => {
-        controls[cc] = genmdmMapping[cc];
+        controls[cc] = this.$store.getters.mapping[cc];
       });
 
       return controls;
@@ -66,5 +76,11 @@ export default {
 
 .control-group__control {
   overflow: hidden;
+}
+
+.control-group.disabled,
+.control-group.disabled .control-group__label,
+.control-group.disabled .control-group__control {
+  border-color: light-dark(rgb(128, 128, 128), rgb(170, 170, 170));
 }
 </style>

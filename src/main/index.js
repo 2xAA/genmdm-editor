@@ -11,6 +11,7 @@ function createWindow() {
     minHeight: 946,
     webPreferences: {
       sandbox: false,
+      preload: join(__dirname, "../preload/index.js"),
     },
   });
 
@@ -20,7 +21,7 @@ function createWindow() {
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
-    return { action: "deny" };
+    return { action: "allow" };
   });
 
   // HMR for renderer base on electron-vite cli.

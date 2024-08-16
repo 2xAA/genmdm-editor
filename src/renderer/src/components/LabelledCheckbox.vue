@@ -1,14 +1,26 @@
 <template>
-  <label>
+  <label :class="{ disabled }" :title="title">
     {{ currentLabel }}
-    <input type="checkbox" :checked="checked" @change="onChange" />
+    <input
+      type="checkbox"
+      :value="checked"
+      :disabled="disabled"
+      @change="onChange"
+    />
   </label>
 </template>
 
 <script>
 export default {
   props: {
-    default: {},
+    disabled: {
+      type: Boolean,
+      default: () => false,
+    },
+
+    modelValue: {
+      type: undefined,
+    },
 
     labels: {
       type: Array,
@@ -20,7 +32,10 @@ export default {
       default: false,
     },
 
-    modelValue: {},
+    title: {
+      type: String,
+      default: "",
+    },
   },
 
   emits: ["update:modelValue"],
@@ -42,10 +57,6 @@ export default {
   },
 
   watch: {
-    modelValue() {
-      this.value = this.modelValue ? 127 : 0;
-    },
-
     value(newValue, oldValue) {
       if (newValue !== oldValue) {
         this.$emit(
@@ -54,10 +65,24 @@ export default {
         );
       }
     },
+
+    modelValue(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        if (this.emitBoolean) {
+          this.value = !newValue ? 0 : 127;
+        } else {
+          this.value = newValue;
+        }
+      }
+    },
   },
 
   created() {
-    this.value = this.modelValue ? 127 : 0;
+    if (this.emitBoolean) {
+      this.value = !this.modelValue ? 0 : 127;
+    } else {
+      this.value = this.modelValue;
+    }
   },
 
   methods: {
@@ -87,9 +112,15 @@ label {
   align-items: center;
 }
 
-label:active {
+label:active:not(.disabled) {
   background: var(--foreground-color);
   color: var(--background-color);
   font-weight: bold;
+}
+
+label.disabled {
+  text-decoration: line-through;
+  cursor: not-allowed;
+  color: light-dark(rgb(128, 128, 128), rgb(170, 170, 170));
 }
 </style>

@@ -25,14 +25,22 @@
 
 .button:active:not(:disabled) {
   background: var(--foreground-color);
-  color: var(--background-color)
+  color: var(--background-color);
 }
 
 .button:disabled {
   cursor: not-allowed;
 }
 
-input[type=text] {
+.button.rt {
+  border-top: none;
+}
+
+.button.rr {
+  border-right: none;
+}
+
+input[type="text"] {
   background-color: transparent;
   border: 1px solid var(--foreground-color);
   box-sizing: border-box;
@@ -86,7 +94,7 @@ label.select svg path {
 }
 
 hr {
-  border:none;
+  border: none;
   border-top: 1px solid var(--foreground-color);
 }
 
@@ -102,4 +110,13 @@ select.select {
   border: none;
   text-align: center;
   letter-spacing: -2px;
+}
+
+.disabled {
+  text-decoration: line-through;
+  color: light-dark(rgb(128, 128, 128), rgb(170, 170, 170));
+}
+
+.svg-icon path {
+  fill: var(--foreground-color);
 }

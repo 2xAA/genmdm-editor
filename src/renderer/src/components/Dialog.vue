@@ -13,7 +13,7 @@
         :disabled="closeDisabled"
         @click="close"
       >
-        <CloseIcon class="close-icon" width="14" height="15" />
+        <CloseIcon class="svg-icon" width="14" height="15" />
       </button>
     </header>
 
@@ -98,6 +98,7 @@ dialog {
   border: 1px solid var(--foreground-color);
   box-sizing: border-box;
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.16);
+  color: var(--foreground-color);
 }
 
 dialog::backdrop {
@@ -127,11 +128,5 @@ button.close:disabled {
 div.body {
   min-height: 72px;
   padding: 8px;
-}
-</style>
-
-<style>
-.close-icon path {
-  fill: var(--foreground-color);
 }
 </style>

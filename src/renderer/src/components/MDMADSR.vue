@@ -9,6 +9,7 @@
           70 + operator - 1,
           90 + operator - 1,
         ]"
+        :channel="channel"
       />
     </c>
     <c span="6">
@@ -16,57 +17,83 @@
     </c>
     <c span="8" class="envelope-dials">
       <MDMDial
-        :value="displayPositions[0][0]"
         :inverse="true"
         :quantise="32"
         :cc="ADSR_CC_NUMBERS[0]"
         :cc-offset="operator - 1"
+        :range="ADSR_DIAL_RANGES[0]"
+        :title="ADSR_TITLES[0]"
+        :channel="channel"
+        @pointerdown="setHighlight(0)"
+        @pointerup="setHighlight(null)"
       />
       <MDMDial
-        :value="displayPositions[0][1]"
-        :quantise="128"
         :cc="ADSR_CC_NUMBERS[1]"
         :cc-offset="operator - 1"
+        :range="ADSR_DIAL_RANGES[1]"
+        :title="ADSR_TITLES[1]"
+        :channel="channel"
+        @pointerdown="setHighlight(1)"
+        @pointerup="setHighlight(null)"
       />
       <MDMDial
-        :value="displayPositions[1][0]"
         :quantise="32"
         :inverse="true"
         :cc="ADSR_CC_NUMBERS[2]"
         :cc-offset="operator - 1"
+        :range="ADSR_DIAL_RANGES[2]"
+        :title="ADSR_TITLES[2]"
+        :channel="channel"
+        @pointerdown="setHighlight(2)"
+        @pointerup="setHighlight(null)"
       />
       <MDMDial
-        :value="displayPositions[1][1]"
         :quantise="16"
         :inverse="true"
         :cc="ADSR_CC_NUMBERS[3]"
         :cc-offset="operator - 1"
+        :range="ADSR_DIAL_RANGES[3]"
+        :title="ADSR_TITLES[3]"
+        :channel="channel"
+        @pointerdown="setHighlight(3)"
+        @pointerup="setHighlight(null)"
       />
       <MDMDial
-        :value="displayPositions[2][0]"
         :quantise="32"
         :inverse="true"
         :cc="ADSR_CC_NUMBERS[4]"
         :cc-offset="operator - 1"
+        :range="ADSR_DIAL_RANGES[4]"
+        :title="ADSR_TITLES[4]"
+        :channel="channel"
+        @pointerdown="setHighlight(4)"
+        @pointerup="setHighlight(null)"
       />
       <MDMDial
-        :value="displayPositions[3][0]"
         :quantise="16"
         :inverse="true"
         :cc="ADSR_CC_NUMBERS[5]"
         :cc-offset="operator - 1"
+        :range="ADSR_DIAL_RANGES[5]"
+        :title="ADSR_TITLES[5]"
+        :channel="channel"
+        @pointerdown="setHighlight(5)"
+        @pointerup="setHighlight(null)"
       />
     </c>
   </grid>
 </template>
 
 <script>
+import { HighResCanvasRenderingContext2D } from "@vcync/hires-canvas2d";
 import MDMDial from "./MDMDial.vue";
 import MDMControlGroup from "./MDMControlGroup.vue";
 import genmdmMapping from "../genmdm-mapping";
 import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
 
 const ADSR_CC_NUMBERS = [43, 16, 47, 55, 51, 59];
+const ADSR_DIAL_RANGES = ADSR_CC_NUMBERS.map((cc) => genmdmMapping[cc].range);
+const ADSR_TITLES = ADSR_CC_NUMBERS.map((cc) => genmdmMapping[cc].label);
 
 export default {
   components: {
@@ -80,23 +107,25 @@ export default {
     operator: { type: Number, required: true },
     width: { type: Number, default: 298 },
     height: { type: Number, default: 156 },
+    channel: {
+      type: Number,
+      required: true,
+    },
   },
 
   data() {
     return {
       context: null,
       mouseDown: true,
-      nodeSelected: -1,
       storeUnsubscribe: null,
+      highlight: null,
       ADSR_CC_NUMBERS,
+      ADSR_DIAL_RANGES,
+      ADSR_TITLES,
     };
   },
 
   computed: {
-    channel() {
-      return this.$store.state.channel;
-    },
-
     displayPositions() {
       const channel = this.$store.state[`channel${this.channel}`];
       const operator = this.operator - 1;
@@ -126,7 +155,10 @@ export default {
 
   mounted() {
     const { canvas } = this.$refs;
-    this.context = canvas.getContext("2d");
+    this.context = new HighResCanvasRenderingContext2D(
+      canvas.getContext("2d"),
+      window.devicePixelRatio,
+    );
 
     this.resize();
     this.draw();
@@ -147,6 +179,11 @@ export default {
   },
 
   methods: {
+    setHighlight(index) {
+      this.highlight = index;
+      this.draw();
+    },
+
     resize() {
       const {
         $refs: { canvas },
@@ -167,10 +204,13 @@ export default {
 
     draw() {
       const dpr = window.devicePixelRatio;
-      const { context, $refs, getXYFromPosition } = this;
       const {
-        canvas: { width: cw, height: ch },
-      } = $refs;
+        context,
+        getXYFromPosition,
+        width: cw,
+        height: ch,
+        highlight,
+      } = this;
 
       context.restore();
       context.strokeStyle = this.$colors.foreground;
@@ -194,60 +234,77 @@ export default {
         ch -
         ((ch - pos3.y) * (((ch - pos1.y) / ch) * ((ch - pos2.y) / ch)) + 0.5);
 
+      highlight === 0 && (context.lineWidth = 2 * dpr);
       context.beginPath();
       context.moveTo(0 + 0.5, ch + 0.5);
       context.lineTo(pos1.x + 0.5, pos1.y + 0.5);
       context.stroke();
+      context.lineWidth = 1 * dpr;
 
+      highlight === 2 && (context.lineWidth = 2 * dpr);
       context.beginPath();
       context.moveTo(pos1.x + 0.5, pos1.y + 0.5);
       context.lineTo(pos2.x + 0.5, pos2Y);
       context.stroke();
+      context.lineWidth = 1 * dpr;
 
+      highlight === 4 && (context.lineWidth = 2 * dpr);
       context.beginPath();
       context.moveTo(pos2.x + 0.5, pos2Y);
       context.lineTo(pos3.x + 0.5, pos3Y);
       context.stroke();
+      context.lineWidth = 1 * dpr;
 
+      highlight === 5 && (context.lineWidth = 2 * dpr);
       context.beginPath();
       context.moveTo(pos3.x + 0.5, pos3Y);
       context.lineTo(pos4.x + 0.5, ch + 0.5);
       context.stroke();
+      context.lineWidth = 1 * dpr;
 
       context.save();
       context.setLineDash([4.5 * dpr, 2 * dpr, 1.5 * dpr, 2 * dpr]);
 
+      highlight === 1 && (context.lineWidth = 2 * dpr);
       context.beginPath();
       context.moveTo(0, pos1.y + 0.5);
       context.lineTo(cw, pos1.y + 0.5);
       context.stroke();
+      context.lineWidth = 1 * dpr;
 
+      highlight === 3 && (context.lineWidth = 2 * dpr);
       context.beginPath();
       context.moveTo(0, pos2Y);
       context.lineTo(cw, pos2Y);
       context.stroke();
+      context.lineWidth = 1 * dpr;
 
+      highlight === 1 && (context.lineWidth = 2 * dpr);
       context.beginPath();
       context.moveTo(pos1.x + 0.5, pos1.y);
       context.lineTo(pos1.x + 0.5, ch);
       context.stroke();
+      context.lineWidth = 1 * dpr;
 
+      highlight === 3 && (context.lineWidth = 2 * dpr);
       context.beginPath();
       context.moveTo(pos2.x + 0.5, pos2Y);
       context.lineTo(pos2.x + 0.5, ch);
       context.stroke();
+      context.lineWidth = 1 * dpr;
 
       context.beginPath();
       context.moveTo(pos3.x + 0.5, pos3Y);
       context.lineTo(pos3.x + 0.5, ch);
       context.stroke();
+      context.lineWidth = 1 * dpr;
 
       context.restore();
     },
 
     getXYFromPosition(index = 0) {
-      const { canvas } = this.$refs;
-      const qw = Math.floor(canvas.width / 4);
+      const { width, height } = this;
+      const qw = Math.floor(width / 4);
 
       let lowerX = 0;
       if (index > 0) {
@@ -259,13 +316,13 @@ export default {
       if (index === 0) {
         return {
           x: lowerX + (1 - position[0]) * qw, //Math.pow(cw, position[0]),
-          y: Math.floor((1 - position[1]) * canvas.height),
+          y: Math.floor((1 - position[1]) * height),
         };
       }
 
       return {
         x: lowerX + Math.floor(position[0] * qw),
-        y: Math.floor(position[1] * canvas.height),
+        y: Math.floor(position[1] * height),
       };
     },
 

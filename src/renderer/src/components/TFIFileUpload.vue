@@ -1,6 +1,6 @@
 <template>
   <label class="button">
-    <input type="file" id="input" accept=".tfi" @change="fileAdded" />
+    <input id="input" type="file" accept=".tfi" @change="fileAdded" />
   </label>
 </template>
 
@@ -11,7 +11,7 @@ export default {
   methods: {
     fileAdded(e) {
       const {
-        files: { 0: file }
+        files: { 0: file },
       } = e.target;
 
       const reader = new FileReader();
@@ -46,10 +46,11 @@ export default {
 
       this.$store.dispatch("setCCValues", {
         values: ccValues,
-        ignoreSameValues: false
+        ignoreSameValues: false,
+        channel: this.$store.state.channel,
       });
-    }
-  }
+    },
+  },
 };
 </script>
 

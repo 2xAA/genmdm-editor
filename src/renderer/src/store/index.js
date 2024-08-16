@@ -3,43 +3,103 @@ import { createStore } from "vuex";
 
 import vuejsStorage from "vuejs-storage";
 import genmdmMapping from "../genmdm-mapping";
+import mdmiMapping from "../mdmi-mapping";
 
 function sleep(milliseconds = 0) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-const GLOBAL_CC = [1, 74, 78, 79, 80, 81, 83, 84, 85, 86, 88, 89];
+const GLOBAL_CC = [1, 74, 78, 79, 80, 81, 83, 84, /*85, */ 86, 88, 89];
 const NUM_CHANNELS = 6;
 
+/**
+ * @typedef {object} GenMDMPatch
+ * @prop {string} name
+ * @prop {object} [data]
+ */
+
+/**
+ * @returns {GenMDMPatch[]}
+ */
 function createBlankPatchesArray() {
   return [...new Array(128).keys()].map(() => ({ name: "" })); // we don't define the data key here until we have data
 }
 
+/**
+ * @readonly
+ * @enum {number}
+ */
+export const MIDIChannelVoiceMode = {
+  MONOPHONIC: 0,
+  POLYPHONIC: 1,
+  UNISON: 2,
+};
+
+/**
+ * @typedef MIDIChannelConfiguration
+ * @prop {MIDIChannelVoiceMode} mode The voice mode of the channel
+ * @prop {number} group Number from -1 to 2. -1 signals the channel is
+ *                      ungrouped, only applicable in the case of
+ *                      MIDIChannelVoiceMode.MONOPHONIC.
+ */
+
+/**
+ * @typedef {object} GenMDMEditorState
+ * @prop {GenMDMPatch[]} patches
+ * @prop {number} channel
+ * @prop {MIDIChannelConfiguration[]} channelConfiguration
+ * @prop {number} instrumentIndex
+ * @prop {boolean} mdmiCompatibility
+ * @prop {import("../genmdm-mapping").GenMDMMapping} [channel1]
+ * @prop {import("../genmdm-mapping").GenMDMMapping} [channel2]
+ * @prop {import("../genmdm-mapping").GenMDMMapping} [channel3]
+ * @prop {import("../genmdm-mapping").GenMDMMapping} [channel4]
+ * @prop {import("../genmdm-mapping").GenMDMMapping} [channel5]
+ * @prop {import("../genmdm-mapping").GenMDMMapping} [channel6]
+ */
+
+/**
+ * @returns {GenMDMEditorState}
+ */
 function createDefaultState() {
   const defaultState = {
     patches: createBlankPatchesArray(),
 
-    polyphonic: false,
-    maxPolyphonicChannels: 6,
     channel: 1,
+    channelConfiguration: [
+      { mode: MIDIChannelVoiceMode.POLYPHONIC, group: 0 },
+      { mode: MIDIChannelVoiceMode.POLYPHONIC, group: 0 },
+      { mode: MIDIChannelVoiceMode.UNISON, group: 1 },
+      { mode: MIDIChannelVoiceMode.UNISON, group: 1 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
+    ],
     instrumentIndex: 0,
     mdmiCompatibility: false,
+    showAboutDialog: true,
+    ...createDefaultChannelState(),
 
     midiInputId: "none",
     midiOutputId: "none",
   };
 
-  const mappedCCNumbers = Object.keys(genmdmMapping);
+  return defaultState;
+}
+
+export function createDefaultChannelState() {
+  const mapping = { ...mdmiMapping, ...genmdmMapping };
+  const channels = {};
+  const mappedCCNumbers = Object.keys(mapping);
 
   for (let i = 0; i < NUM_CHANNELS; ++i) {
-    defaultState[`channel${i + 1}`] = {};
+    channels[`channel${i + 1}`] = {};
 
     mappedCCNumbers.forEach((key) => {
-      defaultState[`channel${i + 1}`][key] = genmdmMapping[key].default || 0;
+      channels[`channel${i + 1}`][key] = mapping[key].default || 0;
     });
   }
 
-  return defaultState;
+  return channels;
 }
 
 const state = createDefaultState();
@@ -50,86 +110,103 @@ const store = createStore({
   plugins: [
     vuejsStorage({
       keys: Object.keys(state),
-      //keep state.count in localStorage
       namespace: "genmdm_autosave",
     }),
   ],
 
-  actions: {
-    setCCValues({ commit, state }, { values, ignoreSameValues = true }) {
-      const keys = Object.keys(values);
-
-      for (let i = 0; i < keys.length; i += 1) {
-        const key = keys[i];
-        const cc = parseInt(key, 10);
-
-        const value = values[cc];
-        const isGlobal = GLOBAL_CC.indexOf(cc) > -1;
-
-        if (
-          (state.polyphonic && state.channel <= state.maxPolyphonicChannels) ||
-          isGlobal
-        ) {
-          const affectedChannels = isGlobal ? 6 : state.maxPolyphonicChannels;
-
-          for (let j = 1; j <= affectedChannels; ++j) {
-            if (state[`channel${j}`][cc] === value) {
-              continue;
-            }
-
-            commit("SET_CC_VALUE", { cc, value, channel: j });
-          }
-        } else {
-          if (
-            ignoreSameValues &&
-            state[`channel${state.channel}`][cc] === value
-          ) {
-            continue;
+  getters: {
+    channelsByGroup: (state) =>
+      state.channelConfiguration.reduce(
+        (groups, { group, mode }, channelIndex) => {
+          if (group > -1 && !groups[group]) {
+            groups[group] = [mode, channelIndex + 1];
+          } else if (group > -1 && groups[group]) {
+            groups[group].push(channelIndex + 1);
           }
 
-          commit("SET_CC_VALUE", { cc, value, channel: state.channel });
-        }
+          return groups;
+        },
+        {},
+      ),
+
+    groupedChannelsFromChannel: (state) => (channelIndex) => {
+      if (channelIndex < 0 || channelIndex > 5) {
+        return [];
       }
+
+      const { group: channelGroup } = state.channelConfiguration[channelIndex];
+
+      if (channelGroup > -1) {
+        return state.channelConfiguration
+          .map((item, index) => ({ ...item, channel: index + 1 }))
+          .filter(({ group }) => group === channelGroup)
+          .map(({ channel }) => channel);
+      }
+      return [channelIndex + 1];
     },
 
-    setCCValuesOnChannel({ commit, state }, values = {}) {
+    freeGroups: (state) =>
+      state.channelConfiguration.reduce(
+        (groups, config) => {
+          if (config.group > -1) {
+            const index = groups.indexOf(config.group);
+
+            if (index > -1) {
+              groups.splice(index, 1);
+            }
+          }
+
+          return groups;
+        },
+        [0, 1, 2],
+      ),
+
+    mapping: (state) => {
+      let mapping = {
+        ...genmdmMapping,
+      };
+
+      if (state.mdmiCompatibility) {
+        mapping = { ...mapping, ...mdmiMapping };
+      }
+
+      return mapping;
+    },
+  },
+
+  actions: {
+    setCCValues(
+      { getters, commit, state },
+      { values, ignoreSameValues = true, channel },
+    ) {
       const keys = Object.keys(values);
 
       for (let i = 0; i < keys.length; i += 1) {
         const key = keys[i];
-
-        if (isNaN(parseInt(key, 10))) {
-          continue;
-        }
         const cc = parseInt(key, 10);
 
         const value = values[cc];
         const isGlobal = GLOBAL_CC.indexOf(cc) > -1;
 
-        if (
-          (state.polyphonic && values.channel <= state.maxPolyphonicChannels) ||
-          isGlobal
-        ) {
-          const affectedChannels = isGlobal ? 6 : state.maxPolyphonicChannels;
+        const affectedChannels = [];
 
-          for (let j = 1; j <= affectedChannels; ++j) {
-            if (state[`channel${j}`][cc] === value) {
-              continue;
-            }
-
-            commit("SET_CC_VALUE", { cc, value, channel: j });
-          }
+        if (isGlobal) {
+          affectedChannels.push(1, 2, 3, 4, 5, 6);
+        } else if (!getters.mapping[cc]?.excludeFromGrouping) {
+          affectedChannels.push(
+            ...getters.groupedChannelsFromChannel(channel - 1),
+          );
         } else {
-          if (state[`channel${values.channel}`][cc] === value) {
+          affectedChannels.push(channel);
+        }
+
+        for (let j = 0; j < affectedChannels.length; ++j) {
+          const channel = affectedChannels[j];
+          if (ignoreSameValues && state[`channel${channel}`][cc] === value) {
             continue;
           }
 
-          commit("SET_CC_VALUE", {
-            cc,
-            value,
-            channel: values.channel,
-            ignoreSameValues: values.ignoreSameValues,
-          });
+          commit("SET_CC_VALUE", { cc, value, channel });
         }
       }
     },
@@ -241,6 +318,31 @@ const store = createStore({
         return dispatch("sendState");
       }
     },
+
+    setChannelConfigurationMode(
+      { commit, state, getters },
+      { channelIndex, mode },
+    ) {
+      if (mode === MIDIChannelVoiceMode.MONOPHONIC) {
+        commit("SET_CHANNELCONFIGURATION_GROUP", { channelIndex, group: -1 });
+      } else {
+        let group = 0;
+
+        const existingChannelWithMode = state.channelConfiguration.find(
+          (config) => config.mode === mode,
+        );
+
+        if (existingChannelWithMode) {
+          group = existingChannelWithMode.group;
+        } else {
+          group = getters.freeGroups[0];
+        }
+
+        commit("SET_CHANNELCONFIGURATION_GROUP", { channelIndex, group });
+      }
+
+      commit("SET_CHANNELCONFIGURATION_MODE", { channelIndex, mode });
+    },
   },
 
   mutations: {
@@ -297,6 +399,18 @@ const store = createStore({
 
     SET_MIDI_OUTPUT_ID(state, value) {
       state.midiOutputId = value;
+    },
+
+    SET_CHANNELCONFIGURATION_MODE(state, { channelIndex, mode }) {
+      state.channelConfiguration[channelIndex].mode = mode;
+    },
+
+    SET_CHANNELCONFIGURATION_GROUP(state, { channelIndex, group }) {
+      state.channelConfiguration[channelIndex].group = group;
+    },
+
+    SET_SHOWABOUTDIALOG(state, value) {
+      state.showAboutDialog = value;
     },
   },
 });
