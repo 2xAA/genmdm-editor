@@ -21,7 +21,7 @@ function createWindow() {
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url);
-    return { action: "allow" };
+    return { action: "deny" };
   });
 
   // HMR for renderer base on electron-vite cli.
