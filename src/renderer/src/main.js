@@ -18,6 +18,12 @@ Object.defineProperty(app.config.globalProperties, "$colors", {
   },
 });
 
+Object.defineProperty(app.config.globalProperties, "$electron", {
+  get() {
+    return window.api || { vibrate: () => {} };
+  },
+});
+
 app.use(VueTippy);
 app.use(store);
 app.mount("#app");

@@ -5,6 +5,7 @@
       :title="title"
       class="ns-resize-cursor"
       :class="{ disabled }"
+      @contextmenu.prevent
       @pointerdown="requestPointerLock"
       @pointerup="exitPointerLock"
       @touchstart.prevent
@@ -165,7 +166,6 @@ export default {
       } = this;
 
       if (disabled) {
-        e.preventDefault();
         return;
       }
 
@@ -259,7 +259,7 @@ export default {
 
         if (this.internalValue !== lastValue && this.lastTimeVibrate > 10) {
           this.lastTimeVibrate = Date.now();
-          window.api.vibrate();
+          this.$electron.vibrate();
         }
 
         this.downY = e.pageY;

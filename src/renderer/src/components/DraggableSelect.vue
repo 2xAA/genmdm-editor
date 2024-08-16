@@ -220,7 +220,7 @@ export default {
       if (this.internalValue !== value && !this.disabledItems[value]) {
         this.internalValue = value;
         this.lastTimeVibrate = Date.now();
-        window.api.vibrate();
+        this.$electron.vibrate();
 
         const emitValue = this.emitArrayValue
           ? this.values[value]
