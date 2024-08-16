@@ -493,7 +493,6 @@ export default {
 
   watch: {
     inputId(newId, oldId) {
-      console.log("wowowow");
       this.createInput(newId, oldId);
     },
 
@@ -598,30 +597,6 @@ export default {
         channel: this.channel,
         ignoreSameValues: false,
       });
-    },
-
-    createInput(newId, oldId) {
-      if (oldId) {
-        const oldInput = this.inputs.find((input) => input.id === oldId);
-        if (oldInput) {
-          oldInput.removeListener();
-        }
-      }
-
-      const input = this.inputs.find((input) => input.id === newId);
-
-      if (!input) {
-        return;
-      }
-
-      this.input = input;
-
-      // Add listeners on all channels
-      input.addListener("noteon", "all", this.handleNoteOn);
-      input.addListener("noteoff", "all", this.handleNoteOff);
-      input.addListener("pitchbend", "all", this.handlePitchBend);
-      input.addListener("controlchange", "all", this.handleCC);
-      input.addListener("programchange", "all", this.handleProgramChange);
     },
 
     populateInputAndOutputPorts() {
