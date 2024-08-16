@@ -78,14 +78,12 @@
 <script>
 import { MIDIChannelVoiceMode } from "../store";
 import DraggableSelect from "./DraggableSelect.vue";
-import LabelledCheckbox from "./LabelledCheckbox.vue";
 import MDMControlGroup from "./MDMControlGroup.vue";
 import MDMDial from "./MDMDial.vue";
 
 export default {
   components: {
     DraggableSelect,
-    LabelledCheckbox,
     MDMControlGroup,
     MDMDial,
   },
