@@ -2,188 +2,163 @@
   <canvas ref="canvas"></canvas>
 </template>
 
-<script>
-import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
+<script lang="ts" setup>
+import {
+  ref,
+  reactive,
+  onMounted,
+  onBeforeUnmount,
+  computed,
+  watchEffect,
+} from "vue";
+import { useStore } from "@renderer/store";
+import { inject } from "vue";
+import { useRedrawOnColorschemeChange } from "./composables/redraw-on-colorscheme-change";
 
-export default {
-  mixins: [redrawOnColorschemeChange],
+const props = defineProps<{
+  size?: number;
+}>();
 
-  props: {
-    size: {
-      type: Number,
-      default: 188,
-    },
-  },
+const store = useStore();
 
-  data() {
-    return {
-      context: null,
-      segments: 14,
-      values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      ccValues: {},
-      storeUnsubscribe: null,
-    };
-  },
+const $colors = inject("$colors");
 
-  computed: {
-    segmentWidth() {
-      return this.size / this.segments;
-    },
-  },
+const size = props.size ?? 188;
+const canvas = ref<HTMLCanvasElement | null>(null);
+const context = ref<CanvasRenderingContext2D | null>(null);
 
-  created() {
-    this.updateFromStore();
+const segments = 14;
+const values = reactive(Array(segments).fill(0));
+const ccValues = reactive<Record<number, number>>({});
 
-    this.storeUnsubscribe = this.$store.subscribe((mutation) => {
-      let redraw = false;
+const segmentWidth = computed(() => size / segments);
 
-      if (mutation.type === "SET_CC_VALUE") {
-        const { cc, value } = mutation.payload;
-
-        if (
-          cc > 99 &&
-          cc < 100 + this.segments &&
-          this.ccValues[cc] !== value
-        ) {
-          this.ccValues[cc] = value;
-          this.values[100 - cc] = value / 127;
-          redraw = true;
-        }
-      } else if (mutation.type === "SET_STATE") {
-        redraw = true;
-        this.updateFromStore();
-      }
-
-      if (redraw) {
-        this.draw();
-      }
-    });
-  },
-
-  mounted() {
-    const { canvas } = this.$refs;
-
-    this.context = canvas.getContext("2d");
-
-    this.resize();
-
-    canvas.addEventListener("pointerdown", this.down);
-  },
-
-  beforeUnmount() {
-    const { canvas } = this.$refs;
-    canvas.removeEventListener("pointerdown", this.down);
-    document.removeEventListener("pointerup", this.up);
-    document.removeEventListener("pointermove", this.move);
-
-    this.storeUnsubscribe();
-  },
-
-  methods: {
-    updateFromStore() {
-      for (let i = 0; i < this.segments; i += 1) {
-        this.ccValues[100 + i] = this.$store.state.channel1[100 + i];
-        this.values[i] = this.ccValues[100 + i] / 127;
-      }
-    },
-
-    down() {
-      document.addEventListener("pointerup", this.up);
-      document.addEventListener("pointermove", this.move);
-    },
-
-    up(e) {
-      this.updateValue(e);
-
-      document.removeEventListener("pointerup", this.up);
-      document.removeEventListener("pointermove", this.move);
-      this.$store.dispatch("setCCValues", {
-        values: this.ccValues,
-        channel: this.$store.state.channel,
-      });
-    },
-
-    move(e) {
-      this.updateValue(e);
-    },
-
-    resize() {
-      const {
-        $refs: { canvas },
-        context,
-        size,
-      } = this;
-      const dpr = window.devicePixelRatio;
-
-      canvas.width = size * dpr;
-      canvas.height = size * dpr;
-      canvas.style.width = `${size}px`;
-      canvas.style.height = `${size}px`;
-
-      context.lineWidth = 1 * dpr;
-      context.lineCap = "round";
-
-      requestAnimationFrame(this.draw);
-    },
-
-    draw() {
-      if (!this.$refs.canvas) {
-        return;
-      }
-
-      const {
-        context,
-        $refs: {
-          canvas: { width: cw, height: ch },
-        },
-      } = this;
-
-      const dpr = window.devicePixelRatio;
-
-      context.clearRect(0, 0, cw, ch);
-      context.strokeStyle = this.$colors.foreground;
-      context.strokeRect(0, 0, cw, ch);
-
-      for (let i = 0; i < this.values.length; ++i) {
-        context.strokeRect(
-          Math.floor(this.segmentWidth * dpr * i) + 0.5,
-          ch,
-          Math.floor(this.segmentWidth * dpr),
-          Math.floor(-this.values[i] * ch) + 0.5,
-        );
-      }
-    },
-
-    updateValue(e) {
-      const segment = Math.floor(e.offsetX / this.segmentWidth);
-
-      if (
-        segment > this.segments - 1 ||
-        segment < 0 ||
-        e.offsetY > this.size ||
-        e.offsetY < 0
-      ) {
-        return;
-      }
-
-      const yValue = 1 - e.offsetY / this.size;
-
-      const q = 1 / 127;
-
-      const value = Math.round(yValue / q) * q;
-      const cc = Math.round(value * 127);
-
-      // Value isn't directly here.
-      // Converting it to the rounded CC value quantises it,
-      // so the segments don't jump when restoring state
-      this.values[segment] = cc / 127;
-
-      requestAnimationFrame(this.draw);
-
-      this.ccValues[100 + segment] = cc;
-    },
-  },
+const updateFromStore = () => {
+  for (let i = 0; i < segments; i += 1) {
+    ccValues[100 + i] = store.state.channel1[100 + i];
+    values[i] = ccValues[100 + i] / 127;
+  }
 };
+
+const draw = () => {
+  if (!canvas.value || !context.value) return;
+
+  const { width: cw, height: ch } = canvas.value;
+  const dpr = window.devicePixelRatio;
+
+  context.value.clearRect(0, 0, cw, ch);
+  context.value.strokeStyle = $colors.foreground;
+  context.value.strokeRect(0, 0, cw, ch);
+
+  for (let i = 0; i < values.length; ++i) {
+    context.value.strokeRect(
+      Math.floor(segmentWidth.value * dpr * i) + 0.5,
+      ch,
+      Math.floor(segmentWidth.value * dpr),
+      Math.floor(-values[i] * ch) + 0.5,
+    );
+  }
+};
+
+useRedrawOnColorschemeChange(draw);
+
+const resize = () => {
+  if (!canvas.value || !context.value) return;
+  const dpr = window.devicePixelRatio;
+
+  canvas.value.width = size * dpr;
+  canvas.value.height = size * dpr;
+  canvas.value.style.width = `${size}px`;
+  canvas.value.style.height = `${size}px`;
+
+  context.value.lineWidth = 1 * dpr;
+  context.value.lineCap = "round";
+
+  requestAnimationFrame(draw);
+};
+
+const updateValue = (e: PointerEvent) => {
+  if (!canvas.value) return;
+
+  const rect = canvas.value.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  const segment = Math.floor(x / segmentWidth.value);
+  if (segment > segments - 1 || segment < 0 || y > size || y < 0) return;
+
+  const yValue = 1 - y / size;
+  const q = 1 / 127;
+  const value = Math.round(yValue / q) * q;
+  const cc = Math.round(value * 127);
+
+  values[segment] = cc / 127;
+
+  requestAnimationFrame(draw);
+
+  ccValues[100 + segment] = cc;
+};
+
+const down = () => {
+  document.addEventListener("pointerup", up);
+  document.addEventListener("pointermove", move);
+};
+
+const up = (e: PointerEvent) => {
+  updateValue(e);
+  document.removeEventListener("pointerup", up);
+  document.removeEventListener("pointermove", move);
+
+  store.dispatch("setCCValues", {
+    values: ccValues,
+    channel: store.state.channel,
+  });
+};
+
+const move = (e: PointerEvent) => {
+  updateValue(e);
+};
+
+watchEffect(() => {
+  const unsubscribe = store.subscribe((mutation) => {
+    let redraw = false;
+    if (mutation.type === "SET_CC_VALUE") {
+      const { cc, value } = mutation.payload;
+      if (cc > 99 && cc < 100 + segments && ccValues[cc] !== value) {
+        ccValues[cc] = value;
+        values[100 - cc] = value / 127;
+        redraw = true;
+      }
+    } else if (mutation.type === "SET_STATE") {
+      redraw = true;
+      updateFromStore();
+    }
+
+    if (redraw) {
+      draw();
+    }
+  });
+
+  onBeforeUnmount(() => {
+    unsubscribe();
+  });
+});
+
+onMounted(() => {
+  if (canvas.value) {
+    context.value = canvas.value.getContext("2d");
+    resize();
+    canvas.value.addEventListener("pointerdown", down);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (canvas.value) {
+    canvas.value.removeEventListener("pointerdown", down);
+  }
+  document.removeEventListener("pointerup", up);
+  document.removeEventListener("pointermove", move);
+});
 </script>
 
 <style scoped>

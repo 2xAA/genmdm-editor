@@ -1,24 +1,35 @@
-/**
- * @typedef {Object} Control
- * @property {string} label - The label of the control.
- * @property {number} range - The range of values for the control.
- * @property {boolean} [type] - The type of the control, if specified.
- * @property {number} default - The default value of the control.
- * @property {string[]} [enum] - The enum values for the control, if specified.
- * @property {string} [description] - The description of the control, if specified.
- * @property {number[]} [values] - The specific values corresponding to the enum, if specified.
- */
+// Base Control interface with common properties
+interface BaseControl {
+  label: string;
+  type?: string;
+  default?: number | boolean;
+  description?: string;
+  excludeFromGrouping?: boolean;
+  enum?: string[];
+}
 
-/**
- * @typedef {Object.<number, Control>} GenMDMMapping
- */
+// If 'values' array is provided, 'range' is redundant
+interface ControlWithValues extends BaseControl {
+  values: number[];
+  range?: never; // 'range' is not allowed if 'values' is present
+}
 
-/**
- * @type {GenMDMMapping}
- */
-export default {
+// If 'range' is provided, 'values' array is redundant
+interface ControlWithRange extends BaseControl {
+  range: number;
+  values?: never; // 'values' is not allowed if 'range' is present
+}
+
+// General Control type as a union of the specific types
+type Control = ControlWithValues | ControlWithRange;
+
+// Mapping interface using the Control type
+export interface GenMDMMapping {
+  [key: number]: Control;
+}
+
+const genMDMMapping: GenMDMMapping = {
   // YM2612 Global Control
-
   74: {
     label: "LFO Enable",
     range: 2,
@@ -561,7 +572,6 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
     label: "SSG-EG",
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
     values: [0, 32, 36, 40, 44, 48, 52, 56, 60],
-    range: 9,
     default: 0,
   },
 
@@ -569,7 +579,6 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
     label: "SSG-EG",
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
     values: [0, 32, 36, 40, 44, 48, 52, 56, 60],
-    range: 9,
     default: 0,
   },
 
@@ -577,7 +586,6 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
     label: "SSG-EG",
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
     values: [0, 32, 36, 40, 44, 48, 52, 56, 60],
-    range: 9,
     default: 0,
   },
 
@@ -585,7 +593,8 @@ A CC value of 0 to 31 indicates that the channel is OFF (muted). A CC value of 3
     label: "SSG-EG",
     enum: ["Off", "0", "1", "2", "3", "4", "5", "6", "7"],
     values: [0, 32, 36, 40, 44, 48, 52, 56, 60],
-    range: 9,
     default: 0,
   },
 };
+
+export default genMDMMapping;

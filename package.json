@@ -9,6 +9,9 @@
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
@@ -28,7 +31,6 @@
     "electron-updater": "^6.1.7",
     "genmdm-parser": "1.0.2",
     "hapticjs": "^1.0.7",
-    "vue-flexible-link": "^1.0.2",
     "vue-tippy": "v6",
     "vuejs-storage": "^3.1.1",
     "vuex": "^4.1.0",
@@ -36,10 +38,13 @@
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",
+    "@electron-toolkit/eslint-config-ts": "^2.0.0",
+    "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/notarize": "^2.3.2",
     "@rushstack/eslint-patch": "^1.10.3",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/eslint-config-prettier": "^9.0.0",
+    "@vue/eslint-config-typescript": "^13.0.0",
     "electron": "^31.0.2",
     "electron-builder": "^24.13.3",
     "electron-vite": "^2.3.0",
@@ -47,11 +52,13 @@
     "eslint-plugin-vue": "^9.26.0",
     "patch-package": "^8.0.0",
     "prettier": "^3.3.2",
+    "typescript": "^5.5.2",
     "vite": "^5.3.1",
     "vite-plugin-minify": "^1.5.2",
     "vite-plugin-node-polyfills": "^0.22.0",
     "vite-svg-loader": "^5.1.0",
-    "vue": "^3.4.30"
+    "vue": "^3.4.30",
+    "vue-tsc": "^2.0.22"
   },
   "browserslist": [
     "last 1 Chrome version"

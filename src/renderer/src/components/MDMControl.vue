@@ -28,100 +28,63 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { computed, defineProps, onMounted } from "vue";
+import { useStore } from "@renderer/store";
 import DraggableSelect from "./DraggableSelect.vue";
 import LabelledCheckbox from "./LabelledCheckbox.vue";
 
-export default {
-  components: {
-    DraggableSelect,
-    LabelledCheckbox,
-  },
+const props = defineProps<{
+  channel: number;
+  cc: number;
+}>();
 
-  props: {
-    channel: {
-      type: Number,
-      required: true,
-    },
+const store = useStore();
 
-    cc: {
-      type: Number,
-      required: true,
-    },
-  },
+const value = computed({
+  get: () => store.state[`channel${props.channel}`][props.cc],
+  set: (value: number) => {
+    const values: Record<number, number> = {};
 
-  computed: {
-    value: {
-      get() {
-        return this.$store.state[`channel${this.channel}`][this.cc];
-      },
-
-      set(value) {
-        const values = {};
-
-        if (this.type === "bool") {
-          values[this.cc] = value ? 127 : 0;
-        } else {
-          values[this.cc] = value;
-        }
-
-        this.$store.dispatch("setCCValues", {
-          values,
-          channel: this.channel,
-        });
-      },
-    },
-
-    mapping() {
-      return this.$store.getters.mapping[this.cc];
-    },
-
-    type() {
-      return this.mapping.type || "int";
-    },
-
-    label() {
-      return this.mapping.label || undefined;
-    },
-
-    range() {
-      return this.mapping.range || 0;
-    },
-
-    enumValues() {
-      return this.mapping.enum;
-    },
-
-    dataValues() {
-      return this.mapping.values;
-    },
-
-    defaultValue() {
-      return this.mapping.default;
-    },
-
-    rangeValues() {
-      const { dataValues, range } = this;
-      let values = [];
-
-      if (dataValues) {
-        values = dataValues;
-      } else {
-        for (let i = 0; i < range; ++i) {
-          values.push(i);
-        }
-      }
-
-      return values;
-    },
-  },
-
-  created() {
-    if (!this.mapping) {
-      throw new Error(`CC mapping doesn't exist for ${this.cc}`);
+    if (type.value === "bool") {
+      values[props.cc] = value ? 127 : 0;
+    } else {
+      values[props.cc] = value;
     }
+
+    store.dispatch("setCCValues", {
+      values,
+      channel: props.channel,
+    });
   },
-};
+});
+
+const mapping = computed(() => store.getters.mapping[props.cc]);
+const type = computed(() => mapping.value.type || "int");
+const range = computed(() => mapping.value.range || 0);
+const enumValues = computed(() => mapping.value.enum);
+const dataValues = computed(() => mapping.value.values);
+const defaultValue = computed(() => mapping.value.default);
+
+const rangeValues = computed(() => {
+  let values: number[] = [];
+
+  if (dataValues.value) {
+    values = dataValues.value;
+  } else {
+    for (let i = 0; i < range.value; ++i) {
+      values.push(i);
+    }
+  }
+
+  return values;
+});
+
+onMounted(() => {
+  if (!mapping.value) {
+    throw new Error(`CC mapping doesn't exist for ${props.cc}`);
+  }
+});
 </script>
 
 <style scoped>

@@ -4,42 +4,41 @@
   </label>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { GenMDMParser } from "genmdm-parser/dist/main.js";
+import { useStore } from "@renderer/store";
 
-export default {
-  methods: {
-    fileAdded(e) {
-      const {
-        files: { 0: file },
-      } = e.target;
+const store = useStore();
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        const text = reader.result;
+const fileAdded = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
 
-        this.parseGenmData(text);
-      };
-      reader.readAsText(file);
-    },
+  if (!file) return;
 
-    parseGenmData(text) {
-      const parser = new GenMDMParser();
-      const parsed = parser.parseGenm(text);
-      const instrumentData = [];
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = reader.result as string;
+    parseGenmData(text);
+  };
+  reader.readAsText(file);
+};
 
-      parsed
-        .map((instrument) => Object.fromEntries(instrument.toGenMDM()))
-        .forEach((ccData, index) => {
-          instrumentData.push({
-            name: parsed[index].instrumentName,
-            data: ccData || {},
-          });
-        });
+const parseGenmData = (text: string) => {
+  const parser = new GenMDMParser();
+  const parsed = parser.parseGenm(text);
+  const instrumentData: { name: string; data: Record<number, any> }[] = [];
 
-      this.$store.dispatch("setPatches", instrumentData);
-    },
-  },
+  parsed
+    .map((instrument) => Object.fromEntries(instrument.toGenMDM()))
+    .forEach((ccData, index) => {
+      instrumentData.push({
+        name: parsed[index].instrumentName,
+        data: ccData || {},
+      });
+    });
+
+  store.dispatch("setPatches", instrumentData);
 };
 </script>
 

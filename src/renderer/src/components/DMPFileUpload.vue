@@ -4,48 +4,48 @@
   </label>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { GenMDMParser } from "genmdm-parser/dist/main.js";
+import { useStore } from "@renderer/store";
 
-export default {
-  methods: {
-    fileAdded(e) {
-      const {
-        files: { 0: file },
-      } = e.target;
+const store = useStore();
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        const arrayBuffer = reader.result;
-        const array = new Uint8Array(arrayBuffer);
+const fileAdded = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
 
-        this.parseDmpDataToMappedCC(array);
-        e.target.value = "";
-      };
+  if (!file) return;
 
-      try {
-        reader.readAsArrayBuffer(file);
-      } catch (e) {
-        console.log("Can't read file", e);
-      }
-    },
+  const reader = new FileReader();
+  reader.onload = () => {
+    const arrayBuffer = reader.result as ArrayBuffer;
+    const array = new Uint8Array(arrayBuffer);
 
-    parseDmpDataToMappedCC(data) {
-      const parser = new GenMDMParser();
-      const parsed = parser.parseDMP(data);
+    parseDmpDataToMappedCC(array);
+    target.value = "";
+  };
 
-      console.log(parsed);
+  try {
+    reader.readAsArrayBuffer(file);
+  } catch (error) {
+    console.error("Can't read file", error);
+  }
+};
 
-      const ccValues = Object.fromEntries(parsed.toGenMDM());
-      ccValues[77] = 127; // deflemask doesn't provide a panning parameter
+const parseDmpDataToMappedCC = (data: Uint8Array) => {
+  const parser = new GenMDMParser();
+  const parsed = parser.parseDMP(data);
 
-      this.$store.dispatch("setCCValues", {
-        values: ccValues,
-        ignoreSameValues: false,
-        channel: this.$store.state.channel,
-      });
-    },
-  },
+  console.log(parsed);
+
+  const ccValues = Object.fromEntries(parsed.toGenMDM());
+  ccValues[77] = 127; // deflemask doesn't provide a panning parameter
+
+  store.dispatch("setCCValues", {
+    values: ccValues,
+    ignoreSameValues: false,
+    channel: store.state.channel,
+  });
 };
 </script>
 

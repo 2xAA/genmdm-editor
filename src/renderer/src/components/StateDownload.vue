@@ -2,20 +2,19 @@
   <button class="button" @click="saveState">Save State</button>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { compress } from "compress-json";
 import { saveFile } from "../utils/save-file";
+import { useStore } from "@renderer/store";
 
-export default {
-  methods: {
-    saveState() {
-      const stateCopy = { ...this.$store.state };
-      delete stateCopy.midiInputId;
-      delete stateCopy.midiOutputId;
+const store = useStore();
 
-      const compressed = compress(stateCopy);
-      saveFile("state.ged", JSON.stringify(compressed));
-    },
-  },
+const saveState = () => {
+  const stateCopy: any = { ...store.state };
+  delete stateCopy.midiInputId;
+  delete stateCopy.midiOutputId;
+
+  const compressed = compress(stateCopy);
+  saveFile("state.ged", JSON.stringify(compressed));
 };
 </script>

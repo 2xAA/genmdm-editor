@@ -9,30 +9,21 @@
   </VDialog>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { computed, defineEmits, defineProps } from "vue";
+import { useStore } from "@renderer/store";
 import VDialog from "./Dialog.vue";
 import VoiceConfig from "./VoiceConfig.vue";
 
-export default {
-  components: {
-    VDialog,
-    VoiceConfig,
-  },
+defineEmits(["close"]);
 
-  props: ["show"],
+defineProps<{
+  show: boolean;
+}>();
 
-  emits: ["close"],
+const store = useStore();
 
-  data() {
-    return {};
-  },
-
-  computed: {
-    height() {
-      return this.$store.state.mdmiCompatibility ? 480 : 200;
-    },
-  },
-};
+const height = computed(() => (store.state.mdmiCompatibility ? 480 : 200));
 </script>
 
 <style scoped>

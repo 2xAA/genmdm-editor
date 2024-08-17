@@ -1,10 +1,13 @@
 <template>
   <div class="algorithm">
-    <Component :is="`a${index}`" />
+    <Component :is="currentComponent" />
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { computed } from "vue";
+import { useStore } from "@renderer/store";
+
 import a0 from "../assets/graphics/algorithms/Algorithm_0.svg";
 import a1 from "../assets/graphics/algorithms/Algorithm_1.svg";
 import a2 from "../assets/graphics/algorithms/Algorithm_2.svg";
@@ -14,28 +17,23 @@ import a5 from "../assets/graphics/algorithms/Algorithm_5.svg";
 import a6 from "../assets/graphics/algorithms/Algorithm_6.svg";
 import a7 from "../assets/graphics/algorithms/Algorithm_7.svg";
 
-export default {
-  components: {
-    a0,
-    a1,
-    a2,
-    a3,
-    a4,
-    a5,
-    a6,
-    a7
-  },
+const store = useStore();
 
-  computed: {
-    value() {
-      return this.$store.state[`channel${this.$store.state.channel}`][14];
-    },
-
-    index() {
-      return Math.round((this.value / 127) * 7);
-    }
-  }
+const components = {
+  a0,
+  a1,
+  a2,
+  a3,
+  a4,
+  a5,
+  a6,
+  a7,
 };
+
+const value = computed(() => store.state[`channel${store.state.channel}`][14]);
+const index = computed(() => Math.round((value.value / 127) * 7));
+
+const currentComponent = computed(() => components[`a${index.value}`]);
 </script>
 
 <style scoped>

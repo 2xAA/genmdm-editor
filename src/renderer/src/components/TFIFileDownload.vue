@@ -2,28 +2,27 @@
   <button class="button" @click="generateTFI">Export TFI</button>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { useStore } from "@renderer/store";
 import { GenMDMParser } from "genmdm-parser/dist/main.js";
 import { saveFile } from "../utils/save-file";
 
-export default {
-  methods: {
-    generateTFI() {
-      const channel = this.$store.state[`channel${this.$store.state.channel}`];
+const store = useStore();
 
-      const parser = new GenMDMParser();
+const generateTFI = () => {
+  const channel = store.state[`channel${store.state.channel}`];
 
-      const map = new Map();
-      Object.keys(channel).forEach(key => {
-        const value = channel[key];
-        map.set(parseInt(key, 10), value);
-      });
+  const parser = new GenMDMParser();
 
-      const instrument = parser.parseGenMDM(map);
-      const tfiData = instrument.toTFI();
+  const map = new Map<number, number>();
+  Object.keys(channel).forEach((key) => {
+    const value = channel[key];
+    map.set(parseInt(key, 10), value);
+  });
 
-      saveFile("genmdm-patch.tfi", tfiData);
-    }
-  }
+  const instrument = parser.parseGenMDM(map);
+  const tfiData = instrument.toTFI();
+
+  saveFile("genmdm-patch.tfi", tfiData);
 };
 </script>

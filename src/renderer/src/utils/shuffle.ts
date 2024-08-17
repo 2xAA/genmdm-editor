@@ -1,11 +1,10 @@
-// https://stackoverflow.com/a/2450976
-export default function shuffle(array) {
-  var currentIndex = array.length,
-    temporaryValue,
-    randomIndex;
+export default function shuffle<T>(array: T[]): T[] {
+  let currentIndex = array.length;
+  let temporaryValue: T;
+  let randomIndex: number;
 
   // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
+  while (currentIndex !== 0) {
     // Pick a remaining element...
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex -= 1;

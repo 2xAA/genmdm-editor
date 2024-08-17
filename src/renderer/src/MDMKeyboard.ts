@@ -1,15 +1,30 @@
-const keys = ["zsxdcvgbhnjm,l.;/", "q2w3er5t6y7ui9o0p[=]"];
+// Define the key mappings
+const keys: string[] = ["zsxdcvgbhnjm,l.;/", "q2w3er5t6y7ui9o0p[=]"];
 
-const mapping = keys
+const mapping: { [key: string]: number } = keys
   .map((string, i) =>
     Object.fromEntries(string.split("").map((x, j) => [x, j + i * 12])),
   )
   .reduce((o, x) => ({ ...o, ...x }), {});
 
+// Define the maximum number of octaves
 const MAX_OCTAVES = 7;
 
+// Type definitions for the callback functions
+type NoteOnCallback = (note: number, velocity: number) => void;
+type NoteOffCallback = (note: number) => void;
+
 export class MDMKeyboard {
-  constructor(noteOn = () => {}, noteOff = () => {}) {
+  private _octave: number;
+  private _keysDownOctave: { [key: string]: number };
+  private _noteOn: NoteOnCallback;
+  private _noteOff: NoteOffCallback;
+  public velocity: number;
+
+  constructor(
+    noteOn: NoteOnCallback = () => {},
+    noteOff: NoteOffCallback = () => {},
+  ) {
     this._octave = 0;
     this._noteOn = noteOn;
     this._noteOff = noteOff;
@@ -21,16 +36,16 @@ export class MDMKeyboard {
     window.addEventListener("keyup", this.keyup.bind(this));
   }
 
-  get octave() {
+  get octave(): number {
     return this._octave + 1;
   }
 
-  set octave(value) {
+  set octave(value: number) {
     this._octave = value;
   }
 
-  keydown(e) {
-    if (e.target.tagName === "INPUT") {
+  private keydown(e: KeyboardEvent): void {
+    if (e.target instanceof HTMLInputElement) {
       return;
     }
 
@@ -39,26 +54,14 @@ export class MDMKeyboard {
     const { key } = e;
 
     if (key === "ArrowLeft") {
-      if (this.velocity - 1 < 0) {
-        this.velocity = 0;
-      } else {
-        this.velocity -= 1;
-      }
-
+      this.velocity = Math.max(0, this.velocity - 1);
       console.log("<", this.velocity);
-
       return;
     }
 
     if (key === "ArrowRight") {
-      if (this.velocity + 1 > 127) {
-        this.velocity = 127;
-      } else {
-        this.velocity += 1;
-      }
-
+      this.velocity = Math.min(127, this.velocity + 1);
       console.log(">", this.velocity);
-
       return;
     }
 
@@ -67,28 +70,23 @@ export class MDMKeyboard {
     }
 
     if (key === "ArrowUp") {
-      this.octave = (this._octave + 1) % MAX_OCTAVES;
+      this._octave = (this._octave + 1) % MAX_OCTAVES;
       return;
     }
 
     if (key === "ArrowDown") {
-      if (this._octave - 1 < 0) {
-        this._octave = MAX_OCTAVES - 1;
-      } else {
-        this._octave -= 1;
-      }
-
+      this._octave = this._octave > 0 ? this._octave - 1 : MAX_OCTAVES - 1;
       return;
     }
 
     if (key in mapping) {
       this._noteOn(this.octave * 12 + mapping[key], this.velocity);
-      this._keysDownOctave[key] = this.octave;
+      this._keysDownOctave[key] = this._octave;
     }
   }
 
-  keyup(e) {
-    if (e.target.tagName === "INPUT") {
+  private keyup(e: KeyboardEvent): void {
+    if (e.target instanceof HTMLInputElement) {
       return;
     } else if (e.repeat) {
       return;

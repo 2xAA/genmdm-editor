@@ -2,14 +2,8 @@
   <Arrow class="svg-icon" />
 </template>
 
-<script>
+<script lang="ts" setup>
 import Arrow from "../assets/graphics/arrow.svg";
-
-export default {
-  components: {
-    Arrow,
-  },
-};
 </script>
 
 <style scoped>

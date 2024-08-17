@@ -1,4 +1,6 @@
-export default {
+import { GenMDMMapping } from "./genmdm-mapping";
+
+const MDMIMapping: GenMDMMapping = {
   5: {
     label: "Portamento Time",
     range: 127,
@@ -22,3 +24,5 @@ export default {
     excludeFromGrouping: true,
   },
 };
+
+export default MDMIMapping;

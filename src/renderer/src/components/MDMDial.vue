@@ -17,364 +17,267 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { ref, computed, onMounted, onBeforeUnmount, watch, inject } from "vue";
+import { useStore } from "@renderer/store";
 import { HighResCanvasRenderingContext2D } from "@vcync/hires-canvas2d";
-import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
+import { useRedrawOnColorschemeChange } from "./composables/redraw-on-colorscheme-change";
 
-export default {
-  mixins: [redrawOnColorschemeChange],
+// Props
+const props = defineProps<{
+  cc: number;
+  ccOffset?: number;
+  channel: number;
+  size?: number;
+  quantise?: number;
+  inverse?: boolean;
+  range: number;
+  title?: string;
+  disabled?: boolean;
+}>();
 
-  props: {
-    cc: {
-      type: Number,
-      required: true,
-    },
+const store = useStore();
+const $colors = inject("$colors");
+const $electron = inject("$electron");
 
-    ccOffset: {
-      type: Number,
-      default: 0,
-    },
+const canvas = ref<HTMLCanvasElement | null>(null);
+const context2d = ref<HighResCanvasRenderingContext2D | null>(null);
+const movementValue = ref(0);
+const mouseButtonDown = ref(false);
+const lastPointerPosition = ref({ x: -1, y: -1 });
+const lastTimeVibrate = ref(100);
+let mouseMoveRaf: number | null = null;
 
-    channel: {
-      type: Number,
-      required: true,
-    },
+const internalValue = computed(() => {
+  let value = movementValue.value / 127;
+  if (props.quantise && props.quantise > -1) {
+    const q = Math.floor((1 / (props.quantise - 1)) * 1000) / 1000;
+    value = Math.round(value / q) * q;
+  }
+  return value;
+});
 
-    size: {
-      type: Number,
-      default: 60,
-    },
+const scaledValue = computed(() => {
+  return Math.floor((internalValue.value * 127) / (128 / props.range));
+});
 
-    quantise: {
-      type: Number,
-      default: -1,
-    },
+const updateFromStore = () => {
+  const value =
+    store.state[`channel${props.channel}`][props.cc + (props.ccOffset ?? 0)];
+  setMovementValue(value);
+};
 
-    inverse: {
-      type: Boolean,
-      default: false,
-    },
+const setMovementValue = (value: number) => {
+  movementValue.value = props.inverse ? -value + 127 : value;
+  draw();
+};
 
-    range: {
-      type: Number,
-      required: true,
-    },
+const resize = () => {
+  if (!canvas.value || !context2d.value) return;
 
-    title: {
-      type: String,
-      default: "",
-    },
+  const dpr = window.devicePixelRatio;
+  context2d.value.dpr = dpr;
 
-    disabled: {
-      type: Boolean,
-      default: () => false,
-    },
-  },
+  canvas.value.width = (props.size ?? 60) * dpr;
+  canvas.value.height = (props.size ?? 60) * dpr;
+  canvas.value.style.width = `${props.size ?? 60}px`;
+  canvas.value.style.height = `${props.size ?? 60}px`;
 
-  data() {
-    return {
-      context: null,
-      movementValue: 0,
-      storeUnsubscribe: null,
-      mouseButtonDown: false,
-      lastPointerPosition: { x: -1, y: -1 },
-      lastTimeVibrate: 100,
-      mouseMoveRaf: null,
-    };
-  },
+  context2d.value.lineWidth = 1 * dpr;
+  context2d.value.lineCap = "round";
+};
 
-  computed: {
-    internalValue() {
-      const { quantise, movementValue } = this;
+const draw = () => {
+  if (!canvas.value || !context2d.value) return;
 
-      let value = movementValue / 127;
+  const { size = 60, range } = props;
+  const context = context2d.value;
 
-      if (quantise > -1) {
-        const q = Math.floor((1 / (quantise - 1)) * 1000) / 1000;
-        value = Math.round(value / q) * q;
-      }
+  requestAnimationFrame(() => {
+    context.clearRect(0, 0, size, size);
+    context.strokeStyle = props.disabled ? "gray" : $colors?.foreground;
 
-      return value;
-    },
+    context.fillStyle = mouseButtonDown.value
+      ? $colors?.foreground
+      : "transparent";
 
-    scaledValue() {
-      return Math.floor((this.internalValue * 127) / (128 / this.range));
-    },
-  },
+    context.beginPath();
+    context.arc(size / 2, size / 2, (size - 6) / 2 - 2, 0, Math.PI * 2);
+    context.stroke();
+    context.fill();
 
-  watch: {
-    "$store.state.channel"() {
-      this.updateFromStore();
-    },
+    context.strokeStyle = props.disabled ? "gray" : $colors?.foreground;
 
-    disabled() {
-      this.draw();
-    },
-  },
-
-  created() {
-    this.updateFromStore();
-
-    this.storeUnsubscribe = this.$store.subscribe((mutation, state) => {
-      if (mutation.type === "SET_CC_VALUE") {
-        const { cc, value, channel } = mutation.payload;
-
-        if (
-          cc === this.cc + this.ccOffset &&
-          !this.mouseButtonDown &&
-          channel === this.channel
-        ) {
-          this.setMovementValue(value);
-        }
-      }
-
-      if (mutation.type === "SET_STATE") {
-        const value =
-          state[`channel${this.$store.state.channel}`][this.cc + this.ccOffset];
-
-        this.setMovementValue(value);
-      }
-    });
-  },
-
-  mounted() {
-    const { canvas } = this.$refs;
-
-    // this.context = canvas.getContext("2d");
-    this.context = new HighResCanvasRenderingContext2D(
-      canvas.getContext("2d"),
-      window.devicePixelRatio,
-    );
-
-    this.resize();
-
-    this.draw();
-  },
-
-  beforeUnmount() {
-    document.removeEventListener("pointerup", this.mouseUp);
-    document.removeEventListener("pointermove", this.mouseMove);
-    document.body.classList.remove("ns-resize-cursor");
-    this.storeUnsubscribe();
-  },
-
-  methods: {
-    requestPointerLock(e) {
-      const {
-        $refs: { canvas },
-        disabled,
-      } = this;
-
-      if (disabled) {
-        return;
-      }
-
-      document.addEventListener(
-        "pointerlockchange",
-        this.lockChangeAlert,
-        false,
-      );
-
-      if (canvas.requestPointerLock) {
-        canvas.requestPointerLock();
-      } else {
-        // Only used for browsers without the Pointer Lock API, such as the WebMIDI Browser for iOS
-        e.preventDefault();
-        document.addEventListener("pointermove", this.mouseMove, false);
-        document.addEventListener("pointerup", this.mouseUp);
-      }
-
-      this.mouseButtonDown = true;
-      this.draw();
-    },
-
-    exitPointerLock() {
-      if (document.exitPointerLock) {
-        document.exitPointerLock();
-      }
-
-      document.removeEventListener(
-        "pointerlockchange",
-        this.lockChangeAlert,
-        false,
-      );
-    },
-
-    lockChangeAlert() {
-      const {
-        $refs: { canvas },
-      } = this;
-
-      if (document.pointerLockElement === canvas) {
-        document.addEventListener("pointermove", this.mouseMove, false);
-        document.addEventListener("pointerup", this.mouseUp);
-      } else {
-        document.removeEventListener("pointermove", this.mouseMove, false);
-        this.mouseUp();
-      }
-    },
-
-    mouseUp() {
-      document.removeEventListener("pointermove", this.mouseMove, false);
-      document.removeEventListener("pointerup", this.mouseUp);
-      document.body.style.cursor =
-        this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
-      this.mouseButtonDown = false;
-      this.draw();
-      this.lastPointerPosition = { x: -1, y: -1 };
-    },
-
-    mouseMove(e) {
-      const { channel } = this;
-
-      // first touch
-      // I feel I've overengineered this somewhat
-      let firstTouch = false;
-      if (this.lastPointerPosition.x < 0) {
-        firstTouch = true;
-        this.lastPointerPosition.x = e.clientX + this.movementValue;
-        this.lastPointerPosition.y = e.clientY + this.movementValue;
-      }
-
-      const yDelta = e.movementY || -this.lastPointerPosition.y + e.clientY;
-
-      this.lastPointerPosition.x = e.clientX;
-      this.lastPointerPosition.y = e.clientY;
-
-      const lastValue = this.internalValue;
-
-      const newValue =
-        (firstTouch && yDelta !== 0 ? 0 : -yDelta) + this.movementValue;
-      const clampedNewValue = Math.max(0, Math.min(127, newValue));
-
-      if (this.mouseMoveRaf) {
-        cancelAnimationFrame(this.mouseMoveRaf);
-      }
-
-      this.mouseMoveRaf = requestAnimationFrame(() => {
-        this.movementValue = clampedNewValue;
-        if (this.internalValue !== lastValue) {
-          this.draw();
-        }
-
-        if (this.internalValue !== lastValue && this.lastTimeVibrate > 10) {
-          this.lastTimeVibrate = Date.now();
-          this.$electron.vibrate();
-        }
-
-        this.downY = e.pageY;
-        if (this.internalValue !== lastValue) {
-          this.$store.dispatch("setCCValues", {
-            channel,
-            values: {
-              [this.cc + this.ccOffset]: this.inverse
-                ? 127 - this.internalValue * 127
-                : this.internalValue * 127,
-            },
-          });
-        }
-        this.mouseMoveRaf = null;
-      });
-    },
-
-    resize() {
-      const {
-        $refs: { canvas },
-        context,
-        size,
-      } = this;
-      const dpr = window.devicePixelRatio;
-      context.dpr = dpr;
-
-      canvas.width = size * dpr;
-      canvas.height = size * dpr;
-      canvas.style.width = `${size}px`;
-      canvas.style.height = `${size}px`;
-
-      context.lineWidth = 1 * dpr;
-      context.lineCap = "round";
-    },
-
-    draw() {
-      if (!this.$refs.canvas) {
-        return;
-      }
-
-      const { context, size, internalValue, range, $colors, disabled } = this;
-
-      requestAnimationFrame(() => {
-        context.clearRect(0, 0, size, size);
-        context.strokeStyle = disabled ? "gray" : $colors.foreground;
-
-        context.fillStyle = this.mouseButtonDown
-          ? $colors.foreground
-          : "transparent";
-
-        context.beginPath();
-        context.arc(size / 2, size / 2, (size - 6) / 2 - 2, 0, Math.PI * 2);
-        context.stroke();
-        context.fill();
-
-        context.strokeStyle = disabled ? "gray" : $colors.foreground;
-
-        if (range > 0) {
-          for (let i = 0; i < range; ++i) {
-            context.save();
-            context.lineWidth =
-              window.devicePixelRatio > 1
-                ? 1 / (window.devicePixelRatio - 1.4)
-                : 1;
-            context.translate(size / 2, size / 2);
-            context.rotate((i / (range - 1)) * 270 * (Math.PI / 180));
-            context.translate(-size / 2, -size / 2);
-
-            context.beginPath();
-            context.moveTo(size * 0.150555556, size - size * 0.150555556);
-            context.lineTo(size * 0.173888889, size - size * 0.173888889);
-            context.stroke();
-
-            context.restore();
-          }
-        }
-
+    if (range > 0) {
+      for (let i = 0; i < range; ++i) {
         context.save();
+        context.lineWidth =
+          window.devicePixelRatio > 1 ? 1 / (window.devicePixelRatio - 1.4) : 1;
         context.translate(size / 2, size / 2);
-        context.rotate(internalValue * 270 * (Math.PI / 180));
+        context.rotate((i / (range - 1)) * 270 * (Math.PI / 180));
         context.translate(-size / 2, -size / 2);
 
-        context.strokeStyle = disabled
-          ? "gray"
-          : this.mouseButtonDown
-            ? $colors.background
-            : $colors.foreground;
-
         context.beginPath();
-        context.arc(
-          size / 2 - size / 5,
-          size / 2 + size / 5,
-          size / 25,
-          0,
-          Math.PI * 2,
-        );
+        context.moveTo(size * 0.150555556, size - size * 0.150555556);
+        context.lineTo(size * 0.173888889, size - size * 0.173888889);
         context.stroke();
+
         context.restore();
-      });
-    },
+      }
+    }
 
-    updateFromStore() {
-      const { channel } = this;
-      const value =
-        this.$store.state[`channel${channel}`][this.cc + this.ccOffset];
+    context.save();
+    context.translate(size / 2, size / 2);
+    context.rotate(internalValue.value * 270 * (Math.PI / 180));
+    context.translate(-size / 2, -size / 2);
 
-      this.setMovementValue(value);
-    },
+    context.strokeStyle = props.disabled
+      ? "gray"
+      : mouseButtonDown.value
+        ? $colors?.background
+        : $colors?.foreground;
 
-    setMovementValue(value) {
-      this.movementValue = this.inverse ? -value + 127 : value;
-      this.draw();
-    },
-  },
+    context.beginPath();
+    context.arc(
+      size / 2 - size / 5,
+      size / 2 + size / 5,
+      size / 25,
+      0,
+      Math.PI * 2,
+    );
+    context.stroke();
+    context.restore();
+  });
 };
+
+useRedrawOnColorschemeChange(draw);
+
+const requestPointerLock = (e: PointerEvent) => {
+  if (props.disabled) return;
+
+  document.addEventListener("pointerlockchange", lockChangeAlert, false);
+
+  if (canvas.value?.requestPointerLock) {
+    canvas.value.requestPointerLock();
+  } else {
+    e.preventDefault();
+    document.addEventListener("pointermove", mouseMove, false);
+    document.addEventListener("pointerup", mouseUp);
+  }
+
+  mouseButtonDown.value = true;
+  draw();
+};
+
+const exitPointerLock = () => {
+  if (document.exitPointerLock) {
+    document.exitPointerLock();
+  }
+
+  document.removeEventListener("pointerlockchange", lockChangeAlert, false);
+};
+
+const lockChangeAlert = () => {
+  if (document.pointerLockElement === canvas.value) {
+    document.addEventListener("pointermove", mouseMove, false);
+    document.addEventListener("pointerup", mouseUp);
+  } else {
+    document.removeEventListener("pointermove", mouseMove, false);
+    mouseUp();
+  }
+};
+
+const mouseUp = () => {
+  document.removeEventListener("pointermove", mouseMove, false);
+  document.removeEventListener("pointerup", mouseUp);
+  document.body.style.cursor =
+    lastPointerPosition.value.x === -1
+      ? "default"
+      : lastPointerPosition.value.x.toString();
+  mouseButtonDown.value = false;
+  draw();
+  lastPointerPosition.value = { x: -1, y: -1 };
+};
+
+const mouseMove = (e: PointerEvent) => {
+  const firstTouch = lastPointerPosition.value.x < 0;
+  if (firstTouch) {
+    lastPointerPosition.value.x = e.clientX + movementValue.value;
+    lastPointerPosition.value.y = e.clientY + movementValue.value;
+  }
+
+  const yDelta = e.movementY || -lastPointerPosition.value.y + e.clientY;
+
+  lastPointerPosition.value.x = e.clientX;
+  lastPointerPosition.value.y = e.clientY;
+
+  const lastValue = internalValue.value;
+  const newValue =
+    (firstTouch && yDelta !== 0 ? 0 : -yDelta) + movementValue.value;
+  const clampedNewValue = Math.max(0, Math.min(127, newValue));
+
+  if (mouseMoveRaf) {
+    cancelAnimationFrame(mouseMoveRaf);
+  }
+
+  mouseMoveRaf = requestAnimationFrame(() => {
+    movementValue.value = clampedNewValue;
+    if (internalValue.value !== lastValue) {
+      draw();
+    }
+
+    if (internalValue.value !== lastValue && lastTimeVibrate.value > 10) {
+      lastTimeVibrate.value = Date.now();
+      $electron.vibrate();
+    }
+
+    if (internalValue.value !== lastValue) {
+      store.dispatch("setCCValues", {
+        channel: props.channel,
+        values: {
+          [props.cc + (props.ccOffset ?? 0)]: props.inverse
+            ? 127 - internalValue.value * 127
+            : internalValue.value * 127,
+        },
+      });
+    }
+    mouseMoveRaf = null;
+  });
+};
+
+watch(
+  () => store.state.channel[props.cc + (props.ccOffset ?? 0)],
+  () => {
+    updateFromStore();
+  },
+);
+
+watch(
+  () => props.disabled,
+  () => {
+    draw();
+  },
+);
+
+onMounted(() => {
+  const ctx = canvas.value?.getContext("2d");
+  if (ctx) {
+    context2d.value = new HighResCanvasRenderingContext2D(
+      ctx,
+      window.devicePixelRatio,
+    );
+    resize();
+    draw();
+  }
+
+  updateFromStore();
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("pointerup", mouseUp);
+  document.removeEventListener("pointermove", mouseMove);
+  document.body.classList.remove("ns-resize-cursor");
+});
 </script>
 
 <style scoped>

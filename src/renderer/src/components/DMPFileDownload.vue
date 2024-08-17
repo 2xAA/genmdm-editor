@@ -2,28 +2,27 @@
   <button class="button" @click="generateDMP">Export DMP</button>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { GenMDMParser } from "genmdm-parser/dist/main.js";
+import { useStore } from "@renderer/store";
 import { saveFile } from "../utils/save-file";
 
-export default {
-  methods: {
-    generateDMP() {
-      const channel = this.$store.state[`channel${this.$store.state.channel}`];
+const store = useStore();
 
-      const parser = new GenMDMParser();
+const generateDMP = () => {
+  const channel = store.state[`channel${store.state.channel}`];
 
-      const map = new Map();
-      Object.keys(channel).forEach(key => {
-        const value = channel[key];
-        map.set(parseInt(key, 10), value);
-      });
+  const parser = new GenMDMParser();
 
-      const instrument = parser.parseGenMDM(map);
-      const dmpData = instrument.toDMP();
+  const map = new Map();
+  Object.keys(channel).forEach((key) => {
+    const value = channel[key];
+    map.set(parseInt(key, 10), value);
+  });
 
-      saveFile("genmdm-patch.dmp", dmpData);
-    }
-  }
+  const instrument = parser.parseGenMDM(map);
+  const dmpData = instrument.toDMP();
+
+  saveFile("genmdm-patch.dmp", dmpData);
 };
 </script>

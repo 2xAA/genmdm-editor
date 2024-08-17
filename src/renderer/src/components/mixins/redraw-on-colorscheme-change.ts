@@ -1,3 +1,9 @@
+interface DarkModeWatcher {
+  created(): void;
+  beforeDestroy(): void;
+  draw(): void;
+}
+
 export default {
   created() {
     window
@@ -10,4 +16,4 @@ export default {
       .matchMedia("(prefers-color-scheme: dark)")
       .removeEventListener("change", this.draw);
   },
-};
+} as DarkModeWatcher;

@@ -43,26 +43,6 @@
         :disabled="glideDisabled"
       ></MDMControlGroup>
 
-      <!-- <grid
-        columns="8"
-        class="control-group"
-        :class="{ disabled: glideDisabled }"
-      >
-        <c span="4" class="control-group__label">Glide</c>
-        <c span="4" class="control-group__control">
-          <LabelledCheckbox
-            v-model="glide"
-            :labels="['Off', 'On']"
-            :disabled="glideDisabled"
-            :title="
-              mode === voiceModeValues.POLYPHONIC
-                ? `MDMI does not support glide between polyphony channels`
-                : ''
-            "
-          />
-        </c>
-      </grid> -->
-
       <h2 :class="{ disabled: glideDisabled }">Porta. Time</h2>
 
       <MDMDial
@@ -75,125 +55,94 @@
   </div>
 </template>
 
-<script>
-import { MIDIChannelVoiceMode } from "../store";
+<script lang="ts" setup>
+import { computed, ref, watch } from "vue";
+import { useStore } from "@renderer/store";
 import DraggableSelect from "./DraggableSelect.vue";
 import MDMControlGroup from "./MDMControlGroup.vue";
 import MDMDial from "./MDMDial.vue";
+import { MIDIChannelVoiceMode } from "../store";
 
-export default {
-  components: {
-    DraggableSelect,
-    MDMControlGroup,
-    MDMDial,
+const store = useStore();
+const voiceModeValues = { ...MIDIChannelVoiceMode };
+const glideInternal = ref<number>(0);
+const { channel } = defineProps<{
+  channel: number;
+}>();
+
+const mdmiCompatibility = computed(() => store.state.mdmiCompatibility);
+
+const glideDisabled = computed(
+  () => mode.value === MIDIChannelVoiceMode.POLYPHONIC,
+);
+
+const channelConfiguration = computed(() => store.state.channelConfiguration);
+
+const channelsByGroup = computed(() => store.getters.channelsByGroup);
+
+const group = computed({
+  get() {
+    return channelConfiguration.value[channel - 1].group;
   },
-
-  props: {
-    channel: {
-      type: Number,
-      required: true,
-    },
+  set(value: number) {
+    store.commit("SET_CHANNELCONFIGURATION_GROUP", {
+      channelIndex: channel - 1,
+      group: value,
+    });
   },
+});
 
-  data() {
-    return {
-      voiceModeValues: { ...MIDIChannelVoiceMode },
-      glideInternal: 0,
-    };
+const groupItemsDisabled = computed(() => {
+  const items = [false, true, true, true];
+
+  if (mode.value < 1) {
+    return items;
+  }
+
+  return items.map((_, index) => {
+    const i = index - 1;
+
+    if (index === 0) {
+      return true;
+    }
+
+    if (
+      channelsByGroup.value[i] &&
+      mode.value === channelsByGroup.value[i][0]
+    ) {
+      return false;
+    } else if (!channelsByGroup.value[i]) {
+      return false;
+    }
+
+    return true;
+  });
+});
+
+const mode = computed({
+  get() {
+    return store.state.channelConfiguration[channel - 1].mode;
   },
-
-  computed: {
-    mdmiCompatibility() {
-      return this.$store.state.mdmiCompatibility;
-    },
-
-    glideDisabled() {
-      return this.mode === MIDIChannelVoiceMode.POLYPHONIC;
-    },
-
-    channelConfiguration() {
-      return this.$store.state.channelConfiguration;
-    },
-
-    channelsByGroup() {
-      return this.$store.getters.channelsByGroup;
-    },
-
-    group: {
-      get() {
-        return this.channelConfiguration[this.channel - 1].group;
-      },
-
-      set(group) {
-        this.$store.commit("SET_CHANNELCONFIGURATION_GROUP", {
-          channelIndex: this.channel - 1,
-          group,
-        });
-      },
-    },
-
-    groupItemsDisabled() {
-      const items = [false, true, true, true];
-
-      if (this.mode < 1) {
-        // Return if in MONO mode
-        return items;
-      }
-
-      return items.map((_, index) => {
-        const i = index - 1;
-
-        if (index === 0) {
-          // Never enable the "Off" item for poly or uni voices
-          return true;
-        }
-
-        if (
-          this.channelsByGroup[i] &&
-          this.mode === this.channelsByGroup[i][0]
-        ) {
-          // If there's a group, check if this channel's mode is the same
-          return false;
-        } else if (!this.channelsByGroup[i]) {
-          // If there's a group which hasn't been used yet, it's up for grabs
-          return false;
-        }
-
-        // Return true for any other case
-        return true;
-      });
-    },
-
-    mode: {
-      get() {
-        return this.$store.state.channelConfiguration[this.channel - 1].mode;
-      },
-
-      set(mode) {
-        this.$store.dispatch("setChannelConfigurationMode", {
-          channelIndex: this.channel - 1,
-          mode,
-        });
-      },
-    },
-
-    glide: {
-      get() {
-        return this.glideInternal;
-      },
-
-      set(value) {
-        this.glideInternal = value;
-      },
-    },
+  set(value: number) {
+    store.dispatch("setChannelConfigurationMode", {
+      channelIndex: channel - 1,
+      mode: value,
+    });
   },
+});
 
-  watch: {
-    mode(mode) {
-      if (mode === MIDIChannelVoiceMode.POLYPHONIC) {
-        this.glide = 0;
-      }
-    },
+const glide = computed({
+  get() {
+    return glideInternal.value;
   },
-};
+  set(value: number) {
+    glideInternal.value = value;
+  },
+});
+
+watch(mode, (newMode) => {
+  if (newMode === MIDIChannelVoiceMode.POLYPHONIC) {
+    glide.value = 0;
+  }
+});
 </script>

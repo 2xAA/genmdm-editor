@@ -1,11 +1,5 @@
 <template>
-  <dialog
-    ref="dialog"
-    :style="{
-      width,
-      height,
-    }"
-  >
+  <dialog ref="dialog" :style="{ width, height }">
     <header>
       <button
         class="close"
@@ -23,77 +17,63 @@
   </dialog>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { ref, computed, watch, onMounted, defineProps, defineEmits } from "vue";
 import CloseIcon from "../assets/graphics/close.svg";
 
-export default {
-  components: {
-    CloseIcon,
+const props = defineProps({
+  title: {
+    type: String,
+    default: "modV",
   },
-
-  props: {
-    title: {
-      type: String,
-      default: "modV",
-    },
-
-    show: {
-      type: Boolean,
-      default: false,
-    },
-
-    closeDisabled: {
-      type: Boolean,
-      default: false,
-    },
-
-    size: {
-      type: Array,
-      default: () => [640, 480],
-    },
+  show: {
+    type: Boolean,
+    default: false,
   },
-
-  emits: ["close"],
-
-  computed: {
-    width() {
-      return `${this.size[0]}px`;
-    },
-    height() {
-      return `${this.size[1]}px`;
-    },
+  closeDisabled: {
+    type: Boolean,
+    default: false,
   },
-
-  watch: {
-    show(value) {
-      if (value) {
-        this.open();
-      }
-    },
+  size: {
+    type: Array,
+    default: () => [640, 480],
   },
+});
 
-  mounted() {
-    if (this.show) {
-      this.open();
+const emit = defineEmits(["close"]);
+
+const dialog = ref<HTMLDialogElement | null>(null);
+
+const width = computed(() => `${props.size[0]}px`);
+const height = computed(() => `${props.size[1]}px`);
+
+watch(
+  () => props.show,
+  (value) => {
+    if (value) {
+      open();
     }
   },
+);
 
-  methods: {
-    open() {
-      this.$refs.dialog.showModal();
-    },
-
-    close() {
-      this.$emit("close");
-      this.$refs.dialog.close();
-    },
-  },
+const open = () => {
+  dialog.value?.showModal();
 };
+
+const close = () => {
+  emit("close");
+  dialog.value?.close();
+};
+
+onMounted(() => {
+  if (props.show) {
+    open();
+  }
+});
 </script>
 
 <style scoped>
 dialog {
-  /* Dialog Box */
   background: var(--background-color);
   border: 1px solid var(--foreground-color);
   box-sizing: border-box;

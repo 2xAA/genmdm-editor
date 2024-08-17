@@ -50,46 +50,34 @@
   </VDialog>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { ref, defineProps } from "vue";
+import { useStore } from "@renderer/store";
 import VDialog from "./Dialog.vue";
 import DraggableSelect from "./DraggableSelect.vue";
 
-export default {
-  components: {
-    VDialog,
-    DraggableSelect,
-  },
-  props: ["show"],
+const store = useStore();
 
-  emits: ["close"],
+const show = defineProps<{ show: boolean }>().show;
+const resetDisabled = ref(false);
+const channel = ref(0);
+const resetEditor = ref(0);
+const resetPatches = ref(0);
 
-  data() {
-    return {
-      resetDisabled: false,
-      channel: 0,
-      resetEditor: 0,
-      resetPatches: 0,
-    };
-  },
+const resetState = async () => {
+  resetDisabled.value = true;
 
-  methods: {
-    async resetState() {
-      this.resetDisabled = true;
-      const { channel, resetEditor, resetPatches } = this;
+  await store.dispatch("resetState", {
+    channel: channel.value,
+    resetEditor: resetEditor.value,
+    resetPatches: resetPatches.value,
+  });
 
-      await this.$store.dispatch("resetState", {
-        channel,
-        resetEditor,
-        resetPatches,
-      });
-
-      this.resetDisabled = false;
-    },
-  },
+  resetDisabled.value = false;
 };
 </script>
 
-<style>
+<style scoped>
 .reset-state-dialog-text {
   color: var(--foreground-color);
   grid-gap: 25px;

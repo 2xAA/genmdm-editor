@@ -29,217 +29,170 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    disabled: {
-      type: Boolean,
-      default: () => false,
-    },
+<script lang="ts" setup>
+import { inject } from "vue";
+import { ref, computed, watch } from "vue";
 
-    disabledItems: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
+interface PointerPosition {
+  x: number;
+  y: number;
+}
 
-    values: {
-      type: Array,
-      required: true,
-    },
-
-    default: {},
-
-    labels: {
-      type: Array,
-      default: () => [],
-    },
-
-    modelValue: {
-      type: undefined,
-      required: true,
-    },
-
-    emitArrayValue: {
-      type: Boolean,
-    },
-
-    whatIs: {
-      type: String,
-      default: "",
-    },
+const props = defineProps({
+  disabled: {
+    type: Boolean,
+    default: false,
   },
-  emits: ["update:modelValue"],
-
-  data() {
-    return {
-      internalValue: -1,
-      lastCursor: "",
-      mouseButtonDown: false,
-      lastPointerPosition: { x: 0, y: 0 },
-      editable: false,
-      lastTimeVibrate: 50,
-    };
+  disabledItems: {
+    type: Array as () => number[],
+    required: false,
+    default: () => [],
   },
-
-  computed: {
-    currentIndex() {
-      return this.values[this.internalValue];
-    },
-
-    currentLabel() {
-      return this.labels[this.internalValue];
-    },
-
-    selectValues() {
-      const values = (this.labels.length ? this.labels : this.values).map(
-        (item, index) => [
-          this.values[index],
-          this.labels.length ? item : this.values[index],
-        ],
-      );
-
-      return values;
-    },
-
-    selectValue: {
-      get() {
-        const value = this.emitArrayValue
-          ? this.modelValue
-          : Math.floor(this.modelValue / (128 / this.values.length));
-        return value;
-      },
-
-      set(key) {
-        this.setAndEmitValue(this.values.indexOf(key));
-      },
-    },
+  values: {
+    type: Array as () => number[],
+    required: true,
   },
-
-  watch: {
-    modelValue(value) {
-      if (!this.mouseButtonDown) {
-        this.internalValue = this.emitArrayValue
-          ? this.values[value]
-          : Math.floor(value / (128 / this.values.length));
-      }
-    },
+  default: Number,
+  labels: {
+    type: Array as () => string[],
+    default: () => [],
   },
-
-  created() {
-    this.internalValue = this.emitArrayValue
-      ? this.modelValue
-      : Math.floor(this.modelValue / (128 / this.values.length));
+  modelValue: {
+    type: Number,
+    required: true,
   },
-
-  methods: {
-    requestPointerLock(e) {
-      if (
-        (e.pointerType === "mouse" && e.button === 2) ||
-        e.pointerType !== "mouse"
-      ) {
-        const {
-          $refs: { draggableSelectBody },
-        } = this;
-
-        document.addEventListener(
-          "pointerlockchange",
-          this.lockChangeAlert,
-          false,
-        );
-
-        if (draggableSelectBody.requestPointerLock) {
-          draggableSelectBody.requestPointerLock();
-        } else {
-          // Only used for browsers without the Pointer Lock API, such as the WebMIDI Browser for iOS
-          e.preventDefault();
-          document.addEventListener("pointermove", this.mouseMove, false);
-          document.addEventListener("pointerup", this.mouseUp);
-        }
-
-        this.lastPointerPosition.x = e.clientX;
-        this.lastPointerPosition.y = e.clientY;
-        this.mouseButtonDown = true;
-      }
-    },
-
-    exitPointerLock() {
-      if (document.exitPointerLock) {
-        document.exitPointerLock();
-      }
-
-      document.removeEventListener(
-        "pointerlockchange",
-        this.lockChangeAlert,
-        false,
-      );
-      this.mouseButtonDown = false;
-    },
-
-    lockChangeAlert() {
-      const {
-        $refs: { draggableSelectBody },
-      } = this;
-
-      if (document.pointerLockElement === draggableSelectBody) {
-        document.addEventListener("pointermove", this.mouseMove, false);
-        document.addEventListener("pointerup", this.mouseUp);
-      } else {
-        document.removeEventListener("pointermove", this.mouseMove, false);
-        this.mouseUp();
-      }
-    },
-
-    mouseUp() {
-      document.removeEventListener("pointermove", this.mouseMove, false);
-      document.removeEventListener("pointerup", this.mouseUp);
-      document.body.style.cursor =
-        this.lastCursor === "ew-resize" ? "default" : this.lastCursor;
-    },
-
-    mouseMove(e) {
-      const yDelta = e.movementY || -this.lastPointerPosition.y + e.clientY;
-
-      const { internalValue, values } = this;
-      const newValue = -yDelta + internalValue;
-      const clampedNewIndex = Math.floor(
-        Math.max(0, Math.min(values.length - 1, newValue)),
-      );
-
-      this.setAndEmitValue(clampedNewIndex);
-
-      this.lastPointerPosition.x = e.clientX;
-      this.lastPointerPosition.y = e.clientY;
-    },
-
-    setAndEmitValue(value) {
-      const clampedNewMIDIValue = Math.floor(
-        (value / (this.values.length - 1)) * 127,
-      );
-
-      if (this.internalValue !== value && !this.disabledItems[value]) {
-        this.internalValue = value;
-        this.lastTimeVibrate = Date.now();
-        this.$electron.vibrate();
-
-        const emitValue = this.emitArrayValue
-          ? this.values[value]
-          : clampedNewMIDIValue;
-        this.$emit("update:modelValue", emitValue);
-      }
-    },
-
-    toggleEditable() {
-      this.editable = !this.editable;
-
-      if (this.editable && this.labels.length) {
-        this.$nextTick(() => {
-          this.$refs.labelSelect.open();
-        });
-      }
-    },
+  emitArrayValue: {
+    type: Boolean,
   },
-};
+});
+
+const emit = defineEmits(["update:modelValue"]);
+
+const internalValue = ref(-1);
+const lastCursor = ref<string>("");
+const mouseButtonDown = ref(false);
+const lastPointerPosition = ref<PointerPosition>({ x: 0, y: 0 });
+const lastTimeVibrate = ref<number>(50);
+
+const draggableSelectBody = ref<HTMLDivElement | null>(null);
+const labelSelect = ref<HTMLSelectElement | null>(null);
+
+const $electron = inject("$electron");
+
+const selectValues = computed(() => {
+  return (props.labels.length ? props.labels : props.values).map(
+    (item, index) => [
+      props.values[index],
+      props.labels.length ? item : props.values[index],
+    ],
+  );
+});
+
+const selectValue = computed({
+  get() {
+    return props.emitArrayValue
+      ? props.modelValue
+      : Math.floor(props.modelValue / (128 / props.values.length));
+  },
+  set(key) {
+    setAndEmitValue(props.values.indexOf(key));
+  },
+});
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (!mouseButtonDown.value) {
+      internalValue.value = props.emitArrayValue
+        ? props.values[value]
+        : Math.floor(value / (128 / props.values.length));
+    }
+  },
+);
+
+internalValue.value = props.emitArrayValue
+  ? props.modelValue
+  : Math.floor(props.modelValue / (128 / props.values.length));
+
+function requestPointerLock(e: PointerEvent) {
+  if (
+    (e.pointerType === "mouse" && e.button === 2) ||
+    e.pointerType !== "mouse"
+  ) {
+    document.addEventListener("pointerlockchange", lockChangeAlert, false);
+
+    if (draggableSelectBody.value?.requestPointerLock) {
+      draggableSelectBody.value.requestPointerLock();
+    } else {
+      // For browsers without Pointer Lock API
+      e.preventDefault();
+      document.addEventListener("pointermove", mouseMove, false);
+      document.addEventListener("pointerup", mouseUp);
+    }
+
+    lastPointerPosition.value.x = e.clientX;
+    lastPointerPosition.value.y = e.clientY;
+    mouseButtonDown.value = true;
+  }
+}
+
+function exitPointerLock() {
+  if (document.exitPointerLock) {
+    document.exitPointerLock();
+  }
+
+  document.removeEventListener("pointerlockchange", lockChangeAlert, false);
+  mouseButtonDown.value = false;
+}
+
+function lockChangeAlert() {
+  if (document.pointerLockElement === draggableSelectBody.value) {
+    document.addEventListener("pointermove", mouseMove, false);
+    document.addEventListener("pointerup", mouseUp);
+  } else {
+    document.removeEventListener("pointermove", mouseMove, false);
+    mouseUp();
+  }
+}
+
+function mouseUp() {
+  document.removeEventListener("pointermove", mouseMove, false);
+  document.removeEventListener("pointerup", mouseUp);
+  document.body.style.cursor =
+    lastCursor.value === "ew-resize" ? "default" : lastCursor.value;
+}
+
+function mouseMove(e: MouseEvent) {
+  const yDelta = e.movementY || -lastPointerPosition.value.y + e.clientY;
+
+  const newValue = -yDelta + internalValue.value;
+  const clampedNewIndex = Math.floor(
+    Math.max(0, Math.min(props.values.length - 1, newValue)),
+  );
+
+  setAndEmitValue(clampedNewIndex);
+
+  lastPointerPosition.value.x = e.clientX;
+  lastPointerPosition.value.y = e.clientY;
+}
+
+function setAndEmitValue(value: number) {
+  const clampedNewMIDIValue = Math.floor(
+    (value / (props.values.length - 1)) * 127,
+  );
+
+  if (internalValue.value !== value && !props.disabledItems[value]) {
+    internalValue.value = value;
+    lastTimeVibrate.value = Date.now();
+    // Assuming you have some vibration logic to implement
+    $electron.vibrate();
+
+    const emitValue = props.emitArrayValue
+      ? props.values[value]
+      : clampedNewMIDIValue;
+    emit("update:modelValue", emitValue);
+  }
+}
 </script>
 
 <style scoped>

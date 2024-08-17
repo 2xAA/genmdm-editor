@@ -10,90 +10,65 @@
   </label>
 </template>
 
-<script>
-export default {
-  props: {
-    disabled: {
-      type: Boolean,
-      default: () => false,
-    },
+<script lang="ts" setup>
+import { computed, ref, watch, onMounted } from "vue";
+import { defineProps, defineEmits } from "vue";
 
-    modelValue: {
-      type: undefined,
-    },
-
-    labels: {
-      type: Array,
-      default: () => [],
-    },
-
-    emitBoolean: {
-      type: Boolean,
-      default: false,
-    },
-
-    title: {
-      type: String,
-      default: "",
-    },
+const props = defineProps({
+  disabled: {
+    type: Boolean,
+    default: false,
   },
-
-  emits: ["update:modelValue"],
-
-  data() {
-    return {
-      value: 0,
-    };
+  modelValue: {
+    type: [Number, Boolean],
   },
-
-  computed: {
-    checked() {
-      return this.value > 63;
-    },
-
-    currentLabel() {
-      return this.labels[this.checked ? 1 : 0];
-    },
+  labels: {
+    type: Array,
+    default: () => [],
   },
-
-  watch: {
-    value(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        this.$emit(
-          "update:modelValue",
-          this.emitBoolean ? !!this.value : this.value,
-        );
-      }
-    },
-
-    modelValue(newValue, oldValue) {
-      if (newValue !== oldValue) {
-        if (this.emitBoolean) {
-          this.value = !newValue ? 0 : 127;
-        } else {
-          this.value = newValue;
-        }
-      }
-    },
+  emitBoolean: {
+    type: Boolean,
+    default: false,
   },
+  title: {
+    type: String,
+    default: "",
+  },
+});
 
-  created() {
-    if (this.emitBoolean) {
-      this.value = !this.modelValue ? 0 : 127;
+const emit = defineEmits(["update:modelValue"]);
+
+const value = ref(0);
+
+const checked = computed(() => value.value > 63);
+
+const currentLabel = computed(() => props.labels[checked.value ? 1 : 0]);
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    if (props.emitBoolean) {
+      value.value = !newValue ? 0 : 127;
     } else {
-      this.value = this.modelValue;
+      value.value = newValue;
     }
   },
+);
 
-  methods: {
-    onChange() {
-      if (this.value > 63) {
-        this.value = 0;
-      } else {
-        this.value = 127;
-      }
-    },
-  },
+watch(value, (newValue) => {
+  emit("update:modelValue", props.emitBoolean ? !!newValue : newValue);
+});
+
+onMounted(() => {
+  if (props.emitBoolean) {
+    value.value = !props.modelValue ? 0 : 127;
+  } else {
+    value.value = props.modelValue;
+  }
+});
+
+const onChange = () => {
+  value.value = value.value > 63 ? 0 : 127;
 };
 </script>
 

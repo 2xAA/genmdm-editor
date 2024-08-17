@@ -4,56 +4,56 @@
   </label>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { GenMDMParser } from "genmdm-parser/dist/main.js";
+import { useStore } from "@renderer/store";
 
-export default {
-  methods: {
-    fileAdded(e) {
-      const {
-        files: { 0: file },
-      } = e.target;
+const store = useStore();
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        const arrayBuffer = reader.result;
-        const array = new Uint8Array(arrayBuffer);
+function fileAdded(e: Event) {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
 
-        this.parseDmpDataToMappedCC(array);
-        e.target.value = "";
-      };
+  if (!file) return;
 
-      try {
-        reader.readAsArrayBuffer(file);
-      } catch (e) {
-        console.log("Can't read file", e);
-      }
-    },
+  const reader = new FileReader();
+  reader.onload = () => {
+    const arrayBuffer = reader.result as ArrayBuffer;
+    const array = new Uint8Array(arrayBuffer);
 
-    parseDmpDataToMappedCC(data) {
-      const parser = new GenMDMParser();
-      const parsed = parser.parseY12(data);
+    parseY12DataToMappedCC(array);
+    target.value = "";
+  };
 
-      console.log(parsed);
+  try {
+    reader.readAsArrayBuffer(file);
+  } catch (err) {
+    console.error("Can't read file", err);
+  }
+}
 
-      const ccValues = Object.fromEntries(parsed.toGenMDM());
-      ccValues[70] = 0;
-      ccValues[71] = 0;
-      ccValues[72] = 0;
-      ccValues[73] = 0;
-      ccValues[74] = 0;
-      ccValues[75] = 0;
-      ccValues[76] = 0;
-      ccValues[77] = 127;
+function parseY12DataToMappedCC(data: Uint8Array) {
+  const parser = new GenMDMParser();
+  const parsed = parser.parseY12(data);
 
-      this.$store.dispatch("setCCValues", {
-        values: ccValues,
-        ignoreSameValues: false,
-        channel: this.$store.state.channel,
-      });
-    },
-  },
-};
+  console.log(parsed);
+
+  const ccValues = Object.fromEntries(parsed.toGenMDM());
+  ccValues[70] = 0;
+  ccValues[71] = 0;
+  ccValues[72] = 0;
+  ccValues[73] = 0;
+  ccValues[74] = 0;
+  ccValues[75] = 0;
+  ccValues[76] = 0;
+  ccValues[77] = 127;
+
+  store.dispatch("setCCValues", {
+    values: ccValues,
+    ignoreSameValues: false,
+    channel: store.state.channel,
+  });
+}
 </script>
 
 <style scoped>

@@ -5,31 +5,25 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { computed } from "vue";
+import { useStore } from "@renderer/store";
 import MDMControlGroup from "./MDMControlGroup.vue";
 
-export default {
-  components: {
-    MDMControlGroup,
-  },
+const store = useStore();
 
-  computed: {
-    channel() {
-      return this.$store.state.channel;
-    },
+const channel = computed(() => store.state.channel);
 
-    ccValues() {
-      const values = [/*84,*/ /*83,*/ 74, 1, /*85,*/ /*81,*/ 80];
+const ccValues = computed(() => {
+  const values = [/*84,*/ /*83,*/ 74, 1, /*85,*/ /*81,*/ 80];
 
-      if (!this.$store.state.mdmiCompatibility) {
-        values.splice(0, 0, 84);
-        values.splice(1, 0, 83);
-        values.splice(4, 0, 85);
-        values.splice(5, 0, 81);
-      }
+  if (!store.state.mdmiCompatibility) {
+    values.splice(0, 0, 84);
+    values.splice(1, 0, 83);
+    values.splice(4, 0, 85);
+    values.splice(5, 0, 81);
+  }
 
-      return values;
-    },
-  },
-};
+  return values;
+});
 </script>

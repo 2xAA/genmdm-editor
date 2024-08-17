@@ -4,44 +4,51 @@
   </label>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { decompress } from "compress-json";
-import { createDefaultChannelState } from "../store";
+import {
+  createDefaultChannelState,
+  GenMDMEditorState,
+  useStore,
+} from "@renderer/store";
 
-export default {
-  methods: {
-    fileAdded(e) {
-      const {
-        files: { 0: file },
-      } = e.target;
+const fileAdded = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        const newState = decompress(JSON.parse(reader.result));
+  const reader = new FileReader();
+  reader.onload = () => {
+    if (!reader.result) return;
 
-        const defaultChannelState = createDefaultChannelState();
+    const result =
+      typeof reader.result === "string"
+        ? reader.result
+        : Buffer.from(reader.result).toString();
 
-        // To account for old state saves.
-        // Not a problem with GenMDM, but new MDMI features somtimes require
-        // new CC values.
-        for (let i = 0; i < 6; i += 1) {
-          newState[`channel${i + 1}`] = {
-            ...defaultChannelState[`channel${i + 1}`],
-            ...newState[`channel${i + 1}`],
-          };
-        }
+    const newState: GenMDMEditorState = decompress(JSON.parse(result));
 
-        this.$store.commit("SET_STATE", newState);
-        e.target.value = "";
+    const defaultChannelState = createDefaultChannelState();
+
+    // To account for old state saves.
+    for (let i = 0; i < 6; i += 1) {
+      newState[`channel${i + 1}`] = {
+        ...defaultChannelState[`channel${i + 1}`],
+        ...newState[`channel${i + 1}`],
       };
+    }
 
-      try {
-        reader.readAsText(file);
-      } catch (e) {
-        console.log("Can't read file", e);
-      }
-    },
-  },
+    const store = useStore();
+    store.commit("SET_STATE", newState);
+
+    target.value = "";
+  };
+
+  try {
+    reader.readAsText(file);
+  } catch (e) {
+    console.log("Can't read file", e);
+  }
 };
 </script>
 

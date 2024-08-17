@@ -102,6 +102,8 @@ export default {
   },
   mixins: [redrawOnColorschemeChange],
 
+  inject: ["$colors"],
+
   props: {
     color: { type: String, default: "#000000" },
     operator: { type: Number, required: true },

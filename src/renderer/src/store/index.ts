@@ -1,70 +1,59 @@
-import { reactive } from "vue";
-import { createStore } from "vuex";
-
+import { InjectionKey, reactive } from "vue";
+import { createStore, Store, useStore as baseUseStore } from "vuex";
 import vuejsStorage from "vuejs-storage";
 import genmdmMapping from "../genmdm-mapping";
 import mdmiMapping from "../mdmi-mapping";
 
-function sleep(milliseconds = 0) {
+function sleep(milliseconds = 0): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 const GLOBAL_CC = [1, 74, 78, 79, 80, 81, 83, 84, /*85, */ 86, 88, 89];
 const NUM_CHANNELS = 6;
 
-/**
- * @typedef {object} GenMDMPatch
- * @prop {string} name
- * @prop {object} [data]
- */
-
-/**
- * @returns {GenMDMPatch[]}
- */
-function createBlankPatchesArray() {
-  return [...new Array(128).keys()].map(() => ({ name: "" })); // we don't define the data key here until we have data
+export interface GenMDMPatch {
+  name: string;
+  data?: object;
 }
 
-/**
- * @readonly
- * @enum {number}
- */
-export const MIDIChannelVoiceMode = {
-  MONOPHONIC: 0,
-  POLYPHONIC: 1,
-  UNISON: 2,
-};
+function createBlankPatchesArray(): GenMDMPatch[] {
+  return Array.from({ length: 128 }, () => ({ name: "" }));
+}
 
-/**
- * @typedef MIDIChannelConfiguration
- * @prop {MIDIChannelVoiceMode} mode The voice mode of the channel
- * @prop {number} group Number from -1 to 2. -1 signals the channel is
- *                      ungrouped, only applicable in the case of
- *                      MIDIChannelVoiceMode.MONOPHONIC.
- */
+export enum MIDIChannelVoiceMode {
+  MONOPHONIC = 0,
+  POLYPHONIC = 1,
+  UNISON = 2,
+}
 
-/**
- * @typedef {object} GenMDMEditorState
- * @prop {GenMDMPatch[]} patches
- * @prop {number} channel
- * @prop {MIDIChannelConfiguration[]} channelConfiguration
- * @prop {number} instrumentIndex
- * @prop {boolean} mdmiCompatibility
- * @prop {import("../genmdm-mapping").GenMDMMapping} [channel1]
- * @prop {import("../genmdm-mapping").GenMDMMapping} [channel2]
- * @prop {import("../genmdm-mapping").GenMDMMapping} [channel3]
- * @prop {import("../genmdm-mapping").GenMDMMapping} [channel4]
- * @prop {import("../genmdm-mapping").GenMDMMapping} [channel5]
- * @prop {import("../genmdm-mapping").GenMDMMapping} [channel6]
- */
+interface MIDIChannelConfiguration {
+  mode: MIDIChannelVoiceMode;
+  group: number; // -1 to 2
+}
 
-/**
- * @returns {GenMDMEditorState}
- */
-function createDefaultState() {
-  const defaultState = {
+interface GenMDMEditorChannelsState {
+  channel1: Record<string, number>;
+  channel2: Record<string, number>;
+  channel3: Record<string, number>;
+  channel4: Record<string, number>;
+  channel5: Record<string, number>;
+  channel6: Record<string, number>;
+}
+
+export interface GenMDMEditorState extends GenMDMEditorChannelsState {
+  patches: GenMDMPatch[];
+  channel: number;
+  channelConfiguration: MIDIChannelConfiguration[];
+  instrumentIndex: number;
+  mdmiCompatibility: boolean;
+  midiInputId: string;
+  midiOutputId: string;
+  showAboutDialog: boolean;
+}
+
+function createDefaultState(): GenMDMEditorState {
+  const defaultState: GenMDMEditorState = {
     patches: createBlankPatchesArray(),
-
     channel: 1,
     channelConfiguration: [
       { mode: MIDIChannelVoiceMode.POLYPHONIC, group: 0 },
@@ -78,7 +67,6 @@ function createDefaultState() {
     mdmiCompatibility: false,
     showAboutDialog: true,
     ...createDefaultChannelState(),
-
     midiInputId: "none",
     midiOutputId: "none",
   };
@@ -86,14 +74,19 @@ function createDefaultState() {
   return defaultState;
 }
 
-export function createDefaultChannelState() {
+export function createDefaultChannelState(): GenMDMEditorChannelsState {
   const mapping = { ...mdmiMapping, ...genmdmMapping };
-  const channels = {};
+  const channels = {
+    channel1: {},
+    channel2: {},
+    channel3: {},
+    channel4: {},
+    channel5: {},
+    channel6: {},
+  };
   const mappedCCNumbers = Object.keys(mapping);
 
   for (let i = 0; i < NUM_CHANNELS; ++i) {
-    channels[`channel${i + 1}`] = {};
-
     mappedCCNumbers.forEach((key) => {
       channels[`channel${i + 1}`][key] = mapping[key].default || 0;
     });
@@ -104,7 +97,9 @@ export function createDefaultChannelState() {
 
 const state = createDefaultState();
 
-const store = createStore({
+export const key: InjectionKey<Store<GenMDMEditorState>> = Symbol();
+
+const store = createStore<GenMDMEditorState>({
   state,
 
   plugins: [
@@ -115,9 +110,9 @@ const store = createStore({
   ],
 
   getters: {
-    channelsByGroup: (state) =>
+    channelsByGroup: (state: GenMDMEditorState) =>
       state.channelConfiguration.reduce(
-        (groups, { group, mode }, channelIndex) => {
+        (groups: Record<number, any[]>, { group, mode }, channelIndex) => {
           if (group > -1 && !groups[group]) {
             groups[group] = [mode, channelIndex + 1];
           } else if (group > -1 && groups[group]) {
@@ -126,28 +121,31 @@ const store = createStore({
 
           return groups;
         },
-        {},
+        {} as Record<number, any[]>,
       ),
 
-    groupedChannelsFromChannel: (state) => (channelIndex) => {
-      if (channelIndex < 0 || channelIndex > 5) {
-        return [];
-      }
+    groupedChannelsFromChannel:
+      (state: GenMDMEditorState) =>
+      (channelIndex: number): number[] => {
+        if (channelIndex < 0 || channelIndex > 5) {
+          return [];
+        }
 
-      const { group: channelGroup } = state.channelConfiguration[channelIndex];
+        const { group: channelGroup } =
+          state.channelConfiguration[channelIndex];
 
-      if (channelGroup > -1) {
-        return state.channelConfiguration
-          .map((item, index) => ({ ...item, channel: index + 1 }))
-          .filter(({ group }) => group === channelGroup)
-          .map(({ channel }) => channel);
-      }
-      return [channelIndex + 1];
-    },
+        if (channelGroup > -1) {
+          return state.channelConfiguration
+            .map((item, index) => ({ ...item, channel: index + 1 }))
+            .filter(({ group }) => group === channelGroup)
+            .map(({ channel }) => channel);
+        }
+        return [channelIndex + 1];
+      },
 
-    freeGroups: (state) =>
+    freeGroups: (state: GenMDMEditorState) =>
       state.channelConfiguration.reduce(
-        (groups, config) => {
+        (groups: number[], config) => {
           if (config.group > -1) {
             const index = groups.indexOf(config.group);
 
@@ -161,7 +159,7 @@ const store = createStore({
         [0, 1, 2],
       ),
 
-    mapping: (state) => {
+    mapping: (state: GenMDMEditorState) => {
       let mapping = {
         ...genmdmMapping,
       };
@@ -177,7 +175,15 @@ const store = createStore({
   actions: {
     setCCValues(
       { getters, commit, state },
-      { values, ignoreSameValues = true, channel },
+      {
+        values,
+        ignoreSameValues = true,
+        channel,
+      }: {
+        values: Record<number, number>;
+        ignoreSameValues?: boolean;
+        channel: number;
+      },
     ) {
       const keys = Object.keys(values);
 
@@ -188,7 +194,7 @@ const store = createStore({
         const value = values[cc];
         const isGlobal = GLOBAL_CC.indexOf(cc) > -1;
 
-        const affectedChannels = [];
+        const affectedChannels: number[] = [];
 
         if (isGlobal) {
           affectedChannels.push(1, 2, 3, 4, 5, 6);
@@ -211,19 +217,19 @@ const store = createStore({
       }
     },
 
-    setChannel({ commit }, channel) {
+    setChannel({ commit }, channel: number) {
       commit("SET_CHANNEL", channel);
     },
 
-    setPolyphony({ commit }, value) {
+    setPolyphony({ commit }, value: boolean) {
       commit("SET_POLYPHONY", value);
     },
 
-    setMaxPolyphonicChannels({ commit }, value) {
+    setMaxPolyphonicChannels({ commit }, value: number) {
       commit("SET_MAX_POLYPHONIC_CHANNELS", value);
     },
 
-    async setPatches({ commit, dispatch }, patches = []) {
+    async setPatches({ commit, dispatch }, patches: GenMDMPatch[] = []) {
       commit("CLEAR_PATCHES");
 
       for (let i = 0; i < patches.length; i += 1) {
@@ -231,11 +237,14 @@ const store = createStore({
       }
     },
 
-    setPatchName({ commit }, { index, name }) {
+    setPatchName({ commit }, { index, name }: { index: number; name: string }) {
       commit("SET_PATCH_NAME", { index, name });
     },
 
-    writePatch({ commit }, { index, patch }) {
+    writePatch(
+      { commit },
+      { index, patch }: { index: number; patch: GenMDMPatch },
+    ) {
       if (index > 127) {
         throw new Error("Slot index is > 127. 128 slots available only.");
       }
@@ -243,7 +252,7 @@ const store = createStore({
       commit("WRITE_TO_SLOT", { index, patch });
     },
 
-    setInstrumentIndex({ commit }, index) {
+    setInstrumentIndex({ commit }, index: number) {
       commit("SET_INSTRUMENT_INDEX", index);
     },
 
@@ -251,15 +260,14 @@ const store = createStore({
       const originalChannel = state.channel;
 
       for (let i = 0; i < NUM_CHANNELS; ++i) {
-        const channelKey = `channel${i + 1}`;
-        const channel = state[channelKey];
+        const channelKey = `channel${i + 1}` as keyof GenMDMEditorState;
+        const channel = state[channelKey] as Record<string, number>;
         const channelEntries = Object.entries(channel);
 
         commit("SET_CHANNEL", i + 1);
 
         for (let j = 0; j < channelEntries.length; ++j) {
           const [cc, value] = channelEntries[j];
-          // throttle to avoid webmidi spamming the port
           await sleep(0);
           commit("SET_CC_VALUE", { cc: Number(cc), value, channel: i + 1 });
         }
@@ -268,18 +276,23 @@ const store = createStore({
       commit("SET_CHANNEL", originalChannel);
     },
 
-    // channel = 0         - don't reset channel data
-    // channel = 1-6       - reset defined channel
-    // channel = 7         - reset all channels
     resetState(
       { commit, dispatch },
-      { channel = undefined, resetEditor = false, resetPatches = false } = {},
+      {
+        channel = -1,
+        resetEditor = false,
+        resetPatches = false,
+      }: {
+        channel?: number;
+        resetEditor?: boolean;
+        resetPatches?: boolean;
+      } = {},
     ) {
       const defaultState = createDefaultState();
       const newState = reactive({
         midiInputId: state.midiInputId,
         midiOutputId: state.midiOutputId,
-      });
+      }) as Partial<GenMDMEditorState>;
 
       let syncWithDevice = false;
 
@@ -301,8 +314,6 @@ const store = createStore({
       }
 
       if (resetEditor) {
-        newState.polyphonic = defaultState.polyphonic;
-        newState.maxPolyphonicChannels = defaultState.maxPolyphonicChannels;
         newState.channel = defaultState.channel;
         newState.instrumentIndex = defaultState.instrumentIndex;
         newState.mdmiCompatibility = defaultState.mdmiCompatibility;
@@ -317,11 +328,16 @@ const store = createStore({
       if (syncWithDevice) {
         return dispatch("sendState");
       }
+
+      return this;
     },
 
     setChannelConfigurationMode(
       { commit, state, getters },
-      { channelIndex, mode },
+      {
+        channelIndex,
+        mode,
+      }: { channelIndex: number; mode: MIDIChannelVoiceMode },
     ) {
       if (mode === MIDIChannelVoiceMode.MONOPHONIC) {
         commit("SET_CHANNELCONFIGURATION_GROUP", { channelIndex, group: -1 });
@@ -346,7 +362,7 @@ const store = createStore({
   },
 
   mutations: {
-    SET_STATE(state, newState) {
+    SET_STATE(state: GenMDMEditorState, newState: Partial<GenMDMEditorState>) {
       const newStateCopy = {
         ...newState,
         midiInputId: state.midiInputId,
@@ -356,63 +372,78 @@ const store = createStore({
       Object.assign(state, newStateCopy);
     },
 
-    SET_CC_VALUE(state, { cc, value, channel }) {
+    SET_CC_VALUE(
+      state: GenMDMEditorState,
+      { cc, value, channel }: { cc: number; value: number; channel: number },
+    ) {
       state[`channel${channel}`][cc] = value;
     },
 
-    SET_CHANNEL(state, channel) {
+    SET_CHANNEL(state: GenMDMEditorState, channel: number) {
       state.channel = channel;
     },
 
-    SET_POLYPHONY(state, value) {
-      state.polyphonic = value;
-    },
-
-    SET_MAX_POLYPHONIC_CHANNELS(state, value) {
-      state.maxPolyphonicChannels = value;
-    },
-
-    CLEAR_PATCHES(state) {
+    CLEAR_PATCHES(state: GenMDMEditorState) {
       state.patches = createBlankPatchesArray();
     },
 
-    SET_PATCH_NAME(state, { index, name }) {
+    SET_PATCH_NAME(
+      state: GenMDMEditorState,
+      { index, name }: { index: number; name: string },
+    ) {
       state.patches[index].name = name;
     },
 
-    WRITE_TO_SLOT(state, { index, patch }) {
+    WRITE_TO_SLOT(
+      state: GenMDMEditorState,
+      { index, patch }: { index: number; patch: GenMDMPatch },
+    ) {
       state.patches[index].name = patch.name;
       state.patches[index].data = patch.data;
     },
 
-    SET_INSTRUMENT_INDEX(state, index) {
+    SET_INSTRUMENT_INDEX(state: GenMDMEditorState, index: number) {
       state.instrumentIndex = index;
     },
 
-    SET_MDMICOMPATIBILITY(state, value) {
+    SET_MDMICOMPATIBILITY(state: GenMDMEditorState, value: boolean) {
       state.mdmiCompatibility = value;
     },
 
-    SET_MIDI_INPUT_ID(state, value) {
+    SET_MIDI_INPUT_ID(state: GenMDMEditorState, value: string) {
       state.midiInputId = value;
     },
 
-    SET_MIDI_OUTPUT_ID(state, value) {
+    SET_MIDI_OUTPUT_ID(state: GenMDMEditorState, value: string) {
       state.midiOutputId = value;
     },
 
-    SET_CHANNELCONFIGURATION_MODE(state, { channelIndex, mode }) {
+    SET_CHANNELCONFIGURATION_MODE(
+      state: GenMDMEditorState,
+      {
+        channelIndex,
+        mode,
+      }: { channelIndex: number; mode: MIDIChannelVoiceMode },
+    ) {
       state.channelConfiguration[channelIndex].mode = mode;
     },
 
-    SET_CHANNELCONFIGURATION_GROUP(state, { channelIndex, group }) {
+    SET_CHANNELCONFIGURATION_GROUP(
+      state: GenMDMEditorState,
+      { channelIndex, group }: { channelIndex: number; group: number },
+    ) {
       state.channelConfiguration[channelIndex].group = group;
     },
 
-    SET_SHOWABOUTDIALOG(state, value) {
+    SET_SHOWABOUTDIALOG(state: GenMDMEditorState, value: boolean) {
       state.showAboutDialog = value;
     },
   },
 });
+
+// define your own `useStore` composition function
+export function useStore() {
+  return baseUseStore(key);
+}
 
 export default store;

@@ -10,24 +10,14 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { computed } from "vue";
+import { useStore } from "@renderer/store";
 import MDMControlGroup from "./MDMControlGroup.vue";
 import MDMWaveform from "./MDMWaveform.vue";
 
-export default {
-  components: {
-    MDMControlGroup,
-    MDMWaveform,
-  },
+const store = useStore();
 
-  computed: {
-    channel() {
-      return this.$store.state.channel;
-    },
-
-    mdmiCompatibility() {
-      return this.$store.state.mdmiCompatibility;
-    },
-  },
-};
+const channel = computed(() => store.state.channel);
+const mdmiCompatibility = computed(() => store.state.mdmiCompatibility);
 </script>

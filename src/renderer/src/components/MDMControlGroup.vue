@@ -17,43 +17,29 @@
   </grid>
 </template>
 
-<script>
+<script lang="ts" setup>
+import { computed, defineProps } from "vue";
+import { useStore } from "@renderer/store";
 import MDMControl from "./MDMControl.vue";
 
-export default {
-  components: {
-    MDMControl,
-  },
+const props = defineProps<{
+  channel: number;
+  disabled?: boolean;
+  ccValues?: number[];
+}>();
 
-  props: {
-    channel: {
-      type: Number,
-      required: true,
-    },
+const store = useStore();
 
-    disabled: {
-      type: Boolean,
-      default: () => false,
-    },
+const controls = computed(() => {
+  const ccs = props.ccValues ?? [];
+  const controls: Record<number, any> = {};
 
-    ccValues: {
-      type: Array,
-      default: () => [],
-    },
-  },
+  ccs.forEach((cc) => {
+    controls[cc] = store.getters.mapping[cc];
+  });
 
-  computed: {
-    controls() {
-      const controls = {};
-
-      this.ccValues.forEach((cc) => {
-        controls[cc] = this.$store.getters.mapping[cc];
-      });
-
-      return controls;
-    },
-  },
-};
+  return controls;
+});
 </script>
 
 <style>

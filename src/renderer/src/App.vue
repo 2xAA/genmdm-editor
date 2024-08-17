@@ -307,7 +307,7 @@ import WebMidi from "webmidi";
 import pkg from "../../../package.json";
 import shuffle from "./utils/shuffle";
 
-import { MIDIChannelVoiceMode } from "./store/index.js";
+import { MIDIChannelVoiceMode } from "./store/index.ts";
 
 import MDMControlGroup from "./components/MDMControlGroup.vue";
 import DraggableSelect from "./components/DraggableSelect.vue";
@@ -334,6 +334,8 @@ import StateDownload from "./components/StateDownload.vue";
 import VoiceConfigDialog from "./components/VoiceConfigDialog.vue";
 import { MDMKeyboard } from "./MDMKeyboard";
 import { reactive } from "vue";
+import { getColors } from "./utils/get-colors";
+import { provide } from "vue";
 
 export default {
   name: "App",
@@ -362,6 +364,11 @@ export default {
     StateUpload,
     StateDownload,
     VoiceConfigDialog,
+  },
+
+  setup() {
+    provide("$colors", getColors());
+    provide("$electron", window.api || { vibrate: () => {} });
   },
 
   data() {
@@ -685,7 +692,7 @@ export default {
         channel: channelIn,
       } = e;
 
-      let outChannels = [];
+      const outChannels = [];
 
       // Pass through other channels
       if (channelIn > 6) {
@@ -730,7 +737,7 @@ export default {
         channel: channelIn,
         note: { number },
       } = e;
-      let outChannels = [];
+      const outChannels = [];
 
       // Pass through other channels
       if (channelIn > 6) {
