@@ -81,6 +81,12 @@ function createDefaultState() {
 
     midiInputId: "none",
     midiOutputId: "none",
+
+    theme: "auto",
+    backgroundImage: true,
+    rotation: true,
+    haptics: true,
+    patchImportBehaviour: ["editor"],
   };
 
   return defaultState;
@@ -411,6 +417,30 @@ const store = createStore({
 
     SET_SHOWABOUTDIALOG(state, value) {
       state.showAboutDialog = value;
+    },
+
+    SET_THEME(state, value) {
+      state.theme = value;
+    },
+
+    SET_BACKGROUNDIMAGE(state, value) {
+      state.backgroundImage = value;
+    },
+
+    SET_ROTATION(state, value) {
+      state.rotation = value;
+    },
+
+    SET_HAPTICS(state, value) {
+      state.haptics = value;
+    },
+
+    SET_PATCHIMPORTBEHAVIOUR(state, value) {
+      if (typeof value !== "string") {
+        return;
+      }
+
+      state.patchImportBehaviour = value.split("-");
     },
   },
 });

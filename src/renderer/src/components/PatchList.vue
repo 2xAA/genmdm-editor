@@ -3,17 +3,18 @@
     <c span="2">
       <label class="select" @pointerdown="openSelect">
         <input
+          v-model="instrumentName"
           class="instrument-name-input"
           type="text"
-          v-model="instrumentName"
         />
         <select ref="select" v-model="instrumentIndex">
           <option
             v-for="({ name }, i) in patches"
-            :value="i"
             :key="`${i}+${name}`"
-            >{{ `${i + 1}`.padStart(3, "0") }}: {{ name }}</option
+            :value="i"
           >
+            {{ `${i + 1}`.padStart(3, "0") }}: {{ name }}
+          </option>
         </select>
         <DropdownArrow />
         <div class="blocker"></div>
@@ -27,14 +28,14 @@ import DropdownArrow from "../assets/graphics/select-dropdown.svg";
 
 export default {
   components: {
-    DropdownArrow
+    DropdownArrow,
   },
 
   data() {
     return {
       selectStyles: {
-        pointerEvents: "none"
-      }
+        pointerEvents: "none",
+      },
     };
   },
 
@@ -51,9 +52,9 @@ export default {
       set(value) {
         this.$store.dispatch("setPatchName", {
           index: this.instrumentIndex,
-          name: value
+          name: value,
         });
-      }
+      },
     },
 
     instrumentIndex: {
@@ -63,21 +64,11 @@ export default {
 
       set(value) {
         this.$store.dispatch("setInstrumentIndex", value);
-      }
-    }
+      },
+    },
   },
 
   methods: {
-    writeToSlot() {
-      this.$store.dispatch("writePatch", {
-        index: this.instrumentIndex,
-        patch: {
-          data: { ...this.$store.state[`channel${this.channel}`] },
-          name: "instrument " + this.instrumentIndex
-        }
-      });
-    },
-
     openSelect() {
       this.selectStyles.pointerEvents = "auto";
       this.$nextTick(() => {
@@ -87,8 +78,8 @@ export default {
 
     closeSelect() {
       this.selectStyles.pointerEvents = "none";
-    }
-  }
+    },
+  },
 };
 </script>
 

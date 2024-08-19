@@ -212,6 +212,10 @@
             </template>
           </MDMControlGroup>
 
+          <button class="button rt" @click="openPreferencesDialog">
+            Preferences
+          </button>
+
           <button class="button rt" @click="openVoiceConfigDialog">
             Voice Configuration
           </button>
@@ -223,69 +227,7 @@
       </c>
     </grid>
 
-    <VDialog
-      v-if="showAboutDialog"
-      :show="showAboutDialog"
-      @close="closeAboutDialog"
-    >
-      <grid columns="3" class="about-dialog-text">
-        <c span="3">
-          <h1>genMDM Editor</h1>
-          <span class="subtitle">version {{ version }} by 2xAA</span>
-        </c>
-        <c>
-          <b
-            >Like this software?<br /><br />Consider supporting the development
-            of this and other projects by
-            <a
-              href="https://github.com/sponsors/2xAA"
-              nofollow
-              noreferrer
-              target="_blank"
-              >donating</a
-            >
-            or
-            <a href="https://2xaa.net/" nofollow noreferrer target="_blank"
-              >buying/streaming my music</a
-            >.</b
-          ><br /><br />
-
-          Need some help?<br /><br />Check out
-          <a
-            href="https://github.com/2xAA/genmdm-editor/discussions"
-            nofollow
-            noreferrer
-            target="_blank"
-            >Discussions</a
-          >
-          for an answer to your question.<br /><br />
-          Found a bug or would like to suggest an improvement?<br />
-          <a
-            href="https://github.com/2xAA/genmdm-editor/issues/new/choose"
-            nofollow
-            noreferrer
-            target="_blank"
-            >Create an issue on GitHub</a
-          >.</c
-        >
-        <c>
-          I created this editor to further the genMDM and MDMI's usability and
-          to understand the Sega MD's capabilities. I hope you find this
-          useful.<br /><br />
-
-          This editor's design was inspired by the scan of the Japanese
-          technical documentation of the YM2608, which is said to be the closest
-          documentation to the Sega Mega Drive's YM2612 as they share the same
-          FM package.
-        </c>
-        <c>
-          Special thanks to catskull, Robert Hargreaves, and littlescale for the
-          genMDM itself.<br /><br />
-          Greetz to: {{ friends }} and all chippers and genMDM users around the
-          world.<br /><br />ALWAYS BACK UP YOUR SAVES.
-        </c>
-      </grid>
-    </VDialog>
+    <AboutDialog />
 
     <ResetStateDialog
       v-if="showResetStateDialog"
@@ -298,16 +240,24 @@
       :show="showVoiceConfigDialog"
       @close="closeVoiceConfigDialog"
     />
+
+    <PreferencesDialog
+      v-if="showPreferencesDialog"
+      :show="showPreferencesDialog"
+      @close="closePreferencesDialog"
+    />
+
+    <ThemeManager />
   </div>
 </template>
 
 <script>
+import pkg from "../../../package.json";
+import { reactive } from "vue";
 import WebMidi from "webmidi";
 
-import pkg from "../../../package.json";
-import shuffle from "./utils/shuffle";
-
 import { MIDIChannelVoiceMode } from "./store/index.js";
+import { MDMKeyboard } from "./MDMKeyboard";
 
 import MDMControlGroup from "./components/MDMControlGroup.vue";
 import DraggableSelect from "./components/DraggableSelect.vue";
@@ -325,15 +275,15 @@ import PatchList from "./components/PatchList.vue";
 import GENMFileDownload from "./components/GENMFileDownload.vue";
 import DMPFileUpload from "./components/DMPFileUpload.vue";
 import DMPFileDownload from "./components/DMPFileDownload.vue";
-import VDialog from "./components/Dialog.vue";
 import Y12FileUpload from "./components/Y12FileUpload.vue";
 import Y12FileDownload from "./components/Y12FileDownload.vue";
 import ResetStateDialog from "./components/ResetStateDialog.vue";
 import StateUpload from "./components/StateUpload.vue";
 import StateDownload from "./components/StateDownload.vue";
 import VoiceConfigDialog from "./components/VoiceConfigDialog.vue";
-import { MDMKeyboard } from "./MDMKeyboard";
-import { reactive } from "vue";
+import AboutDialog from "./components/AboutDialog.vue";
+import PreferencesDialog from "./components/PreferencesDialog.vue";
+import ThemeManager from "./components/ThemeManager.vue";
 
 export default {
   name: "App",
@@ -355,13 +305,15 @@ export default {
     GENMFileDownload,
     DMPFileUpload,
     DMPFileDownload,
-    VDialog,
     Y12FileUpload,
     Y12FileDownload,
     ResetStateDialog,
     StateUpload,
     StateDownload,
     VoiceConfigDialog,
+    AboutDialog,
+    PreferencesDialog,
+    ThemeManager,
   },
 
   data() {
@@ -390,24 +342,7 @@ export default {
 
       showResetStateDialog: false,
       showVoiceConfigDialog: false,
-
-      friendsNames: [
-        "Mum",
-        "James",
-        "Nic",
-        "Li",
-        "NERDDISCO",
-        "Lazer Sausage",
-        "cTrix",
-        "Infotoxin",
-        "Henry Homesweet",
-        "Leon",
-        "Jamatar",
-        "gwEm",
-        "Cyanide Dansen",
-        "Polyop",
-        "jonic",
-      ],
+      showPreferencesDialog: false,
 
       keyboardInstance: null,
     };
@@ -466,28 +401,12 @@ export default {
       },
     },
 
-    friends() {
-      // expression using this.showAboutDialog makes Vue run the shuffle
-      // function each time this.showAboutDialog updates :)
-      return this.showAboutDialog && shuffle(this.friendsNames).join(", ");
-    },
-
     patches() {
       return this.$store.state.patches;
     },
 
     instrumentIndex() {
       return this.$store.state.instrumentIndex;
-    },
-
-    showAboutDialog: {
-      get() {
-        return this.$store.state.showAboutDialog;
-      },
-
-      set(value) {
-        this.$store.commit("SET_SHOWABOUTDIALOG", value);
-      },
     },
   },
 
@@ -882,11 +801,7 @@ export default {
     },
 
     openAboutDialog() {
-      this.showAboutDialog = true;
-    },
-
-    closeAboutDialog() {
-      this.showAboutDialog = false;
+      this.$store.commit("SET_SHOWABOUTDIALOG", true);
     },
 
     openResetStateDialog() {
@@ -904,6 +819,14 @@ export default {
     closeVoiceConfigDialog() {
       this.showVoiceConfigDialog = false;
     },
+
+    openPreferencesDialog() {
+      this.showPreferencesDialog = true;
+    },
+
+    closePreferencesDialog() {
+      this.showPreferencesDialog = false;
+    },
   },
 };
 </script>
@@ -911,17 +834,29 @@ export default {
 <style>
 @import url("./assets/fonts/kokoro/index.css");
 
-:root {
+body {
   --foreground-color: black;
   --background-color: white;
   --background-image: url(assets/images/background.jpg);
 }
 
+body.theme-dark {
+  --foreground-color: white;
+  --background-color: black;
+  --background-image: url(assets/images/background-inverted.jpg);
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  body {
     --foreground-color: white;
     --background-color: black;
     --background-image: url(assets/images/background-inverted.jpg);
+  }
+
+  body.theme-light {
+    --foreground-color: black;
+    --background-color: white;
+    --background-image: url(assets/images/background.jpg);
   }
 }
 
@@ -940,6 +875,10 @@ body {
   background-attachment: fixed;
   background-position: calc(50% - 100px) center;
   background-repeat: no-repeat;
+}
+
+body.no-background {
+  background-image: none;
 }
 
 /* big screens */
@@ -972,6 +911,10 @@ label.select select {
 
   transform: rotate(-0.2deg);
   margin-top: -0.5px;
+}
+
+body.no-rotation #app {
+  transform: none;
 }
 
 .ns-resize-cursor {

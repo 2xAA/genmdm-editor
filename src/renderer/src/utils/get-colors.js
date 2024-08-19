@@ -1,12 +1,12 @@
 function getColors() {
   return {
-    background: getComputedStyle(document.documentElement).getPropertyValue(
-      "--background-color"
+    background: getComputedStyle(document.body).getPropertyValue(
+      "--background-color",
     ),
 
-    foreground: getComputedStyle(document.documentElement).getPropertyValue(
-      "--foreground-color"
-    )
+    foreground: getComputedStyle(document.body).getPropertyValue(
+      "--foreground-color",
+    ),
   };
 }
 
