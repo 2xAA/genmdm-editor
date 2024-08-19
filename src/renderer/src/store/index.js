@@ -61,16 +61,16 @@ export const MIDIChannelVoiceMode = {
 /**
  * @returns {GenMDMEditorState}
  */
-function createDefaultState() {
+export function createDefaultState() {
   const defaultState = {
     patches: createBlankPatchesArray(),
 
     channel: 1,
     channelConfiguration: [
-      { mode: MIDIChannelVoiceMode.POLYPHONIC, group: 0 },
-      { mode: MIDIChannelVoiceMode.POLYPHONIC, group: 0 },
-      { mode: MIDIChannelVoiceMode.UNISON, group: 1 },
-      { mode: MIDIChannelVoiceMode.UNISON, group: 1 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
       { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
       { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
     ],
