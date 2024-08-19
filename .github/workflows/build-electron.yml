@@ -10,6 +10,9 @@ jobs:
   release:
     runs-on: ${{ matrix.os }}
 
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -59,5 +62,3 @@ jobs:
             dist/*.tar.gz
             dist/*.yml
             dist/*.blockmap
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
