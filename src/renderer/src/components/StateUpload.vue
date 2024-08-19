@@ -23,7 +23,6 @@ export default {
       reader.onload = () => {
         const newState = decompress(JSON.parse(reader.result));
         const defaultState = createDefaultState();
-        debugger;
 
         // To account for old state saves.
         // Handle old polyphony settings.
