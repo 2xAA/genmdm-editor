@@ -802,6 +802,11 @@ export default {
 
     openAboutDialog() {
       this.$store.commit("SET_SHOWABOUTDIALOG", true);
+      this.showAboutDialog = true;
+    },
+
+    closeAboutDialog() {
+      this.showAboutDialog = false;
     },
 
     openResetStateDialog() {
