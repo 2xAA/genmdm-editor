@@ -750,6 +750,7 @@ export default {
       this.$store.dispatch("setCCValues", {
         values: { ...data },
         channel,
+        ignoreGrouping: !this.$store.state.programChangeLoadsIntoGroup,
       });
     },
 

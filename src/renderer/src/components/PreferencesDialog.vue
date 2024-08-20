@@ -1,5 +1,5 @@
 <template>
-  <VDialog :size="[840, 380]" :show="show" @close="$emit('close')">
+  <VDialog :size="[840, 420]" :show="show" @close="$emit('close')">
     <grid columns="6">
       <c span="6"><h2>Preferences</h2></c>
     </grid>
@@ -38,6 +38,14 @@
       <c span="2" class="control-group__label">Musical Typing</c>
       <c span="4" class="control-group__control">
         <label><input v-model="musicalTyping" type="checkbox" />Enabled</label>
+      </c>
+
+      <c span="2" class="control-group__label">MIDI</c>
+      <c span="4" class="control-group__control">
+        <label>
+          <input v-model="programChangeLoadsIntoGroup" type="checkbox" />
+          Program Change loads patch into all channels in group
+        </label>
       </c>
 
       <c span="2" class="control-group__label">Patch Import Behaviour</c>
@@ -131,6 +139,16 @@ export default {
 
       set(value) {
         this.$store.commit("SET_MUSICALTYPING", value);
+      },
+    },
+
+    programChangeLoadsIntoGroup: {
+      get() {
+        return this.$store.state.programChangeLoadsIntoGroup;
+      },
+
+      set(value) {
+        this.$store.commit("SET_PROGRAMCHANGELOADSINTOGROUP", value);
       },
     },
 

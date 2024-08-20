@@ -6,11 +6,7 @@
 
 <script>
 import { decompress } from "compress-json";
-import {
-  createDefaultState,
-  createDefaultChannelState,
-  MIDIChannelVoiceMode,
-} from "../store";
+import { createDefaultState, MIDIChannelVoiceMode } from "../store";
 
 export default {
   methods: {

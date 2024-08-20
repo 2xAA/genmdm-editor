@@ -87,6 +87,7 @@ export function createDefaultState() {
     rotation: true,
     haptics: true,
     musicalTyping: false,
+    programChangeLoadsIntoGroup: true,
     patchImportBehaviour: ["editor"],
   };
 
@@ -184,7 +185,7 @@ const store = createStore({
   actions: {
     setCCValues(
       { getters, commit, state },
-      { values, ignoreSameValues = true, channel },
+      { values, ignoreSameValues = true, channel, ignoreGrouping = false },
     ) {
       const keys = Object.keys(values);
 
@@ -199,7 +200,10 @@ const store = createStore({
 
         if (isGlobal) {
           affectedChannels.push(1, 2, 3, 4, 5, 6);
-        } else if (!getters.mapping[cc]?.excludeFromGrouping) {
+        } else if (
+          !getters.mapping[cc]?.excludeFromGrouping &&
+          !ignoreGrouping
+        ) {
           affectedChannels.push(
             ...getters.groupedChannelsFromChannel(channel - 1),
           );
@@ -438,6 +442,10 @@ const store = createStore({
 
     SET_MUSICALTYPING(state, value) {
       state.musicalTyping = value;
+    },
+
+    SET_PROGRAMCHANGELOADSINTOGROUP(state, value) {
+      state.programChangeLoadsIntoGroup = value;
     },
 
     SET_PATCHIMPORTBEHAVIOUR(state, value) {
