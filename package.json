@@ -1,7 +1,7 @@
 {
   "name": "genmdm-editor",
   "author": "2xAA",
-  "version": "3.0.0",
+  "version": "2.1.2",
   "productName": "genMDM Editor",
   "private": true,
   "description": "genMDM editor is a web-based interface for genMDM, a MIDI controller for the Sega Mega Drive and Genesis",
@@ -38,6 +38,7 @@
     "@electron-toolkit/eslint-config": "^1.0.2",
     "@electron/notarize": "^2.3.2",
     "@rushstack/eslint-patch": "^1.10.3",
+    "@semantic-release/git": "^9.0.0",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/eslint-config-prettier": "^9.0.0",
     "electron": "^31.0.2",

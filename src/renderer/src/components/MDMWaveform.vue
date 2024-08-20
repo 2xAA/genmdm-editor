@@ -31,6 +31,12 @@ export default {
     },
   },
 
+  computed: {
+    segmentWidth() {
+      return this.size / this.segments;
+    },
+  },
+
   created() {
     this.updateFromStore();
 
@@ -80,6 +86,13 @@ export default {
   },
 
   methods: {
+    updateFromStore() {
+      for (let i = 0; i < this.segments; i += 1) {
+        this.ccValues[100 + i] = this.$store.state.channel1[100 + i];
+        this.values[i] = this.ccValues[100 + i] / 127;
+      }
+    },
+
     updateFromStore() {
       for (let i = 0; i < this.segments; i += 1) {
         this.ccValues[100 + i] = this.$store.state.channel1[100 + i];
