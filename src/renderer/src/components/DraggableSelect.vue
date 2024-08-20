@@ -8,7 +8,6 @@
     @contextmenu.prevent
   >
     <select
-      class="select"
       ref="labelSelect"
       v-model="selectValue"
       class="select"
