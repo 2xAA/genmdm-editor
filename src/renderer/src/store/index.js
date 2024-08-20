@@ -86,6 +86,7 @@ export function createDefaultState() {
     backgroundImage: true,
     rotation: true,
     haptics: true,
+    musicalTyping: false,
     patchImportBehaviour: ["editor"],
   };
 
@@ -433,6 +434,10 @@ const store = createStore({
 
     SET_HAPTICS(state, value) {
       state.haptics = value;
+    },
+
+    SET_MUSICALTYPING(state, value) {
+      state.musicalTyping = value;
     },
 
     SET_PATCHIMPORTBEHAVIOUR(state, value) {

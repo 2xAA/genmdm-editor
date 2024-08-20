@@ -408,6 +408,10 @@ export default {
     instrumentIndex() {
       return this.$store.state.instrumentIndex;
     },
+
+    musicalTyping() {
+      return this.$store.state.musicalTyping;
+    },
   },
 
   watch: {
@@ -437,6 +441,14 @@ export default {
       }
 
       this.sendTLInversionSysEx(value);
+    },
+
+    musicalTyping(value) {
+      if (value) {
+        this.keyboardInstance.start();
+      } else {
+        this.keyboardInstance.stop();
+      }
     },
   },
 
@@ -473,10 +485,16 @@ export default {
         });
       },
     );
+
+    if (this.musicalTyping) {
+      this.keyboardInstance.start();
+    }
   },
 
   beforeUnmount() {
     this.storeUnsubscribe();
+
+    this.keyboardInstance.stop();
 
     const input = this.inputs.find((input) => input.id === this.inputId);
     if (input) {

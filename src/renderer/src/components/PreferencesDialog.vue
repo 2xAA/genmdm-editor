@@ -1,5 +1,5 @@
 <template>
-  <VDialog :size="[840, 340]" :show="show" @close="$emit('close')">
+  <VDialog :size="[840, 380]" :show="show" @close="$emit('close')">
     <grid columns="6">
       <c span="6"><h2>Preferences</h2></c>
     </grid>
@@ -33,6 +33,11 @@
       <c span="2" class="control-group__label">Haptics (macOS only)</c>
       <c span="4" class="control-group__control">
         <label><input v-model="haptics" type="checkbox" />Enabled</label>
+      </c>
+
+      <c span="2" class="control-group__label">Musical Typing</c>
+      <c span="4" class="control-group__control">
+        <label><input v-model="musicalTyping" type="checkbox" />Enabled</label>
       </c>
 
       <c span="2" class="control-group__label">Patch Import Behaviour</c>
@@ -116,6 +121,16 @@ export default {
       },
       set(value) {
         this.$store.commit("SET_HAPTICS", value);
+      },
+    },
+
+    musicalTyping: {
+      get() {
+        return this.$store.state.musicalTyping;
+      },
+
+      set(value) {
+        this.$store.commit("SET_MUSICALTYPING", value);
       },
     },
 
