@@ -17,67 +17,16 @@
     </c>
     <c span="8" class="envelope-dials">
       <MDMDial
-        :inverse="true"
-        :quantise="32"
-        :cc="ADSR_CC_NUMBERS[0]"
+        v-for="(data, index) in ADSR_DATA"
+        :key="index"
+        :quantise="data.quantise"
+        :inverse="data.inverse"
+        :cc="data.cc"
         :cc-offset="operator - 1"
-        :range="ADSR_DIAL_RANGES[0]"
-        :title="ADSR_TITLES[0]"
+        :range="data.quantise"
+        :title="data.label"
         :channel="channel"
-        @pointerdown="setHighlight(0)"
-        @pointerup="setHighlight(null)"
-      />
-      <MDMDial
-        :cc="ADSR_CC_NUMBERS[1]"
-        :cc-offset="operator - 1"
-        :range="ADSR_DIAL_RANGES[1]"
-        :title="ADSR_TITLES[1]"
-        :channel="channel"
-        @pointerdown="setHighlight(1)"
-        @pointerup="setHighlight(null)"
-      />
-      <MDMDial
-        :quantise="32"
-        :inverse="true"
-        :cc="ADSR_CC_NUMBERS[2]"
-        :cc-offset="operator - 1"
-        :range="ADSR_DIAL_RANGES[2]"
-        :title="ADSR_TITLES[2]"
-        :channel="channel"
-        @pointerdown="setHighlight(2)"
-        @pointerup="setHighlight(null)"
-      />
-      <MDMDial
-        :quantise="16"
-        :inverse="true"
-        :cc="ADSR_CC_NUMBERS[3]"
-        :cc-offset="operator - 1"
-        :range="ADSR_DIAL_RANGES[3]"
-        :title="ADSR_TITLES[3]"
-        :channel="channel"
-        @pointerdown="setHighlight(3)"
-        @pointerup="setHighlight(null)"
-      />
-      <MDMDial
-        :quantise="32"
-        :inverse="true"
-        :cc="ADSR_CC_NUMBERS[4]"
-        :cc-offset="operator - 1"
-        :range="ADSR_DIAL_RANGES[4]"
-        :title="ADSR_TITLES[4]"
-        :channel="channel"
-        @pointerdown="setHighlight(4)"
-        @pointerup="setHighlight(null)"
-      />
-      <MDMDial
-        :quantise="16"
-        :inverse="true"
-        :cc="ADSR_CC_NUMBERS[5]"
-        :cc-offset="operator - 1"
-        :range="ADSR_DIAL_RANGES[5]"
-        :title="ADSR_TITLES[5]"
-        :channel="channel"
-        @pointerdown="setHighlight(5)"
+        @pointerdown="setHighlight(index)"
         @pointerup="setHighlight(null)"
       />
     </c>
@@ -92,8 +41,6 @@ import genmdmMapping from "../genmdm-mapping";
 import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
 
 const ADSR_CC_NUMBERS = [43, 16, 47, 55, 51, 59];
-const ADSR_DIAL_RANGES = ADSR_CC_NUMBERS.map((cc) => genmdmMapping[cc].range);
-const ADSR_TITLES = ADSR_CC_NUMBERS.map((cc) => genmdmMapping[cc].label);
 
 export default {
   components: {
@@ -119,14 +66,21 @@ export default {
       mouseDown: true,
       storeUnsubscribe: null,
       highlight: null,
-      ADSR_CC_NUMBERS,
-      ADSR_DIAL_RANGES,
-      ADSR_TITLES,
     };
   },
 
   computed: {
+    ADSR_DATA() {
+      return ADSR_CC_NUMBERS.map((cc, index) => ({
+        cc,
+        inverse: index !== 1,
+        quantise: genmdmMapping[cc].range,
+        label: `${genmdmMapping[cc].label} (CC ${cc + (this.operator - 1)})`,
+      }));
+    },
+
     displayPositions() {
+      const { ADSR_DATA } = this;
       const channel = this.$store.state[`channel${this.channel}`];
       const operator = this.operator - 1;
       const positions = [
@@ -136,12 +90,12 @@ export default {
         [0.5, 1],
       ];
 
-      positions[0][0] = channel[ADSR_CC_NUMBERS[0] + operator] / 127;
-      positions[0][1] = channel[ADSR_CC_NUMBERS[1] + operator] / 127;
-      positions[1][0] = 1 - channel[ADSR_CC_NUMBERS[2] + operator] / 127;
-      positions[1][1] = 1 - channel[ADSR_CC_NUMBERS[3] + operator] / 127;
-      positions[2][0] = 1 - channel[ADSR_CC_NUMBERS[4] + operator] / 127;
-      positions[3][0] = 1 - channel[ADSR_CC_NUMBERS[5] + operator] / 127;
+      positions[0][0] = channel[ADSR_DATA[0].cc + operator] / 127;
+      positions[0][1] = channel[ADSR_DATA[1].cc + operator] / 127;
+      positions[1][0] = 1 - channel[ADSR_DATA[2].cc + operator] / 127;
+      positions[1][1] = 1 - channel[ADSR_DATA[3].cc + operator] / 127;
+      positions[2][0] = 1 - channel[ADSR_DATA[4].cc + operator] / 127;
+      positions[3][0] = 1 - channel[ADSR_DATA[5].cc + operator] / 127;
 
       return positions;
     },
@@ -332,31 +286,19 @@ export default {
 
       const values = {};
 
-      const ar = Math.floor(
-        positions[0][0] * (genmdmMapping[ADSR_CC_NUMBERS[0]].range - 1),
-      );
-      const tl = Math.floor(
-        positions[0][1] * (genmdmMapping[ADSR_CC_NUMBERS[1]].range - 1),
-      );
-      const dr1 = Math.floor(
-        positions[1][0] * (genmdmMapping[ADSR_CC_NUMBERS[2]].range - 1),
-      );
-      const sa = Math.floor(
-        positions[1][1] * (genmdmMapping[ADSR_CC_NUMBERS[3]].range - 1),
-      );
-      const dr2 = Math.floor(
-        positions[2][0] * (genmdmMapping[ADSR_CC_NUMBERS[4]].range - 1),
-      );
-      const rr = Math.floor(
-        positions[3][0] * (genmdmMapping[ADSR_CC_NUMBERS[5]].range - 1),
-      );
+      const ar = Math.floor(positions[0][0] * (ADSR_DATA[0].range - 1));
+      const tl = Math.floor(positions[0][1] * (ADSR_DATA[1].range - 1));
+      const dr1 = Math.floor(positions[1][0] * (ADSR_DATA[2].range - 1));
+      const sa = Math.floor(positions[1][1] * (ADSR_DATA[3].range - 1));
+      const dr2 = Math.floor(positions[2][0] * (ADSR_DATA[4].range - 1));
+      const rr = Math.floor(positions[3][0] * (ADSR_DATA[5].range - 1));
 
-      values[ADSR_CC_NUMBERS[0] + (operator - 1)] = ar;
-      values[ADSR_CC_NUMBERS[1] + (operator - 1)] = tl;
-      values[ADSR_CC_NUMBERS[2] + (operator - 1)] = dr1;
-      values[ADSR_CC_NUMBERS[3] + (operator - 1)] = sa;
-      values[ADSR_CC_NUMBERS[4] + (operator - 1)] = dr2;
-      values[ADSR_CC_NUMBERS[5] + (operator - 1)] = rr;
+      values[ADSR_DATA[0].cc + (operator - 1)] = ar;
+      values[ADSR_DATA[1].cc + (operator - 1)] = tl;
+      values[ADSR_DATA[2].cc + (operator - 1)] = dr1;
+      values[ADSR_DATA[3].cc + (operator - 1)] = sa;
+      values[ADSR_DATA[4].cc + (operator - 1)] = dr2;
+      values[ADSR_DATA[5].cc + (operator - 1)] = rr;
 
       return values;
     },
