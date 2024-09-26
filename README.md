@@ -22,25 +22,46 @@ Also fully compatible with <a href="https://github.com/rhargreaves/mega-drive-mi
 
 genMDM Editor is a desktop executable and a webpage.
 
-The webpage works in Firefox (starting at Firefox version 99) and Chromuim based browsers.  
+The webpage works in Firefox (starting at Firefox version 99) and Chromuim based browsers.
 Chromium based browsers include Google Chrome, Opera, Brave and Microsoft Edge.
 
-Using genMDM on iOS/iPadOS is possible using Web MIDI Browser, found here: [apps.apple.com/app/web-midi-browser](https://apps.apple.com/app/web-midi-browser/id953846217)
+Using genMDM Editor on iOS/iPadOS is possible using Web MIDI Browser, found here: [apps.apple.com/app/web-midi-browser](https://apps.apple.com/app/web-midi-browser/id953846217)
 
-genMDM Editor is compatible with both the genMDM, by little-scale, and the MDMI (Mega Drive MIDI Interface), by Robert Hargreaves.
+genMDM Editor is compatible with both the GenMDM, by little-scale, and the MDMI (Mega Drive MIDI Interface), by Robert Hargreaves.
 This Readme will refer to both interfaces as **"your Sega"**, for convinience.
+
+## Getting Started
+
+Read this README!
+
+If you have any questions that aren't covered in the linked YouTube video below or this README, please start a discussion at [genmdm-editor/discussions](https://github.com/2xAA/genmdm-editor/discussions).
+
+## Contributing
+
+Contributions, issues and feature requests are welcome!
+
+Feel free to check [issues page](https://github.com/2xAA/genmdm-editor/issues).
+
+## Support this project
+
+Give a ⭐️ if this project helped you!
+
+Consider sponsoring me on GitHub or PayPal: [github.com/sponsors/2xAA](https://github.com/sponsors/2xAA) / [paypal.me/2xAA](https://paypal.me/2xAA).
 
 ## Using genMDM Editor
 
 ### Quickstart
+
 Check out the overview video on how to use the editor: [youtu.be/btzQHaF8cU4](https://youtu.be/btzQHaF8cU4)
 
 ### Getting genMDM Editor
 
 #### Desktop
+
 Download the latest desktop release at [genmdm-editor/releases/latest](https://github.com/2xAA/genmdm-editor/releases/latest).
 
 #### Web
+
 Navigate to [2xaa.github.io/genmdm-editor](https://2xaa.github.io/genmdm-editor).
 
 ### Mega Drive MIDI Interface Compatibility
@@ -55,8 +76,8 @@ More information: [mega-drive-midi-interface/wiki/UI-Features](https://github.co
 
 #### `.genm` Format
 
-The genMDM Editor was build around the `.genm` file format, which can hold 128 genMDM instruments.
-Each instrument in the `.genm` file can store every parameter of the genMDM instrument.
+The genMDM Editor was build around the `.genm` file format, which can hold 128 GenMDM instruments.
+Each instrument in the `.genm` file can store every parameter of the GenMDM instrument.
 
 The `.genm` format does not include any of the editor settings, the global settings or the DAC Control settings.
 
@@ -90,7 +111,7 @@ It contains the entire application state, including patches and editor settings.
 
 ### State
 
-Neither genMDM or MDMI save their session state when powered off, but genMDM Editor does.
+Neither GenMDM or MDMI save their session state when powered off, but genMDM Editor does.
 
 #### Autosave
 
@@ -109,25 +130,59 @@ If you want to sync this state to your Sega, press the **"Send State"** button.
 
 The genMDM Editor UI reacts to incoming MIDI CC messages. It is recommended to route all MIDI messages to the Sega through genMDM Editor to keep the UI in sync.
 
-Find genMDM's MIDI CC parameters here:
-[catskullelectronics.com/products/genmdm](https://catskullelectronics.com/products/genmdm?variant=29399089381454)
+Find GenMDM's MIDI CC parameters here:
+[little-scale.com/GENMDM/GENMDM_102/GENMDM_102.txt](https://web.archive.org/web/20210205134907/http://little-scale.com/GENMDM/GENMDM_102/GENMDM_102.txt) (102 version linked, which is the version catskull used in their production runs)
 
 Find MDMI's MIDI CC parameters here:
 
 - [mega-drive-midi-interface/wiki/Common-MIDI-CCs-&-Events](https://github.com/rhargreaves/mega-drive-midi-interface/wiki/Common-MIDI-CCs-&-Events)
 - [mega-drive-midi-interface/wiki/FM-Parameter-CCs](https://github.com/rhargreaves/mega-drive-midi-interface/wiki/FM-Parameter-CCs)
 
-#### MIDI Note Polyphony
+#### Voice Configuration
 
-genMDM does not support polyphony, though MDMI does the editor currently does not use this.
+The voice configuration dialog can be accessed by the **"VOICE CONFIGURATION"** button in the **"EDITOR SETTINGS"** section.
 
-If **"Polyphony Enable"** is turned on, the **"MIDI Input"** device selected in the editor will have its notes spread over the output MIDI channels, starting from channel 1 up to the limit set by **"Max Poly. Channels"** (minimum 2, maximum 6).
+This dialog's features adapt to whether GenMDM is being used or MDMI.
+Please read below which features are available for which platforms.
 
-When **"Polyphony Enable"** is turned on, changes to the instrument are copied automatically over the polyphony channels.
+##### Voice Groups
 
-## Support
+genMDM Editor can group the 6 FM channels in up to 3 groups. Groups are only available for **"POLY"** and **"UNI"** (unison) modes.
 
-If you have any questions that aren't covered in the linked video, please start a discussion at [genmdm-editor/discussions](https://github.com/2xAA/genmdm-editor/discussions).
+Groups can only contain channels set to the same mode. You cannot mix **"MONO"**, **"POLY"** and **"UNI"** in the same voice group.
+
+If a channel is in a group, notes and CC values are also sent to that channel will also be sent to the channels in its group. If you change any channel parameters in the editor, those changes are made across all the channels in the group.
+
+##### Mono
+
+If a channel is set to **"MONO"** it may not be in a group.
+
+##### Polyphony
+
+GenMDM does not support polyphony, though MDMI has its own polyphony the editor currently does not use this.
+
+Example setup: Channels 1, 2 and 6 are in group 1 and are all set to **"POLY"** mode. I play a 3 note chord and the notes are spread across channels 1, 2 and 6, leaving channels 3, 4 and 5 free to do something else.
+
+##### Unison
+
+Example setup: Channels 4 and 5 are in group 2 and are all set to **"UNI**" mode. I load a patch into channel 4 and the same is loaded into channel 5. I play a single note and both channels play the same sound at the same time.
+
+##### Detune
+
+This feature is only available for MDMI. See CC 85 in MDMI's docs here: [mega-drive-midi-interface/wiki/MIDI-CCs-&-Events](https://github.com/rhargreaves/mega-drive-midi-interface/wiki/MIDI-CCs-&-Events).
+
+Detune is especially useful for unison voice modes, to create chorus effects.
+
+Example setup: Channels 4 and 5 are in group 2 and are all set to **"UNI**" mode. I load a patch into channel 4 and the same is loaded into channel 5.  
+Detune on channel 4 is set to 41 and channel 5 is set to 79. I play a single note and both channels play the same note, however since they are playing the same sound but slightly detuned a phasing/chorus effect is produced.
+
+##### Portamento
+
+This feature is only available for MDMI. See CC 65 in MDMI's docs here: [mega-drive-midi-interface/wiki/MIDI-CCs-&-Events](https://github.com/rhargreaves/mega-drive-midi-interface/wiki/MIDI-CCs-&-Events).
+
+Portamento can be toggled On or Off for each channel. Once it is on for a channel, the **"PORTA. TIME"** dial below controls the length of the note glide.
+
+This feature works best for **"UNI"** or **"MONO"** channels.
 
 ## Project development setup
 
@@ -138,41 +193,29 @@ yarn
 ### Compiles and hot-reloads for development in the browser
 
 ```
-yarn serve
+yarn dev:browser
 ```
 
 ### Builds for browser release
 
 ```
-yarn build
+yarn build:browser
 ```
 
 ### Compiles and hot-reloads for development with [Electron](https://www.electronjs.org)
 
 ```
-yarn electron:serve
+yarn dev
 ```
 
 ### Builds for electron release
 
 ```
-yarn electron:build
+yarn build
 ```
-
-## Contributing
-
-Contributions, issues and feature requests are welcome!
-
-Feel free to check [issues page](https://github.com/2xAA/genmdm-editor/issues).
-
-## Show your support
-
-Give a ⭐️ if this project helped you!
-
-Consider sponsoring me on GitHub: [https://github.com/sponsors/2xAA](https://github.com/sponsors/2xAA).
 
 ## License
 
-Copyright © 2023 [2xAA](https://github.com/2xAA).
+Copyright © 2024 [2xAA](https://github.com/2xAA).
 
 This project is [MIT](https://github.com/2xAA/genmdm-editor/blob/main/LICENSE) licensed.
