@@ -196,7 +196,10 @@
               </c>
 
               <c
-                v-tippy="{ followCursor: true }"
+                v-tippy="{
+                  followCursor: true,
+                  onShow: () => $store.state.tooltips,
+                }"
                 span="6"
                 class="control-group__label"
                 content="Turn on to use genMDM Editor with Mega Drive MIDI Interface."
@@ -741,17 +744,21 @@ export default {
       if (!this.outputPort) {
         return;
       }
-
       const { value, channel } = e;
-      const { data } = this.patches[value];
 
-      if (!data) return;
+      if (!this.$store.state.programChangePassthrough) {
+        const { data } = this.patches[value];
 
-      this.$store.dispatch("setCCValues", {
-        values: { ...data },
-        channel,
-        ignoreGrouping: !this.$store.state.programChangeLoadsIntoGroup,
-      });
+        if (!data) return;
+
+        this.$store.dispatch("setCCValues", {
+          values: { ...data },
+          channel,
+          ignoreGrouping: !this.$store.state.programChangeLoadsIntoGroup,
+        });
+      } else {
+        this.outputPort.sendProgramChange(value, channel);
+      }
     },
 
     freeChannel(channels) {

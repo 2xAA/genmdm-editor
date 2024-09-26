@@ -3,7 +3,13 @@
     <slot name="header"></slot>
     <template v-for="cc in ccValues" :key="`label-${cc}`">
       <c
-        v-tippy="{ followCursor: true }"
+        v-tippy="{
+          followCursor: true,
+          onShow: () =>
+            !!controls[cc].description &&
+            controls[cc].description.length &&
+            $store.state.tooltips,
+        }"
         span="6"
         class="control-group__label"
         :content="controls[cc].description"

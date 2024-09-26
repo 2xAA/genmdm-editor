@@ -86,7 +86,9 @@ export function createDefaultState() {
     backgroundImage: true,
     rotation: true,
     haptics: true,
+    tooltips: true,
     musicalTyping: false,
+    programChangePassthrough: false,
     programChangeLoadsIntoGroup: true,
     patchImportBehaviour: ["editor"],
   };
@@ -440,8 +442,16 @@ const store = createStore({
       state.haptics = value;
     },
 
+    SET_TOOLTIPS(state, value) {
+      state.tooltips = value;
+    },
+
     SET_MUSICALTYPING(state, value) {
       state.musicalTyping = value;
+    },
+
+    SET_PROGRAMCHANGEPASSTHROUGH(state, value) {
+      state.programChangePassthrough = value;
     },
 
     SET_PROGRAMCHANGELOADSINTOGROUP(state, value) {

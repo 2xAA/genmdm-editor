@@ -1,5 +1,5 @@
 <template>
-  <VDialog :size="[840, 420]" :show="show" @close="$emit('close')">
+  <VDialog :size="[840, 480]" :show="show" @close="$emit('close')">
     <grid columns="6">
       <c span="6"><h2>Preferences</h2></c>
     </grid>
@@ -35,6 +35,11 @@
         <label><input v-model="haptics" type="checkbox" />Enabled</label>
       </c>
 
+      <c span="2" class="control-group__label">Tooltips</c>
+      <c span="4" class="control-group__control">
+        <label><input v-model="tooltips" type="checkbox" />Enabled</label>
+      </c>
+
       <c span="2" class="control-group__label">Musical Typing</c>
       <c span="4" class="control-group__control">
         <label><input v-model="musicalTyping" type="checkbox" />Enabled</label>
@@ -43,8 +48,18 @@
       <c span="2" class="control-group__label">MIDI</c>
       <c span="4" class="control-group__control">
         <label>
-          <input v-model="programChangeLoadsIntoGroup" type="checkbox" />
-          Program Change loads patch into all channels in group
+          <input
+            v-model="programChangePassthrough"
+            type="checkbox"
+          />Pass-through Program Change messages to Sega (useful for
+          MDMI)</label
+        ><br />
+        <label :class="{ disabled: programChangePassthrough }">
+          <input
+            v-model="programChangeLoadsIntoGroup"
+            type="checkbox"
+            :disabled="programChangePassthrough"
+          />Program Change loads patch into all channels in group
         </label>
       </c>
 
@@ -132,6 +147,15 @@ export default {
       },
     },
 
+    tooltips: {
+      get() {
+        return this.$store.state.tooltips;
+      },
+      set(value) {
+        this.$store.commit("SET_TOOLTIPS", value);
+      },
+    },
+
     musicalTyping: {
       get() {
         return this.$store.state.musicalTyping;
@@ -139,6 +163,16 @@ export default {
 
       set(value) {
         this.$store.commit("SET_MUSICALTYPING", value);
+      },
+    },
+
+    programChangePassthrough: {
+      get() {
+        return this.$store.state.programChangePassthrough;
+      },
+
+      set(value) {
+        this.$store.commit("SET_PROGRAMCHANGEPASSTHROUGH", value);
       },
     },
 
