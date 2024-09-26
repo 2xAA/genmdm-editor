@@ -1799,6 +1799,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"builder-util-runtime@npm:9.2.9":
+  version: 9.2.9
+  resolution: "builder-util-runtime@npm:9.2.9"
+  dependencies:
+    debug: "npm:^4.3.4"
+    sax: "npm:^1.2.4"
+  checksum: 10c0/0bc141d0e9f272e2cf6aa536e9a9c2243d54ac76b25645997ee0966eefddfa221e40ae421962982a6278cc36cef12d8ef5cc6cdb1e1c02706c3eb477d7e6d7a7
+  languageName: node
+  linkType: hard
+
 "builder-util@npm:24.13.1":
   version: 24.13.1
   resolution: "builder-util@npm:24.13.1"
@@ -2656,19 +2666,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-updater@npm:^6.1.7":
-  version: 6.2.1
-  resolution: "electron-updater@npm:6.2.1"
+"electron-updater@npm:^6.3.0":
+  version: 6.3.8
+  resolution: "electron-updater@npm:6.3.8"
   dependencies:
-    builder-util-runtime: "npm:9.2.4"
+    builder-util-runtime: "npm:9.2.9"
     fs-extra: "npm:^10.1.0"
     js-yaml: "npm:^4.1.0"
     lazy-val: "npm:^1.0.5"
     lodash.escaperegexp: "npm:^4.1.2"
     lodash.isequal: "npm:^4.5.0"
-    semver: "npm:^7.3.8"
+    semver: "npm:^7.6.3"
     tiny-typed-emitter: "npm:^2.1.0"
-  checksum: 8/92a064610a3c9df747dce9c3eccd69c48adb2c8b37b9d7c13d1c39f7e2a9ffaef4e909ab50e6973d557566bde6de7ec9c64e2cc3a2cdef18b3220c5d91333e1c
+  checksum: 10c0/85bb0a24d0900584c3786ead881bf2a82c97f10b57d8541c24d67a101622da59c3929254c92739c4e86949bf6ecf9bbeb748478bbf59b13e1eaa09a889e249c8
   languageName: node
   linkType: hard
 
@@ -3427,7 +3437,7 @@ __metadata:
     compress-json: "npm:^2.1.2"
     electron: "npm:^31.0.2"
     electron-builder: "npm:^24.13.3"
-    electron-updater: "npm:^6.1.7"
+    electron-updater: "npm:^6.3.0"
     electron-vite: "npm:^2.3.0"
     eslint: "npm:^8.57.0"
     eslint-plugin-vue: "npm:^9.26.0"
@@ -5717,7 +5727,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.3.5":
+"semver@npm:^7.3.5, semver@npm:^7.6.3":
   version: 7.6.3
   resolution: "semver@npm:7.6.3"
   bin:

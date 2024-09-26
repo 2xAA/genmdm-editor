@@ -25,7 +25,7 @@
     "@electron-toolkit/utils": "^3.0.0",
     "@vcync/hires-canvas2d": "^1.0.0",
     "compress-json": "^2.1.2",
-    "electron-updater": "^6.1.7",
+    "electron-updater": "^6.3.0",
     "genmdm-parser": "1.0.2",
     "hapticjs": "^1.0.7",
     "vue-flexible-link": "^1.0.2",
