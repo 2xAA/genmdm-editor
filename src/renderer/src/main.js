@@ -20,7 +20,14 @@ Object.defineProperty(app.config.globalProperties, "$colors", {
 
 Object.defineProperty(app.config.globalProperties, "$electron", {
   get() {
-    return window.api || { vibrate: () => {} };
+    return window.api
+      ? {
+          ...window.api,
+          vibrate: () => {
+            store.state.haptics && window.api.vibrate();
+          },
+        }
+      : { vibrate: () => {} };
   },
 });
 

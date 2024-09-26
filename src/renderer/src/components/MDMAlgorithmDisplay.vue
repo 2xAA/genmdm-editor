@@ -1,6 +1,6 @@
 <template>
   <div class="algorithm">
-    <Component :is="`a${index}`" />
+    <Component :is="`a${index}`" class="algorithm-svg" />
   </div>
 </template>
 
@@ -23,7 +23,7 @@ export default {
     a4,
     a5,
     a6,
-    a7
+    a7,
   },
 
   computed: {
@@ -33,8 +33,8 @@ export default {
 
     index() {
       return Math.round((this.value / 127) * 7);
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -50,10 +50,19 @@ export default {
   justify-content: center;
   align-items: center;
 }
+</style>
 
-@media (prefers-color-scheme: dark) {
-  svg {
-    filter: invert();
-  }
+<style>
+.algorithm-svg path {
+  fill: var(--foreground-color);
+}
+
+.algorithm-svg rect {
+  stroke: var(--foreground-color);
+  fill: var(--background-color);
+}
+
+.algorithm-svg line {
+  stroke: var(--foreground-color);
 }
 </style>

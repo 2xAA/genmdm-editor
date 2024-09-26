@@ -12,7 +12,9 @@ export const sharedConfig = {
           },
         },
       }),
-      svgLoader(),
+      svgLoader({
+        svgo: false,
+      }),
       ViteMinifyPlugin(),
     ],
   },

@@ -17,8 +17,24 @@ export class MDMKeyboard {
       keys.map((string) => string.split("").map((x) => [x, 0])).flat(),
     );
     this.velocity = 127;
-    window.addEventListener("keydown", this.keydown.bind(this));
-    window.addEventListener("keyup", this.keyup.bind(this));
+
+    this._keydown = this.keydown.bind(this);
+    this._keyup = this.keyup.bind(this);
+    this._started = false;
+  }
+
+  start() {
+    if (!this._started) {
+      this._started = true;
+      window.addEventListener("keydown", this._keydown);
+      window.addEventListener("keyup", this._keyup);
+    }
+  }
+
+  stop() {
+    this._started = false;
+    window.removeEventListener("keydown", this._keydown);
+    window.removeEventListener("keyup", this._keyup);
   }
 
   get octave() {
@@ -30,7 +46,13 @@ export class MDMKeyboard {
   }
 
   keydown(e) {
-    if (e.target.tagName === "INPUT") {
+    if (
+      e.target.tagName === "INPUT" ||
+      e.metaKey ||
+      e.ctrlKey ||
+      e.shiftKey ||
+      e.repeat
+    ) {
       return;
     }
 
