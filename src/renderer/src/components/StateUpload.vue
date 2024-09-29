@@ -36,6 +36,7 @@ export default {
             newState.channelConfiguration.unshift({
               mode: MIDIChannelVoiceMode.POLYPHONIC,
               group: 0,
+              transpose: 24,
             });
           }
 
@@ -44,13 +45,22 @@ export default {
         }
 
         // Also to account for old state saves.
-        // Not a problem with GenMDM, but new MDMI features somtimes require
+        // Not a problem with GenMDM, but new MDMI features sometimes require
         // new CC values.
         for (let i = 0; i < 6; i += 1) {
           newState[`channel${i + 1}`] = {
             ...defaultState[`channel${i + 1}`],
             ...newState[`channel${i + 1}`],
           };
+        }
+
+        // To account for saves < 2.1.0, pre-transpose
+        for (let i = 0; i < 6; i += 1) {
+          const channelConfig = newState.channelConfiguration[i];
+
+          if (!!channelConfig.transpose) {
+            newState.channelConfiguration[i].transpose = 24;
+          }
         }
 
         this.$store.commit("SET_STATE", newState);

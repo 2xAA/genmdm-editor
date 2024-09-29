@@ -69,12 +69,12 @@ export function createDefaultState() {
 
     channel: 1,
     channelConfiguration: [
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 24 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 24 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 24 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 24 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 24 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 24 },
     ],
     instrumentIndex: 0,
     mdmiCompatibility: false,
