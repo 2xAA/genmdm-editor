@@ -31,6 +31,19 @@
       </c>
     </grid>
 
+    <div>
+      <h2>Transpose</h2>
+
+      <MDMDial
+        :emit="true"
+        :min-display="24"
+        :range="48"
+        :quantise="48"
+        :value="transpose"
+        @input="setTranspose"
+      />
+    </div>
+
     <div v-if="mdmiCompatibility">
       <h2>Detune</h2>
 
@@ -185,6 +198,34 @@ export default {
       set(value) {
         this.glideInternal = value;
       },
+    },
+
+    transpose: {
+      get() {
+        const transpose =
+          this.$store.state.channelConfiguration[this.channel - 1].transpose;
+
+        if (!!transpose) {
+          return (transpose / 48) * 127;
+        }
+
+        return 64;
+      },
+
+      set(transposeIn) {
+        const transpose = Math.round((Math.floor(transposeIn) / 128) * 48);
+
+        this.$store.commit("SET_CHANNELCONFIGURATION_TRANSPOSE", {
+          channelIndex: this.channel - 1,
+          transpose,
+        });
+      },
+    },
+  },
+
+  methods: {
+    setTranspose(transpose) {
+      this.transpose = transpose;
     },
   },
 

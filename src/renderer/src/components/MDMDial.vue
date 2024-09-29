@@ -13,7 +13,7 @@
       @touchend.prevent
       @touchcancel.prevent
     ></canvas>
-    {{ scaledValue }}
+    {{ scaledValue - minDisplay }}
   </div>
 </template>
 
@@ -24,10 +24,27 @@ import redrawOnColorschemeChange from "./mixins/redraw-on-colorscheme-change";
 export default {
   mixins: [redrawOnColorschemeChange],
 
+  emits: ["input"],
+
   props: {
     cc: {
       type: Number,
-      required: true,
+      required: false,
+    },
+
+    emit: {
+      type: Boolean,
+      default: false,
+    },
+
+    value: {
+      type: Number,
+      required: false,
+    },
+
+    minDisplay: {
+      type: Number,
+      default: 0,
     },
 
     ccOffset: {
@@ -37,7 +54,7 @@ export default {
 
     channel: {
       type: Number,
-      required: true,
+      required: false,
     },
 
     size: {
@@ -104,7 +121,7 @@ export default {
 
   watch: {
     "$store.state.channel"() {
-      this.updateFromStore();
+      this.updateFromStoreOrValue();
     },
 
     disabled() {
@@ -113,28 +130,32 @@ export default {
   },
 
   created() {
-    this.updateFromStore();
+    this.updateFromStoreOrValue();
 
-    this.storeUnsubscribe = this.$store.subscribe((mutation, state) => {
-      if (mutation.type === "SET_CC_VALUE") {
-        const { cc, value, channel } = mutation.payload;
+    if (!this.emit) {
+      this.storeUnsubscribe = this.$store.subscribe((mutation, state) => {
+        if (mutation.type === "SET_CC_VALUE") {
+          const { cc, value, channel } = mutation.payload;
 
-        if (
-          cc === this.cc + this.ccOffset &&
-          !this.mouseButtonDown &&
-          channel === this.channel
-        ) {
+          if (
+            cc === this.cc + this.ccOffset &&
+            !this.mouseButtonDown &&
+            channel === this.channel
+          ) {
+            this.setMovementValue(value);
+          }
+        }
+
+        if (mutation.type === "SET_STATE") {
+          const value =
+            state[`channel${this.$store.state.channel}`][
+              this.cc + this.ccOffset
+            ];
+
           this.setMovementValue(value);
         }
-      }
-
-      if (mutation.type === "SET_STATE") {
-        const value =
-          state[`channel${this.$store.state.channel}`][this.cc + this.ccOffset];
-
-        this.setMovementValue(value);
-      }
-    });
+      });
+    }
   },
 
   mounted() {
@@ -155,7 +176,7 @@ export default {
     document.removeEventListener("pointerup", this.mouseUp);
     document.removeEventListener("pointermove", this.mouseMove);
     document.body.classList.remove("ns-resize-cursor");
-    this.storeUnsubscribe();
+    !!this.storeUnsubscribe && this.storeUnsubscribe();
   },
 
   methods: {
@@ -264,14 +285,7 @@ export default {
 
         this.downY = e.pageY;
         if (this.internalValue !== lastValue) {
-          this.$store.dispatch("setCCValues", {
-            channel,
-            values: {
-              [this.cc + this.ccOffset]: this.inverse
-                ? 127 - this.internalValue * 127
-                : this.internalValue * 127,
-            },
-          });
+          this.setOrEmitValue();
         }
         this.mouseMoveRaf = null;
       });
@@ -361,17 +375,36 @@ export default {
       });
     },
 
-    updateFromStore() {
-      const { channel } = this;
-      const value =
-        this.$store.state[`channel${channel}`][this.cc + this.ccOffset];
+    updateFromStoreOrValue() {
+      const { channel, emit, value } = this;
+      const updatedValue = emit
+        ? value
+        : this.$store.state[`channel${channel}`][this.cc + this.ccOffset];
 
-      this.setMovementValue(value);
+      this.setMovementValue(updatedValue);
     },
 
     setMovementValue(value) {
       this.movementValue = this.inverse ? -value + 127 : value;
       this.draw();
+    },
+
+    setOrEmitValue() {
+      const { cc, ccOffset, channel, emit, inverse, internalValue } = this;
+
+      const value = inverse ? 127 - internalValue * 127 : internalValue * 127;
+
+      if (emit) {
+        this.$emit("input", value);
+        return;
+      }
+
+      this.$store.dispatch("setCCValues", {
+        channel,
+        values: {
+          [cc + ccOffset]: value,
+        },
+      });
     },
   },
 };
