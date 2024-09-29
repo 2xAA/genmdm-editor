@@ -29,7 +29,7 @@ export default {
 
   computed: {
     height() {
-      return this.$store.state.mdmiCompatibility ? 480 : 200;
+      return this.$store.state.mdmiCompatibility ? 580 : 300;
     },
   },
 };

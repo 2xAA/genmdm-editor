@@ -330,7 +330,6 @@ export default {
       inputs: [],
       outputs: [],
 
-      notesOn: {}, // should key channels and have note as value...
       noteOnChannels: {
         1: [],
         2: [],
@@ -635,6 +634,19 @@ export default {
         return;
       }
 
+      const allNotes = [
+        ...this.noteOnChannels[1],
+        ...this.noteOnChannels[2],
+        ...this.noteOnChannels[3],
+        ...this.noteOnChannels[4],
+        ...this.noteOnChannels[5],
+        ...this.noteOnChannels[6],
+      ];
+
+      if (allNotes.indexOf(number) > -1) {
+        return;
+      }
+
       /** @type {MIDIChannelConfiguration} */
       const { group, mode } =
         this.$store.state.channelConfiguration[channelIn - 1];
@@ -653,9 +665,12 @@ export default {
 
       for (let i = 0; i < outChannels.length; i++) {
         const channel = outChannels[i];
+        const { transpose } =
+          this.$store.state.channelConfiguration[channel - 1];
+
         this.noteOnChannels[channel].push(number);
 
-        this.outputPort.playNote(number, channel, {
+        this.outputPort.playNote(number + (-24 + transpose), channel, {
           velocity,
         });
       }
@@ -700,7 +715,10 @@ export default {
 
       for (let i = 0; i < outChannels.length; i++) {
         const channel = outChannels[i];
-        this.outputPort.stopNote(number, channel);
+        const { transpose } =
+          this.$store.state.channelConfiguration[channel - 1];
+
+        this.outputPort.stopNote(number + (-24 + transpose), channel);
         const index = this.noteOnChannels[channel].indexOf(number);
 
         if (index > -1) {

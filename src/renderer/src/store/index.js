@@ -41,6 +41,8 @@ export const MIDIChannelVoiceMode = {
  * @prop {number} group Number from -1 to 2. -1 signals the channel is
  *                      ungrouped, only applicable in the case of
  *                      MIDIChannelVoiceMode.MONOPHONIC.
+ * @prop {number} transpose Number from 0 to 48. (-24 + transpose) to find
+ *                          semitones to transpose by.
  */
 
 /**
@@ -67,12 +69,12 @@ export function createDefaultState() {
 
     channel: 1,
     channelConfiguration: [
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
-      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
+      { mode: MIDIChannelVoiceMode.MONOPHONIC, group: -1, transpose: 0 },
     ],
     instrumentIndex: 0,
     mdmiCompatibility: false,
@@ -420,6 +422,10 @@ const store = createStore({
 
     SET_CHANNELCONFIGURATION_GROUP(state, { channelIndex, group }) {
       state.channelConfiguration[channelIndex].group = group;
+    },
+
+    SET_CHANNELCONFIGURATION_TRANSPOSE(state, { channelIndex, transpose }) {
+      state.channelConfiguration[channelIndex].transpose = transpose;
     },
 
     SET_SHOWABOUTDIALOG(state, value) {
