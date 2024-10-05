@@ -46,6 +46,11 @@ export const MIDIChannelVoiceMode = {
  */
 
 /**
+ * @typedef MIDIChannelAftertouchMapping
+ * @prop {number[]} ccs
+ */
+
+/**
  * @typedef {object} GenMDMEditorState
  * @prop {GenMDMPatch[]} patches
  * @prop {number} channel
@@ -58,6 +63,20 @@ export const MIDIChannelVoiceMode = {
  * @prop {import("../genmdm-mapping").GenMDMMapping} [channel4]
  * @prop {import("../genmdm-mapping").GenMDMMapping} [channel5]
  * @prop {import("../genmdm-mapping").GenMDMMapping} [channel6]
+ * @prop {boolean} showAboutDialog
+ * @prop {string} midiInputId
+ * @prop {string} midiOutputId
+ * @prop {string} theme
+ * @prop {boolean} backgroundImage
+ * @prop {boolean} rotation
+ * @prop {boolean} haptics
+ * @prop {boolean} tooltips
+ * @prop {boolean} musicalTyping
+ * @prop {boolean} programChangePassthrough
+ * @prop {boolean} programChangeLoadsIntoGroup
+ * @prop {string[]} patchImportBehaviour
+ * @prop {string} aftertouchType
+ * @prop {MIDIChannelAftertouchMapping[]} aftertouchMapping
  */
 
 /**
@@ -93,6 +112,15 @@ export function createDefaultState() {
     programChangePassthrough: false,
     programChangeLoadsIntoGroup: true,
     patchImportBehaviour: ["editor"],
+    aftertouchType: "channel", // "key", "both"
+    aftertouchMapping: [
+      { ccs: [] },
+      { ccs: [] },
+      { ccs: [] },
+      { ccs: [] },
+      { ccs: [] },
+      { ccs: [] },
+    ],
   };
 
   return defaultState;

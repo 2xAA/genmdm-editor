@@ -43,7 +43,7 @@ export default {
           delete newState.maxPolyphonicChannels;
         }
 
-        // Also to account for old state saves.
+        // To account for old state saves.
         // Not a problem with GenMDM, but new MDMI features somtimes require
         // new CC values.
         for (let i = 0; i < 6; i += 1) {
@@ -51,6 +51,11 @@ export default {
             ...defaultState[`channel${i + 1}`],
             ...newState[`channel${i + 1}`],
           };
+        }
+
+        // To account for old state saves.
+        if (!newState.aftertouchMapping) {
+          newState.aftertouchMapping = defaultState.aftertouchMapping;
         }
 
         this.$store.commit("SET_STATE", newState);
