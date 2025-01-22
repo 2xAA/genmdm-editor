@@ -48,7 +48,7 @@
     "eslint-plugin-vue": "^9.26.0",
     "patch-package": "^8.0.0",
     "prettier": "^3.3.2",
-    "vite": "^5.3.6",
+    "vite": "^5.4.12",
     "vite-plugin-minify": "^1.5.2",
     "vite-plugin-node-polyfills": "^0.22.0",
     "vite-svg-loader": "^5.1.0",
