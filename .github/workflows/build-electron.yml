@@ -31,7 +31,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: yarn install --immutable --immutable-cache
+        run: yarn install --immutable
 
       - name: build-linux
         if: matrix.os == 'ubuntu-latest'
