@@ -3396,18 +3396,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fsevents@patch:fsevents@npm%3A~2.3.2#optional!builtin<compat/fsevents>":
+"fsevents@patch:fsevents@npm%3A~2.3.2#~builtin<compat/fsevents>":
   version: 2.3.2
-  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#optional!builtin<compat/fsevents>::version=2.3.2&hash=df0bf1"
+  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=df0bf1"
   dependencies:
     node-gyp: "npm:latest"
   conditions: os=darwin
   languageName: node
   linkType: hard
 
-"fsevents@patch:fsevents@npm%3A~2.3.3#optional!builtin<compat/fsevents>":
+"fsevents@patch:fsevents@npm%3A~2.3.3#~builtin<compat/fsevents>":
   version: 2.3.3
-  resolution: "fsevents@patch:fsevents@npm%3A2.3.3#optional!builtin<compat/fsevents>::version=2.3.3&hash=df0bf1"
+  resolution: "fsevents@patch:fsevents@npm%3A2.3.3#~builtin<compat/fsevents>::version=2.3.3&hash=df0bf1"
   dependencies:
     node-gyp: "npm:latest"
   conditions: os=darwin
@@ -3425,36 +3425,36 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "genmdm-editor@workspace:."
   dependencies:
-    "@electron-toolkit/eslint-config": "npm:^1.0.2"
-    "@electron-toolkit/preload": "npm:^3.0.1"
-    "@electron-toolkit/utils": "npm:^3.0.0"
-    "@electron/notarize": "npm:^2.3.2"
-    "@rushstack/eslint-patch": "npm:^1.10.3"
-    "@semantic-release/git": "npm:^9.0.0"
-    "@vcync/hires-canvas2d": "npm:^1.0.0"
-    "@vitejs/plugin-vue": "npm:^5.0.5"
-    "@vue/eslint-config-prettier": "npm:^9.0.0"
-    compress-json: "npm:^2.1.2"
-    electron: "npm:^31.0.2"
-    electron-builder: "npm:^24.13.3"
-    electron-updater: "npm:^6.3.0"
-    electron-vite: "npm:^2.3.0"
-    eslint: "npm:^8.57.0"
-    eslint-plugin-vue: "npm:^9.26.0"
-    genmdm-parser: "npm:1.0.2"
-    hapticjs: "npm:^1.0.7"
-    patch-package: "npm:^8.0.0"
-    prettier: "npm:^3.3.2"
-    vite: "npm:^5.3.6"
-    vite-plugin-minify: "npm:^1.5.2"
-    vite-plugin-node-polyfills: "npm:^0.22.0"
-    vite-svg-loader: "npm:^5.1.0"
-    vue: "npm:^3.4.30"
-    vue-flexible-link: "npm:^1.0.2"
-    vue-tippy: "npm:v6"
-    vuejs-storage: "npm:^3.1.1"
-    vuex: "npm:^4.1.0"
-    webmidi: "npm:2.5.1"
+    "@electron-toolkit/eslint-config": ^1.0.2
+    "@electron-toolkit/preload": ^3.0.1
+    "@electron-toolkit/utils": ^3.0.0
+    "@electron/notarize": ^2.3.2
+    "@rushstack/eslint-patch": ^1.10.3
+    "@semantic-release/git": ^9.0.0
+    "@vcync/hires-canvas2d": ^1.0.0
+    "@vitejs/plugin-vue": ^5.0.5
+    "@vue/eslint-config-prettier": ^9.0.0
+    compress-json: ^2.1.2
+    electron: ^31.0.2
+    electron-builder: ^24.13.3
+    electron-updater: ^6.3.0
+    electron-vite: ^2.3.0
+    eslint: ^8.57.0
+    eslint-plugin-vue: ^9.26.0
+    genmdm-parser: 1.0.2
+    hapticjs: ^1.0.7
+    patch-package: ^8.0.0
+    prettier: ^3.3.2
+    vite: ^5.3.6
+    vite-plugin-minify: ^1.5.2
+    vite-plugin-node-polyfills: ^0.22.0
+    vite-svg-loader: ^5.1.0
+    vue: ^3.4.30
+    vue-flexible-link: ^1.0.2
+    vue-tippy: v6
+    vuejs-storage: ^3.1.1
+    vuex: ^4.1.0
+    webmidi: 2.5.1
   languageName: unknown
   linkType: soft
 
@@ -5480,9 +5480,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@patch:resolve@npm%3A^1.17.0#optional!builtin<compat/resolve>":
+"resolve@patch:resolve@npm%3A^1.17.0#~builtin<compat/resolve>":
   version: 1.22.8
-  resolution: "resolve@patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d"
+  resolution: "resolve@patch:resolve@npm%3A1.22.8#~builtin<compat/resolve>::version=1.22.8&hash=c3c19d"
   dependencies:
     is-core-module: "npm:^2.13.0"
     path-parse: "npm:^1.0.7"
@@ -6266,7 +6266,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.3.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.3.3#~builtin<compat/typescript>":
   version: 5.5.3
   resolution: "typescript@patch:typescript@npm%3A5.5.3#optional!builtin<compat/typescript>::version=5.5.3&hash=379a07"
   bin:
@@ -6276,7 +6276,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.5.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.5.3#~builtin<compat/typescript>":
   version: 5.5.4
   resolution: "typescript@patch:typescript@npm%3A5.5.4#optional!builtin<compat/typescript>::version=5.5.4&hash=379a07"
   bin:
