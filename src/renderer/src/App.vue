@@ -622,6 +622,7 @@ export default {
         note: { number },
         velocity,
         channel: channelIn,
+        timestamp,
       } = e;
 
       let outChannels = [];
@@ -630,26 +631,35 @@ export default {
       if (channelIn > 6) {
         this.outputPort.playNote(number, channelIn, {
           velocity,
+          time: timestamp,
         });
-        return;
-      }
-
-      const allNotes = [
-        ...this.noteOnChannels[1],
-        ...this.noteOnChannels[2],
-        ...this.noteOnChannels[3],
-        ...this.noteOnChannels[4],
-        ...this.noteOnChannels[5],
-        ...this.noteOnChannels[6],
-      ];
-
-      if (allNotes.indexOf(number) > -1) {
         return;
       }
 
       /** @type {MIDIChannelConfiguration} */
       const { group, mode } =
         this.$store.state.channelConfiguration[channelIn - 1];
+
+      const allNotes = [];
+
+      if (mode === MIDIChannelVoiceMode.MONOPHONIC) {
+        allNotes.push(...this.noteOnChannels[channelIn]);
+      } else if (
+        mode === MIDIChannelVoiceMode.UNISON ||
+        mode === MIDIChannelVoiceMode.POLYPHONIC
+      ) {
+        const channelsToCheck =
+          this.$store.getters.channelsByGroup[group].slice(1);
+
+        for (let i = 0; i < channelsToCheck.length; i++) {
+          const channel = channelsToCheck[i];
+          allNotes.push(...this.noteOnChannels[channel]);
+        }
+      }
+
+      if (allNotes.indexOf(number) > -1) {
+        return;
+      }
 
       if (mode === MIDIChannelVoiceMode.MONOPHONIC) {
         outChannels.push(channelIn);
@@ -672,6 +682,7 @@ export default {
 
         this.outputPort.playNote(number + (-24 + transpose), channel, {
           velocity,
+          time: timestamp,
         });
       }
     },
